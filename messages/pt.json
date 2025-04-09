@@ -1,0 +1,15 @@
+{
+  "Page": {
+    "getStartedEditing": "Comece editando {file}.",
+    "saveAndSeeChanges": "Salve e veja suas alterações instantaneamente.",
+    "deployNow": "Publicar agora",
+    "readOurDocs": "Leia nossa documentação",
+    "learn": "Aprender",
+    "examples": "Exemplos",
+    "gotoNextjs": "Ir para nextjs.org →"
+  },
+  "Layout": {
+    "title": "Criar App Next",
+    "description": "Gerado pelo create next app"
+  }
+}
