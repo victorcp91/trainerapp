@@ -1,0 +1,14 @@
+{
+  "ForgotPassword": {
+    "title": "Esqueceu sua senha?",
+    "instruction": "Insira seu endereço de e-mail para receber um link de redefinição de senha.",
+    "email": "E-mail",
+    "emailPlaceholder": "Digite seu e-mail",
+    "sendResetLink": "Enviar link de redefinição",
+    "rememberPassword": "Lembrou sua senha?",
+    "logIn": "Entrar",
+    "invalidEmailError": "Por favor, insira um endereço de e-mail válido.",
+    "resetEmailSuccess": "E-mail de redefinição de senha enviado com sucesso.",
+    "resetEmailError": "Falha ao enviar o e-mail de redefinição de senha. Por favor, tente novamente."
+  }
+}

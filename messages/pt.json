@@ -11,5 +11,58 @@
   "Layout": {
     "title": "Criar App Next",
     "description": "Gerado pelo create next app"
+  },
+  "Register": {
+    "title": "Criar uma Conta",
+    "signUpWithGoogle": "Entrar com Google",
+    "orSignUpWithEmail": "OU ENTRE COM E-MAIL",
+    "fullName": "Nome Completo",
+    "fullNamePlaceholder": "Seu nome completo",
+    "email": "Seu Endereço de E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "password": "Senha",
+    "passwordPlaceholder": "Sua senha",
+    "confirmPassword": "Confirmar Senha",
+    "confirmPasswordPlaceholder": "Confirme sua senha",
+    "signUp": "CADASTRAR",
+    "alreadyHaveAccount": "Já possui uma conta?",
+    "logIn": "Entrar",
+    "registerSuccess": "Cadastro realizado com sucesso! Você já pode fazer login.",
+    "registerError": "Falha ao realizar cadastro. Tente novamente."
+  },
+  "Login": {
+    "title": "Entrar no Everfit",
+    "loginWithGoogle": "Entrar com Google",
+    "orLoginWithEmail": "OU ENTRE COM E-MAIL",
+    "email": "Seu Endereço de E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "password": "Senha",
+    "passwordPlaceholder": "Sua senha",
+    "rememberMe": "Lembrar-me",
+    "forgotPassword": "Esqueceu sua senha?",
+    "login": "ENTRAR",
+    "dontHaveAccount": "Não possui uma conta?",
+    "signUp": "Cadastrar",
+    "loginSuccess": "Login realizado com sucesso!",
+    "loginError": "Falha ao realizar login. Verifique suas credenciais."
+  },
+  "ForgotPassword": {
+    "title": "Esqueceu sua senha?",
+    "instruction": "Digite seu endereço de e-mail abaixo e enviaremos um link para redefinir sua senha.",
+    "email": "Seu Endereço de E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "sendResetLink": "Enviar Link de Redefinição",
+    "rememberPassword": "Lembrou sua senha?",
+    "logIn": "Entrar"
+  },
+  "Dashboard": {
+    "students": "Alunos",
+    "messages": "Mensagens",
+    "myAccount": "Minha conta",
+    "dashboardTitle": "Dashboard",
+    "workouts": "Treinos",
+    "newStudent": "+ Novo aluno",
+    "newWorkout": "+ Novo treino",
+    "latestFeedbacks": "Últimos Feedbacks"
   }
 }

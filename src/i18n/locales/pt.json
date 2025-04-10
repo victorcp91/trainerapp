@@ -1,0 +1,31 @@
+{
+  "Login": {
+    "title": "Entrar",
+    "loginWithGoogle": "Entrar com o Google",
+    "orLoginWithEmail": "ou entre com seu e-mail",
+    "email": "E-mail",
+    "emailPlaceholder": "Digite seu e-mail",
+    "password": "Senha",
+    "passwordPlaceholder": "Digite sua senha",
+    "forgotPassword": "Esqueceu sua senha?",
+    "login": "Entrar",
+    "dontHaveAccount": "Não tem uma conta?",
+    "signUp": "Cadastre-se"
+  },
+  "Register": {
+    "title": "Cadastrar",
+    "signUpWithGoogle": "Cadastrar com o Google",
+    "orSignUpWithEmail": "ou cadastre-se com seu e-mail",
+    "fullName": "Nome completo",
+    "fullNamePlaceholder": "Digite seu nome completo",
+    "email": "E-mail",
+    "emailPlaceholder": "Digite seu e-mail",
+    "password": "Senha",
+    "passwordPlaceholder": "Digite sua senha",
+    "confirmPassword": "Confirmar senha",
+    "confirmPasswordPlaceholder": "Confirme sua senha",
+    "signUp": "Cadastrar",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "logIn": "Entrar"
+  }
+}

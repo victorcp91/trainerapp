@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { withAuth } from "@/utils/withAuth";
 
-export default function Home() {
+const HomePage = () => {
   const t = useTranslations("Page");
 
   return (
@@ -97,4 +100,6 @@ export default function Home() {
       </footer>
     </div>
   );
-}
+};
+
+export default withAuth(HomePage, true);
