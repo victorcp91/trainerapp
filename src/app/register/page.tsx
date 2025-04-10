@@ -12,22 +12,40 @@ import {
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import { withAuth } from "@/utils/withAuth";
+import { useRouter } from "next/navigation";
 
 const RegisterPage = () => {
   const t = useTranslations("Register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleRegister = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      router.push("/dashboard");
     } catch (err) {
       console.error(err);
       setError("Failed to register. Please try again.");
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to register with Google. Please try again.");
     }
   };
 
@@ -48,7 +66,7 @@ const RegisterPage = () => {
       >
         <Title order={2}>{t("title")}</Title>
         <Stack mt="lg">
-          <Button fullWidth variant="outline">
+          <Button fullWidth variant="outline" onClick={handleGoogleSignUp}>
             {t("signUpWithGoogle")}
           </Button>
           <Text size="sm" color="dimmed">

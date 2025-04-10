@@ -10,7 +10,8 @@
     "forgotPassword": "Esqueceu sua senha?",
     "login": "Entrar",
     "dontHaveAccount": "Não tem uma conta?",
-    "signUp": "Cadastre-se"
+    "signUp": "Cadastre-se",
+    "redirectingToDashboard": "Redirecionando para o Dashboard..."
   },
   "Register": {
     "title": "Cadastrar",
@@ -26,6 +27,7 @@
     "confirmPasswordPlaceholder": "Confirme sua senha",
     "signUp": "Cadastrar",
     "alreadyHaveAccount": "Já tem uma conta?",
-    "logIn": "Entrar"
+    "logIn": "Entrar",
+    "redirectingToDashboard": "Redirecionando para o Dashboard..."
   }
 }

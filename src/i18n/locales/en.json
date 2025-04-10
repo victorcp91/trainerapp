@@ -10,7 +10,8 @@
     "forgotPassword": "Forgot your password?",
     "login": "Login",
     "dontHaveAccount": "Don't have an account?",
-    "signUp": "Sign up"
+    "signUp": "Sign up",
+    "redirectingToDashboard": "Redirecting to Dashboard..."
   },
   "Register": {
     "title": "Register",
@@ -26,6 +27,7 @@
     "confirmPasswordPlaceholder": "Confirm your password",
     "signUp": "Sign up",
     "alreadyHaveAccount": "Already have an account?",
-    "logIn": "Log in"
+    "logIn": "Log in",
+    "redirectingToDashboard": "Redirecting to Dashboard..."
   }
 }

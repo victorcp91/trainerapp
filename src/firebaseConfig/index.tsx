@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
+  apiKey: "AIzaSyCXAwQbtppmwwYi6GxHj3ai3oG2vXTGt0E",
+  authDomain: "trainerapp-d0459.firebaseapp.com",
   projectId: "trainerapp-d0459",
   storageBucket: "trainerapp-d0459.firebasestorage.app",
   messagingSenderId: "809760639154",
@@ -12,4 +13,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+
+export { app, analytics, auth };

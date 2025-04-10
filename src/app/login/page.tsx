@@ -13,22 +13,40 @@ import {
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import { withAuth } from "@/utils/withAuth";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const t = useTranslations("Login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      router.push("/dashboard");
     } catch (err) {
       console.error(err);
       setError("Failed to log in. Please check your credentials.");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to log in with Google. Please try again.");
     }
   };
 
@@ -49,7 +67,7 @@ const LoginPage = () => {
       >
         <Title order={2}>{t("title")}</Title>
         <Stack mt="lg">
-          <Button fullWidth variant="outline">
+          <Button fullWidth variant="outline" onClick={handleGoogleLogin}>
             {t("loginWithGoogle")}
           </Button>
           <Text size="sm" color="dimmed">
