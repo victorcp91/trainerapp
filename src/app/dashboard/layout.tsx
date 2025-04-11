@@ -1,7 +1,22 @@
 "use client";
 
-import { Anchor, AppShell, Burger, NavLink, Title } from "@mantine/core";
+import {
+  AppShell,
+  Burger,
+  NavLink,
+  Title,
+  Button,
+  Avatar,
+  Group,
+  Stack,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import {
+  IconDashboard,
+  IconUsers,
+  IconCalendar,
+  IconMessageCircle,
+} from "@tabler/icons-react";
 
 export default function DashboardLayout({
   children,
@@ -19,19 +34,78 @@ export default function DashboardLayout({
       }}
       padding="md"
     >
-      <AppShell.Navbar p="md">
-        <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <Title order={1}>
-          <NavLink label="TrainerApp" href="/dashboard" />
-        </Title>
-        <NavLink href="/dashboard" label="Dashboard" />
-        <NavLink href="/dashboard/clients" label="Alunos" />
-        <NavLink href="/dashboard/messages" label="Calendário" />
-        <NavLink href="/dashboard/messages" label="Planos de treino" />
-        <NavLink href="/dashboard/account" label="Minha conta" />
+      <AppShell.Navbar
+        p="md"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          backgroundColor: "#1A1B1E", // Cor de fundo ajustada
+          color: "#FFFFFF", // Cor do texto ajustada
+        }}
+      >
+        <div>
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <Title order={1} mb="lg" style={{ color: "#FFFFFF" }}>
+            <NavLink
+              label="Fituno"
+              href="/dashboard"
+              style={{ color: "#FFFFFF" }}
+            />
+          </Title>
+          <NavLink
+            href="/dashboard"
+            label="Dashboard"
+            leftSection={<IconDashboard size={16} />}
+            style={{ color: "#FFFFFF" }}
+          />
+          <NavLink
+            href="/dashboard/clients"
+            label="Alunos"
+            leftSection={<IconUsers size={16} />}
+            style={{ color: "#FFFFFF" }}
+          />
+          <NavLink
+            href="/dashboard/calendar"
+            label="Calendário"
+            leftSection={<IconCalendar size={16} />}
+            style={{ color: "#FFFFFF" }}
+          />
+          <NavLink
+            href="/dashboard/messages"
+            label="Planos de treino"
+            leftSection={<IconMessageCircle size={16} />}
+            style={{ color: "#FFFFFF" }}
+          />
+        </div>
+        <Stack>
+          <Group>
+            <Avatar radius="xl" color="blue">
+              J
+            </Avatar>
+            <Button
+              variant="subtle"
+              color="dark"
+              onClick={() => (window.location.href = "/profile")}
+              style={{ color: "#FFFFFF" }}
+            >
+              John Doe
+            </Button>
+          </Group>
+          <Button
+            variant="subtle"
+            color="red"
+            onClick={() => console.log("Logout")}
+            style={{ color: "#FFFFFF" }}
+          >
+            Logout
+          </Button>
+        </Stack>
       </AppShell.Navbar>
 
-      <AppShell.Main>{children}</AppShell.Main>
+      <AppShell.Main style={{ backgroundColor: "#f8f9fa" }}>
+        {children}
+      </AppShell.Main>
     </AppShell>
   );
 }

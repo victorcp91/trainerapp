@@ -13,7 +13,7 @@ import {
 import { NextIntlClientProvider } from "next-intl";
 
 export const metadata: Metadata = {
-  title: "TrainerApp",
+  title: "Fituno",
   description: "",
 };
 
