@@ -48,7 +48,7 @@ const ForgotPasswordPage = () => {
       >
         <Title order={2}>{t("title")}</Title>
         <Stack mt="lg">
-          <Text size="sm" color="dimmed">
+          <Text size="sm" c="dimmed">
             {t("instruction")}
           </Text>
           <TextInput
@@ -61,11 +61,11 @@ const ForgotPasswordPage = () => {
           <Button fullWidth mt="xl" onClick={handlePasswordReset}>
             {t("sendResetLink")}
           </Button>
-          {message && <Text color="green">{message}</Text>}
-          {error && <Text color="red">{error}</Text>}
+          {message && <Text c="green">{message}</Text>}
+          {error && <Text c="red">{error}</Text>}
           <Text size="sm" mt="md">
             {t("rememberPassword")}{" "}
-            <Text component="a" href="/login" color="blue">
+            <Text component="a" href="/login" c="blue">
               {t("logIn")}
             </Text>
           </Text>

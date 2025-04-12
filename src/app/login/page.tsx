@@ -70,7 +70,7 @@ const LoginPage = () => {
           <Button fullWidth variant="outline" onClick={handleGoogleLogin}>
             {t("loginWithGoogle")}
           </Button>
-          <Text size="sm" color="dimmed">
+          <Text size="sm" c="dimmed">
             {t("orLoginWithEmail")}
           </Text>
           <TextInput
@@ -88,17 +88,17 @@ const LoginPage = () => {
             required
           />
           <Group mt="md">
-            <Text size="sm" color="blue" component="a" href="/forgot-password">
+            <Text size="sm" c="blue" component="a" href="/forgot-password">
               {t("forgotPassword")}
             </Text>
           </Group>
           <Button fullWidth mt="xl" onClick={handleLogin}>
             {t("login")}
           </Button>
-          {error && <Text color="red">{error}</Text>}
+          {error && <Text c="red">{error}</Text>}
           <Text size="sm" mt="md">
             {t("dontHaveAccount")}{" "}
-            <Text component="a" href="/register" color="blue">
+            <Text component="a" href="/register" c="blue">
               {t("signUp")}
             </Text>
           </Text>

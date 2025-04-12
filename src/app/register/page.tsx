@@ -69,7 +69,7 @@ const RegisterPage = () => {
           <Button fullWidth variant="outline" onClick={handleGoogleSignUp}>
             {t("signUpWithGoogle")}
           </Button>
-          <Text size="sm" color="dimmed">
+          <Text size="sm" c="dimmed">
             {t("orSignUpWithEmail")}
           </Text>
           <TextInput
@@ -99,10 +99,10 @@ const RegisterPage = () => {
           <Button fullWidth mt="xl" onClick={handleRegister}>
             {t("signUp")}
           </Button>
-          {error && <Text color="red">{error}</Text>}
+          {error && <Text c="red">{error}</Text>}
           <Text size="sm" mt="md">
             {t("alreadyHaveAccount")}{" "}
-            <Text component="a" href="/login" color="blue">
+            <Text component="a" href="/login" c="blue">
               {t("logIn")}
             </Text>
           </Text>

@@ -61,13 +61,13 @@ export default function DashboardLayout({
           />
           <NavLink
             href="/dashboard/clients"
-            label="Alunos"
+            label="Clientes"
             leftSection={<IconUsers size={16} />}
             style={{ color: "#FFFFFF" }}
           />
           <NavLink
-            href="/dashboard/calendar"
-            label="Calendário"
+            href="/dashboard/attendances"
+            label="Atendimentos"
             leftSection={<IconCalendar size={16} />}
             style={{ color: "#FFFFFF" }}
           />
@@ -80,12 +80,12 @@ export default function DashboardLayout({
         </div>
         <Stack>
           <Group>
-            <Avatar radius="xl" color="blue">
+            <Avatar radius="xl" c="blue">
               J
             </Avatar>
             <Button
               variant="subtle"
-              color="dark"
+              c="dark"
               onClick={() => (window.location.href = "/profile")}
               style={{ color: "#FFFFFF" }}
             >
@@ -94,7 +94,7 @@ export default function DashboardLayout({
           </Group>
           <Button
             variant="subtle"
-            color="red"
+            c="red"
             onClick={() => console.log("Logout")}
             style={{ color: "#FFFFFF" }}
           >

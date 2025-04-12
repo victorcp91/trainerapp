@@ -15,6 +15,7 @@ import {
   Image,
   TextInput,
   Checkbox,
+  Switch,
 } from "@mantine/core";
 import {
   IconShare,
@@ -25,11 +26,13 @@ import {
   IconBell,
   IconHeart,
   IconAlertCircle,
+  IconBrandWhatsapp,
 } from "@tabler/icons-react";
 import html2canvas from "html2canvas";
 import { useState } from "react";
 import { DateInput } from "@mantine/dates";
-import { useRouter } from "next/navigation";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { showNotification } from "@mantine/notifications"; // Importação para notificações
 
 export default function ClientProfilePage() {
   const [notes, setNotes] = useState<string[]>([]);
@@ -44,8 +47,24 @@ export default function ClientProfilePage() {
     "side",
     "back",
   ]); // Estado para ângulos selecionados
+  const [replicateModalOpened, setReplicateModalOpened] = useState(false); // Estado para o modal de replicação
+  const [replicateStartDate, setReplicateStartDate] = useState<Date | null>(
+    null
+  ); // Data de início
+  const [replicateEndDate, setReplicateEndDate] = useState<Date | null>(null); // Data de expiração
+  const [isClientActive, setIsClientActive] = useState<boolean>(true); // Estado para ativar/desativar cliente
 
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
+
+  const currentTab = searchParams?.get("tab") || "profile";
+
+  const handleTabChange = (value: string | null) => {
+    if (value) {
+      router.push(`${pathname}?tab=${value}`);
+    }
+  };
 
   const angleOptions = [
     { value: "front", label: "Frente" },
@@ -106,24 +125,48 @@ export default function ClientProfilePage() {
     alert("Funcionalidade de compartilhamento em redes sociais em breve!");
   };
 
+  const handleReplicateSeries = () => {
+    if (replicateStartDate && replicateEndDate) {
+      alert(
+        `Série replicada como rascunho de ${replicateStartDate.toLocaleDateString(
+          "pt-BR"
+        )} até ${replicateEndDate.toLocaleDateString("pt-BR")}`
+      );
+      setReplicateModalOpened(false); // Fecha o modal
+    } else {
+      alert("Por favor, preencha ambas as datas.");
+    }
+  };
+
   return (
     <Stack>
       <Group>
         <Group>
           <Avatar radius="xl" size="lg" />
           <Stack>
-            <Text size="lg">Ben Andrew</Text>
-            <Badge color="blue">Híbrido</Badge>{" "}
-            {/* Pode ser Presencial, Remoto ou Híbrido */}
+            <Group>
+              <Text size="lg">Ben Andrew</Text>
+              {/* Pode ser Presencial, Remoto ou Híbrido */}
+              <Badge color="blue">Híbrido</Badge>{" "}
+            </Group>
+            <Switch
+              checked={isClientActive}
+              onChange={(event) =>
+                setIsClientActive(event.currentTarget.checked)
+              }
+              label={isClientActive ? "Ativo" : "Inativo"}
+              size="sm"
+            />
           </Stack>
         </Group>
       </Group>
 
       {/* Tabs */}
-      <Tabs defaultValue="profile">
+      <Tabs value={currentTab} onChange={handleTabChange}>
         <Tabs.List>
           <Tabs.Tab value="profile">Perfil</Tabs.Tab>
           <Tabs.Tab value="training">Treinos</Tabs.Tab>
+          <Tabs.Tab value="evolution">Evolução</Tabs.Tab>
           <Tabs.Tab value="anamnesis">Anamnese</Tabs.Tab>
         </Tabs.List>
 
@@ -138,7 +181,7 @@ export default function ClientProfilePage() {
                 padding="lg"
                 style={{
                   flex: 1,
-                  display: "flex",
+
                   flexDirection: "column",
                 }}
               >
@@ -148,13 +191,53 @@ export default function ClientProfilePage() {
                   align="flex-start"
                   style={{ justifyContent: "space-between" }}
                 >
-                  <Stack style={{ flex: 1 }}>
-                    <Text>Idade: 30 anos</Text>
+                  <Stack style={{ flex: 1, gap: "4px" }}>
                     <Text>Sexo: Masculino</Text>
-                    <Text>Telefone: (11) 98765-4321</Text>
-                    <Text>Email: ben.andrew@example.com</Text>
+                    <Group>
+                      <Text>Telefone: </Text>
+                      <a
+                        href="https://wa.me/5511987654321"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "green",
+                          display: "flex",
+                          gap: "5px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <IconBrandWhatsapp size={16} />
+                        (11) 98765-4321
+                      </a>
+                    </Group>
+                    <Group>
+                      <Text>Email:</Text>
+                      <Text
+                        style={{
+                          cursor: "pointer",
+                          color: "orange",
+                          textDecoration: "underline",
+                        }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            "ben.andrew@example.com"
+                          );
+                          showNotification({
+                            title: "E-mail copiado!",
+                            message:
+                              "O e-mail foi copiado para a área de transferência.",
+                            color: "orange",
+                            position: "top-right",
+                          });
+                        }}
+                      >
+                        ben.andrew@example.com
+                      </Text>
+                    </Group>
+                    <Text>Endereço: São Paulo - SP, Brasil</Text>
                   </Stack>
-                  <Stack style={{ flex: 1 }}>
+                  <Stack style={{ flex: 1, gap: "4px" }}>
+                    <Text>Idade: 30 anos</Text>
                     <Text>Altura: 1,75m</Text>
                     <Text>Peso: 70kg</Text>
                     <Text>BF: 15%</Text>
@@ -168,7 +251,7 @@ export default function ClientProfilePage() {
                 padding="lg"
                 style={{
                   flex: 1,
-                  display: "flex",
+
                   flexDirection: "column",
                 }}
               >
@@ -195,7 +278,7 @@ export default function ClientProfilePage() {
                 padding="lg"
                 style={{
                   flex: 1,
-                  display: "flex",
+
                   flexDirection: "column",
                 }}
               >
@@ -232,7 +315,6 @@ export default function ClientProfilePage() {
                         placeholder="Digite sua anotação"
                         value={newNote}
                         onChange={(e) => setNewNote(e.currentTarget.value)}
-                        style={{ flex: 1 }}
                       />
                       <Button variant="light" onClick={addNote}>
                         <IconCheck size={16} />
@@ -267,7 +349,7 @@ export default function ClientProfilePage() {
                 padding="lg"
                 style={{
                   flex: 1,
-                  display: "flex",
+
                   flexDirection: "column",
                 }}
               >
@@ -296,78 +378,192 @@ export default function ClientProfilePage() {
                 </Button>
               </Card>
             </Group>
-
-            {/* Progress Photos */}
-            <Card shadow="sm" padding="lg">
-              <Text size="md">Progresso</Text>
-              <Divider my="sm" />
-              <Group>
-                {photoDates.map((date) => (
-                  <Card
-                    key={date}
-                    shadow="sm"
-                    padding="sm"
-                    onClick={() => handlePhotoClick(date)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Text size="sm">{date}</Text>
-                    <Avatar
-                      src={progressPhotos[date].front}
-                      size={100}
-                      radius="md"
-                    />
-                  </Card>
-                ))}
-              </Group>
-            </Card>
           </Stack>
         </Tabs.Panel>
 
         {/* Training Tab */}
         <Tabs.Panel value="training" pt="md">
-          <Card shadow="sm" padding="lg">
-            <Text size="md">Informações de Treino</Text>
-            <Divider my="sm" />
-            <Group align="flex-start" style={{ alignItems: "stretch" }}>
-              <Stack style={{ flex: 1 }}>
+          <Group
+            mt="md"
+            grow
+            align="flex-start"
+            style={{ alignItems: "stretch" }}
+          >
+            <Card shadow="sm" padding="lg">
+              <Text size="md">Informações de Treino</Text>
+              <Divider my="sm" />
+              <Group align="flex-start" style={{ alignItems: "stretch" }}>
+                <Stack>
+                  <Group>
+                    <IconCalendar size={20} />
+                    <Text size="sm">
+                      <strong>Dias disponíveis:</strong> Segunda, Quarta, Sexta
+                    </Text>
+                  </Group>
+                  <Group>
+                    <IconClock size={20} />
+                    <Text size="sm">
+                      <strong>Tempo por treino:</strong> 1 hora
+                    </Text>
+                  </Group>
+                  <Group>
+                    <IconBell size={20} />
+                    <Text size="sm">
+                      <strong>Equipamento:</strong> Pesos livres
+                    </Text>
+                  </Group>
+                </Stack>
+                <Stack>
+                  <Group>
+                    <IconHeart size={20} />
+                    <Text size="sm">
+                      <strong>Cardio:</strong> Esteira, Bicicleta
+                    </Text>
+                  </Group>
+                  <Group>
+                    <IconAlertCircle size={20} />
+                    <Text size="sm">
+                      <strong>Restrições:</strong> Nenhuma
+                    </Text>
+                  </Group>
+                </Stack>
+              </Group>
+            </Card>
+            <Card
+              shadow="sm"
+              padding="lg"
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden", // Garante que o conteúdo excedente seja tratado
+              }}
+            >
+              <Text size="md">Histórico de Séries</Text>
+              <Divider my="sm" />
+              <Stack mah="200px" style={{ overflowY: "auto" }}>
                 <Group>
-                  <IconCalendar size={20} />
-                  <Text size="sm">
-                    <strong>Dias disponíveis:</strong> Segunda, Quarta, Sexta
-                  </Text>
+                  <Stack style={{ flex: 1, gap: "4px" }}>
+                    <Text size="sm">Mobilidade</Text>
+                    <Group>
+                      <Text size="xs" color="dimmed">
+                        Iniciado em: 01/01/2023
+                      </Text>
+                      <Divider orientation="vertical" mx="xs" />
+                      <Text size="xs" color="dimmed">
+                        Trocado em: 15/01/2023
+                      </Text>
+                    </Group>
+                  </Stack>
+                  <Group>
+                    <Button variant="light" color="blue" size="xs">
+                      Ver Detalhes
+                    </Button>
+                    <Button variant="light" color="orange" size="xs">
+                      Replicar
+                    </Button>
+                  </Group>
                 </Group>
-                <Group>
-                  <IconClock size={20} />
-                  <Text size="sm">
-                    <strong>Tempo por treino:</strong> 1 hora
-                  </Text>
+                <Group style={{ width: "100%" }}>
+                  <Stack style={{ flex: 1, gap: "4px" }}>
+                    <Text size="sm">Hipertrofia</Text>
+                    <Group>
+                      <Text size="xs" color="dimmed">
+                        Iniciado em: 16/01/2023
+                      </Text>
+                      <Divider orientation="vertical" mx="xs" />
+                      <Text size="xs" color="dimmed">
+                        Trocado em: 01/02/2023
+                      </Text>
+                    </Group>
+                  </Stack>
+                  <Group>
+                    <Button variant="light" color="blue" size="xs">
+                      Ver Detalhes
+                    </Button>
+                    <Button variant="light" color="orange" size="xs">
+                      Replicar
+                    </Button>
+                  </Group>
                 </Group>
-                <Group>
-                  <IconBell size={20} />
-                  <Text size="sm">
-                    <strong>Equipamento:</strong> Pesos livres
-                  </Text>
+                <Group style={{ width: "100%" }}>
+                  <Stack style={{ flex: 1, gap: "4px" }}>
+                    <Text size="sm">Hipertrofia</Text>
+                    <Group>
+                      <Text size="xs" color="dimmed">
+                        Iniciado em: 02/02/2023
+                      </Text>
+                      <Divider orientation="vertical" mx="xs" />
+                      <Text size="xs" color="dimmed">
+                        Trocado em: 15/02/2023
+                      </Text>
+                    </Group>
+                  </Stack>
+                  <Group>
+                    <Button variant="light" color="blue" size="xs">
+                      Ver Detalhes
+                    </Button>
+                    <Button variant="light" color="orange" size="xs">
+                      Replicar
+                    </Button>
+                  </Group>
+                </Group>
+                {/* Exemplos adicionais */}
+                <Group style={{ width: "100%" }}>
+                  <Stack style={{ flex: 1, gap: "4px" }}>
+                    <Text size="sm">Resistência</Text>
+                    <Group>
+                      <Text size="xs" color="dimmed">
+                        Iniciado em: 20/02/2023
+                      </Text>
+                      <Divider orientation="vertical" mx="xs" />
+                      <Text size="xs" color="dimmed">
+                        Trocado em: 10/03/2023
+                      </Text>
+                    </Group>
+                  </Stack>
+                  <Group>
+                    <Button variant="light" color="blue" size="xs">
+                      Ver Detalhes
+                    </Button>
+                    <Button variant="light" color="orange" size="xs">
+                      Replicar
+                    </Button>
+                  </Group>
+                </Group>
+                <Group style={{ width: "100%" }}>
+                  <Stack style={{ flex: 1, gap: "4px" }}>
+                    <Text size="sm">Cardio</Text>
+                    <Group>
+                      <Text size="xs" color="dimmed">
+                        Iniciado em: 15/03/2023
+                      </Text>
+                      <Divider orientation="vertical" mx="xs" />
+                      <Text size="xs" color="dimmed">
+                        Trocado em: 01/04/2023
+                      </Text>
+                    </Group>
+                  </Stack>
+                  <Group>
+                    <Button variant="light" color="blue" size="xs">
+                      Ver Detalhes
+                    </Button>
+                    <Button variant="light" color="orange" size="xs">
+                      Replicar
+                    </Button>
+                  </Group>
                 </Group>
               </Stack>
-              <Stack style={{ flex: 1 }}>
-                <Group>
-                  <IconHeart size={20} />
-                  <Text size="sm">
-                    <strong>Cardio:</strong> Esteira, Bicicleta
-                  </Text>
-                </Group>
-                <Group>
-                  <IconAlertCircle size={20} />
-                  <Text size="sm">
-                    <strong>Lesões:</strong> Nenhuma
-                  </Text>
-                </Group>
-              </Stack>
-            </Group>
-          </Card>
+            </Card>
+          </Group>
 
           {/* New Row with Two Cards */}
-          <Group mt="md" grow align="flex-start">
+          <Group
+            mt="md"
+            grow
+            align="flex-start"
+            style={{ alignItems: "stretch" }}
+          >
             {/* Current Training Card */}
             <Card shadow="sm" padding="lg" style={{ flex: 1 }}>
               <Text size="md">Série Atual: Hipertrofia</Text>
@@ -393,8 +589,21 @@ export default function ClientProfilePage() {
                   <Button variant="light" color="teal" size="xs">
                     Gerar PDF
                   </Button>
-                  <Button variant="light" color="orange" size="xs">
-                    Duplicar Série
+                  <Button
+                    variant="light"
+                    color="orange"
+                    size="xs"
+                    onClick={() => setReplicateModalOpened(true)} // Abre o modal ao clicar
+                  >
+                    Replicar
+                  </Button>
+                  <Button
+                    variant="light"
+                    color="red"
+                    size="xs"
+                    onClick={() => alert("Série marcada como expirada.")}
+                  >
+                    Expirar
                   </Button>
                 </Group>
                 <Button
@@ -412,129 +621,299 @@ export default function ClientProfilePage() {
               </Stack>
             </Card>
 
-            {/* Training History Card */}
+            {/* Drafts Card */}
             <Card shadow="sm" padding="lg" style={{ flex: 1 }}>
-              <Text size="md">Histórico de Séries</Text>
+              <Text size="md">Rascunhos</Text>
               <Divider my="sm" />
               <Stack>
                 <Group style={{ width: "100%" }}>
                   <Stack style={{ flex: 1, gap: "4px" }}>
-                    <Text size="sm">Mobilidade</Text>
+                    <Text size="sm">Treino de Força</Text>
                     <Group>
                       <Text size="xs" color="dimmed">
-                        Iniciado em: 01/01/2023
-                      </Text>
-                      <Divider orientation="vertical" mx="xs" />
-                      <Text size="xs" color="dimmed">
-                        Trocado em: 15/01/2023
+                        Criado em: 10/03/2023
                       </Text>
                     </Group>
                   </Stack>
                   <Group>
                     <Button variant="light" color="blue" size="xs">
-                      Ver Detalhes
+                      Editar
                     </Button>
-                    <Button variant="light" color="orange" size="xs">
-                      Duplicar
+                    <Button variant="light" color="green" size="xs">
+                      Publicar
+                    </Button>
+                    <Button variant="light" color="red" size="xs">
+                      Excluir
                     </Button>
                   </Group>
                 </Group>
                 <Group style={{ width: "100%" }}>
                   <Stack style={{ flex: 1, gap: "4px" }}>
-                    <Text size="sm">Hipertrofia</Text>
+                    <Text size="sm">Treino de Resistência</Text>
                     <Group>
                       <Text size="xs" color="dimmed">
-                        Iniciado em: 16/01/2023
-                      </Text>
-                      <Divider orientation="vertical" mx="xs" />
-                      <Text size="xs" color="dimmed">
-                        Trocado em: 01/02/2023
+                        Criado em: 15/03/2023
                       </Text>
                     </Group>
                   </Stack>
                   <Group>
                     <Button variant="light" color="blue" size="xs">
-                      Ver Detalhes
+                      Editar
                     </Button>
-                    <Button variant="light" color="orange" size="xs">
-                      Duplicar
+                    <Button variant="light" color="green" size="xs">
+                      Publicar
                     </Button>
-                  </Group>
-                </Group>
-                <Group style={{ width: "100%" }}>
-                  <Stack style={{ flex: 1, gap: "4px" }}>
-                    <Text size="sm">Hipertrofia</Text>
-                    <Group>
-                      <Text size="xs" color="dimmed">
-                        Iniciado em: 02/02/2023
-                      </Text>
-                      <Divider orientation="vertical" mx="xs" />
-                      <Text size="xs" color="dimmed">
-                        Trocado em: 15/02/2023
-                      </Text>
-                    </Group>
-                  </Stack>
-                  <Group>
-                    <Button variant="light" color="blue" size="xs">
-                      Ver Detalhes
-                    </Button>
-                    <Button variant="light" color="orange" size="xs">
-                      Duplicar
+                    <Button variant="light" color="red" size="xs">
+                      Excluir
                     </Button>
                   </Group>
                 </Group>
               </Stack>
+              <Button
+                variant="light"
+                fullWidth
+                mt="sm"
+                onClick={() =>
+                  router.push(`/dashboard/clients/clientId/new-plan`)
+                }
+              >
+                Criar Novo Rascunho
+              </Button>
             </Card>
           </Group>
         </Tabs.Panel>
 
         {/* Anamnesis Tab */}
         <Tabs.Panel value="anamnesis" pt="md">
-          <Card shadow="sm" padding="lg">
-            <Text size="md">Informações de Treino</Text>
-            <Divider my="sm" />
-            <Stack>
-              {/* Dias da semana disponíveis */}
-              <Group>
-                <IconCalendar size={20} />
-                <Text size="sm">
-                  <strong>Dias disponíveis:</strong> Segunda, Quarta, Sexta
-                </Text>
-              </Group>
+          <Stack>
+            <Group grow align="flex-start" style={{ alignItems: "stretch" }}>
+              {/* 🧠 Objetivo e experiência */}
+              <Card
+                shadow="sm"
+                padding="lg"
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Text size="md">🧠 Objetivo e Experiência</Text>
+                <Divider my="sm" />
+                <Stack>
+                  <Select
+                    label="Objetivo principal:"
+                    placeholder="Selecione o objetivo"
+                    data={[
+                      { value: "hipertrofia", label: "Hipertrofia" },
+                      { value: "emagrecimento", label: "Emagrecimento" },
+                      { value: "forca", label: "Força" },
+                      { value: "resistencia", label: "Resistência muscular" },
+                      {
+                        value: "condicionamento",
+                        label: "Condicionamento físico geral",
+                      },
+                    ]}
+                  />
+                  <Select
+                    label="Nível de experiência:"
+                    placeholder="Selecione o nível"
+                    data={[
+                      {
+                        value: "iniciante",
+                        label: "Iniciante (Menos de 6 meses)",
+                      },
+                      {
+                        value: "intermediario",
+                        label: "Intermediário (6m a 2 anos)",
+                      },
+                      { value: "avancado", label: "Avançado (+2 anos)" },
+                    ]}
+                  />
+                </Stack>
+              </Card>
 
-              {/* Tempo disponível por treino */}
-              <Group>
-                <IconClock size={20} />
-                <Text size="sm">
-                  <strong>Tempo por treino:</strong> 1 hora
-                </Text>
-              </Group>
+              {/* 📅 Frequência e tempo */}
+              <Card
+                shadow="sm"
+                padding="lg"
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Text size="md">📅 Frequência e Tempo</Text>
+                <Divider my="sm" />
+                <Stack>
+                  <Checkbox.Group
+                    label="Quais dias da semana o aluno pode treinar?"
+                    description="Selecione os dias disponíveis"
+                  >
+                    <Group mt="md">
+                      <Checkbox value="Segunda" label="Segunda" />
+                      <Checkbox value="Terça" label="Terça" />
+                      <Checkbox value="Quarta" label="Quarta" />
+                      <Checkbox value="Quinta" label="Quinta" />
+                      <Checkbox value="Sexta" label="Sexta" />
+                      <Checkbox value="Sábado" label="Sábado" />
+                      <Checkbox value="Domingo" label="Domingo" />
+                    </Group>
+                  </Checkbox.Group>
+                  <TextInput
+                    label="Tempo disponível por treino (em minutos):"
+                    placeholder="Ex: 45"
+                    type="number"
+                  />
+                </Stack>
+              </Card>
+            </Group>
 
-              {/* Equipamento disponível */}
-              <Group>
-                <IconBell size={20} />
-                <Text size="sm">
-                  <strong>Equipamento:</strong> Pesos livres
-                </Text>
-              </Group>
+            <Group grow align="flex-start" style={{ alignItems: "stretch" }}>
+              {/* 🏋️ Foco muscular e treino */}
+              <Card
+                shadow="sm"
+                padding="lg"
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Text size="md">🏋️ Foco Muscular e Treino</Text>
+                <Divider my="sm" />
+                <Stack>
+                  <Checkbox.Group
+                    label="Deseja dar foco a algum grupo muscular específico?"
+                    style={{ flexWrap: "wrap", gap: "16px" }}
+                  >
+                    <Group mt="md">
+                      <Checkbox
+                        key="Peitoral"
+                        value="Peitoral"
+                        label="Peitoral"
+                      />
+                      <Checkbox key="Costas" value="Costas" label="Costas" />
+                      <Checkbox key="Ombros" value="Ombros" label="Ombros" />
+                      <Checkbox key="Bíceps" value="Bíceps" label="Bíceps" />
+                      <Checkbox key="Tríceps" value="Tríceps" label="Tríceps" />
+                      <Checkbox key="Abdômen" value="Abdômen" label="Abdômen" />
+                      <Checkbox key="Glúteos" value="Glúteos" label="Glúteos" />
+                      <Checkbox
+                        key="Quadríceps"
+                        value="Quadríceps"
+                        label="Quadríceps"
+                      />
 
-              {/* Preferência de cardio */}
-              <Group>
-                <IconHeart size={20} />
-                <Text size="sm">
-                  <strong>Cardio:</strong> Esteira, Bicicleta
-                </Text>
-              </Group>
+                      <Checkbox
+                        key="Posteriores de coxa"
+                        value="Posteriores de coxa"
+                        label="Posteriores de coxa"
+                      />
 
-              {/* Lesões */}
+                      <Checkbox
+                        key="Panturrilhas"
+                        value="Panturrilhas"
+                        label="Panturrilhas"
+                      />
+                    </Group>
+                  </Checkbox.Group>
+                  <Select
+                    label="Equipamento disponível:"
+                    placeholder="Selecione o equipamento"
+                    data={[
+                      { value: "sem_equipamento", label: "Sem equipamentos" },
+                      { value: "pesos_livres", label: "Pesos livres em casa" },
+                      {
+                        value: "academia_completa",
+                        label: "Academia completa",
+                      },
+                    ]}
+                  />
+                </Stack>
+              </Card>
+
+              {/* 🫀 Cardio */}
+              <Card
+                shadow="sm"
+                padding="lg"
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Text size="md">🫀 Cardio</Text>
+                <Divider my="sm" />
+                <Stack>
+                  <Select
+                    label="Qual a relação do aluno com o cardio?"
+                    placeholder="Selecione uma opção"
+                    data={[
+                      { value: "regular", label: "Faço regularmente" },
+                      { value: "as_vezes", label: "Faço às vezes" },
+                      { value: "nao_faco", label: "Não faço" },
+                    ]}
+                  />
+                  <Checkbox.Group
+                    label="Preferências de cardio:"
+                    style={{ flexWrap: "wrap", gap: "16px" }}
+                  >
+                    <Group mt="md">
+                      <Checkbox
+                        value="Caminhada/corrida ao ar livre"
+                        label="Caminhada/corrida ao ar livre"
+                      />
+                      <Checkbox value="esteira ergométrica" label="Esteira" />
+                      <Checkbox value="ciclismo" label="Ciclismo" />
+                      <Checkbox
+                        value="ciclismo indoor"
+                        label="Ciclismo indoor"
+                      />
+                      <Checkbox value="HIIT" label="HIIT" />
+                      <Checkbox value="Elíptico" label="Elíptico" />
+                      <Checkbox value="escada" label="Escada" />
+                      <Checkbox value="outros" label="Outros" />
+                    </Group>
+                  </Checkbox.Group>
+                  <TextInput
+                    label="Se outros, especifique:"
+                    placeholder="Descreva suas preferências de cardio"
+                    style={{ marginTop: "8px" }}
+                  />
+                </Stack>
+              </Card>
+            </Group>
+
+            <Group grow align="flex-start">
+              {/* 🚫 Restrições */}
+              <Card shadow="sm" padding="lg">
+                <Text size="md">🚫 Restrições</Text>
+                <Divider my="sm" />
+                <TextInput
+                  label="Possui alguma lesão ou limitação física?"
+                  placeholder="Descreva se houver algo importante a considerar"
+                />
+              </Card>
+            </Group>
+
+            {/* Botão de salvar */}
+            <Button variant="filled" color="blue" mt="md">
+              Salvar Todas as Edições
+            </Button>
+          </Stack>
+        </Tabs.Panel>
+
+        {/* Evolução Tab */}
+        <Tabs.Panel value="evolution" pt="md">
+          <Stack>
+            {/* Progress Photos */}
+            <Card shadow="sm" padding="lg">
+              <Text size="md">Progresso</Text>
+              <Divider my="sm" />
               <Group>
-                <IconAlertCircle size={20} />
-                <Text size="sm">
-                  <strong>Lesões:</strong> Nenhuma
-                </Text>
+                {photoDates.map((date) => (
+                  <Card
+                    key={date}
+                    shadow="sm"
+                    padding="sm"
+                    onClick={() => handlePhotoClick(date)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Text size="sm">{date}</Text>
+                    <Avatar
+                      src={progressPhotos[date].front}
+                      size={100}
+                      radius="md"
+                    />
+                  </Card>
+                ))}
               </Group>
-            </Stack>
-          </Card>
+            </Card>
+          </Stack>
         </Tabs.Panel>
       </Tabs>
 
@@ -642,6 +1021,31 @@ export default function ClientProfilePage() {
             Compartilhar
           </Button>
         </Group>
+      </Modal>
+
+      {/* Modal para replicar série */}
+      <Modal
+        opened={replicateModalOpened}
+        onClose={() => setReplicateModalOpened(false)}
+        title="Replicar Série"
+      >
+        <Stack>
+          <DateInput
+            label="Data de Início"
+            placeholder="Selecione a data de início"
+            value={replicateStartDate}
+            onChange={setReplicateStartDate}
+          />
+          <DateInput
+            label="Data de Expiração"
+            placeholder="Selecione a data de expiração"
+            value={replicateEndDate}
+            onChange={setReplicateEndDate}
+          />
+          <Button onClick={handleReplicateSeries} variant="filled" color="blue">
+            Confirmar
+          </Button>
+        </Stack>
       </Modal>
     </Stack>
   );

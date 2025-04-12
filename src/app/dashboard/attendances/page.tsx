@@ -1,0 +1,675 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Button,
+  Card,
+  Group,
+  Text,
+  Title,
+  Modal,
+  TextInput,
+  Select,
+  Avatar,
+  Tooltip,
+  Indicator,
+} from "@mantine/core";
+import { DonutChart } from "@mantine/charts";
+import { DatePicker, TimeInput } from "@mantine/dates";
+import {
+  IconCheck,
+  IconX,
+  IconAlertCircle,
+  IconCalendar,
+  IconMapPin,
+  IconEdit,
+} from "@tabler/icons-react";
+
+const CalendarPage = () => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [appointmentDetails, setAppointmentDetails] = useState("");
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [appointmentTime, setAppointmentTime] = useState<string | null>(null);
+  const [appointmentLocation, setAppointmentLocation] = useState<{
+    name: string;
+    formatted_address: string;
+    place_id: string;
+  } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  }>({ lat: -23.5505, lng: -46.6333 }); // São Paulo como padrão
+  const [totalAppointments, setTotalAppointments] = useState(0);
+  const [completedAppointments, setCompletedAppointments] = useState(0);
+  const [canceledAppointments, setCanceledAppointments] = useState(0);
+  const [missedAppointments, setMissedAppointments] = useState(0);
+  const [appointments, setAppointments] = useState<
+    {
+      id: number;
+      client: string;
+      address: string;
+      startTime: string; // Alterado para incluir horário inicial
+      endTime: string; // Adicionado para incluir horário final
+      avatar: string;
+    }[]
+  >([
+    {
+      id: 1,
+      client: "João Silva",
+      address: "Rua das Flores, 123 - São Paulo, SP",
+      startTime: new Date().toISOString(), // Horário inicial
+      endTime: new Date(new Date().getTime() + 3600000).toISOString(), // Horário final (1h depois)
+      avatar: "https://via.placeholder.com/40",
+    },
+    {
+      id: 2,
+      client: "Maria Oliveira",
+      address: "Avenida Paulista, 456 - São Paulo, SP",
+      startTime: new Date(
+        new Date().setDate(new Date().getDate() + 1)
+      ).toISOString(),
+      endTime: new Date(
+        new Date().setDate(new Date().getDate() + 1) + 3600000
+      ).toISOString(),
+      avatar: "https://via.placeholder.com/40",
+    },
+  ]);
+
+  const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [currentAction, setCurrentAction] = useState<{
+    type: "cancel" | "absence";
+    appointmentId: number | null;
+  }>({ type: "cancel", appointmentId: null });
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.warn("Erro ao obter localização do usuário:", error);
+          // Fallback para São Paulo
+          setUserLocation({ lat: -23.5505, lng: -46.6333 });
+        }
+      );
+    } else {
+      console.warn("Geolocalização não suportada pelo navegador.");
+      // Fallback para São Paulo
+      setUserLocation({ lat: -23.5505, lng: -46.6333 });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!window?.google || !inputRef.current) return;
+    const autocomplete = new google.maps.places.Autocomplete(
+      inputRef.current!,
+      {
+        types: ["establishment"],
+        componentRestrictions: { country: "br" },
+      }
+    );
+
+    autocomplete.addListener("place_changed", () => {
+      console.log("here");
+      const place = autocomplete.getPlace();
+      if (place) {
+        setAppointmentLocation({
+          name: place.name || "",
+          formatted_address: place.formatted_address || "",
+          place_id: place.place_id || "",
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputRef.current, window?.google]);
+
+  const calculateDonutData = () => {
+    const total = totalAppointments || 1; // Evitar divisão por zero
+    const pending =
+      total -
+      (completedAppointments + canceledAppointments + missedAppointments);
+    return [
+      {
+        value: completedAppointments,
+        color: "green",
+        name: "Concluídos",
+      },
+      {
+        name: "Cancelados",
+        value: canceledAppointments,
+        color: "yellow",
+      },
+      {
+        name: "Faltas",
+        value: missedAppointments,
+        color: "red",
+      },
+      {
+        name: "Pendentes",
+        value: pending,
+        color: "gray",
+      },
+    ];
+  };
+
+  // Exemplo de valores fictícios para os gráficos
+  useEffect(() => {
+    setTotalAppointments(120); // Total de agendamentos
+    setCompletedAppointments(60); // Total de concluídos
+    setCanceledAppointments(25); // Total de cancelados
+    setMissedAppointments(15); // Total de faltas
+    // Pendentes serão calculados automaticamente como 20
+  }, []);
+
+  const handleScheduleAppointment = () => {
+    setIsModalOpen(false);
+    setAppointmentDetails("");
+    setSelectedClient(null);
+    setAppointmentTime(null);
+    setAppointmentLocation(null);
+  };
+
+  const handleCheckIn = (id: number) => {
+    console.log(`Check-in realizado para o agendamento ${id}`);
+  };
+
+  const handleOpenReasonModal = (type: "cancel" | "absence", id: number) => {
+    setCurrentAction({ type, appointmentId: id });
+    setReason("");
+    setIsReasonModalOpen(true);
+  };
+
+  const handleConfirmReason = () => {
+    if (
+      currentAction.type === "cancel" &&
+      currentAction.appointmentId !== null
+    ) {
+      console.log(
+        `Agendamento ${currentAction.appointmentId} cancelado. Motivo: ${reason}`
+      );
+      setAppointments((prev) =>
+        prev.filter(
+          (appointment) => appointment.id !== currentAction.appointmentId
+        )
+      );
+    } else if (
+      currentAction.type === "absence" &&
+      currentAction.appointmentId !== null
+    ) {
+      console.log(
+        `Falta registrada para o agendamento ${currentAction.appointmentId}. Motivo: ${reason}`
+      );
+    }
+    setIsReasonModalOpen(false);
+  };
+
+  const handleEditAppointment = (appointment: {
+    id: number;
+    client: string;
+    address: string;
+    startTime: string;
+    endTime: string;
+    avatar: string;
+  }) => {
+    setSelectedClient(appointment.client);
+    setSelectedDate(new Date(appointment.startTime));
+    setAppointmentTime(
+      new Date(appointment.startTime).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
+    setAppointmentDetails(appointment.address);
+    setIsModalOpen(true);
+  };
+
+  const renderDay = (date: Date) => {
+    const isToday = date.toDateString() === new Date().toDateString();
+    const hasAppointments = appointments.some(
+      (appointment) =>
+        new Date(appointment.startTime).toDateString() === date.toDateString()
+    );
+
+    return (
+      <div
+        style={{
+          backgroundColor:
+            isToday &&
+            selectedDate &&
+            date.toDateString() !== selectedDate.toDateString()
+              ? "#e0f7fa"
+              : "transparent", // Fundo azul claro apenas para hoje se outra data estiver selecionada
+          borderRadius: "50%",
+          padding: "5px",
+        }}
+      >
+        <Indicator
+          size={8}
+          color="blue"
+          offset={-2}
+          disabled={!hasAppointments}
+        >
+          <div>{date.getDate()}</div>
+        </Indicator>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <Group mb="lg">
+        <Title order={1}>Atendimentos</Title>
+      </Group>
+
+      <Group mb="lg" grow style={{ alignItems: "stretch" }}>
+        {/* Card do ano */}
+        <Card shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
+          <Group style={{ flexDirection: "column" }}>
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-between",
+              }}
+            >
+              <Title order={3}>
+                {selectedDate
+                  ? selectedDate.getFullYear().toString()
+                  : "Ano não selecionado"}
+              </Title>
+            </div>
+            <DonutChart
+              style={{ marginTop: "-50px" }}
+              data={calculateDonutData()}
+              withLabels
+              withLabelsLine
+              labelsType="value"
+              paddingAngle={5}
+              size={100}
+              thickness={14}
+            />
+          </Group>
+        </Card>
+
+        {/* Card do mês */}
+        <Card shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
+          <Group style={{ flexDirection: "column" }}>
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-between",
+              }}
+            >
+              <Title order={3}>
+                {selectedDate
+                  ? selectedDate.toLocaleDateString("pt-BR", {
+                      month: "long",
+                      year:
+                        selectedDate.getFullYear() !== new Date().getFullYear()
+                          ? "numeric"
+                          : undefined,
+                    })
+                  : "Mês não selecionado"}
+              </Title>
+            </div>
+            <DonutChart
+              style={{ marginTop: "-50px" }}
+              paddingAngle={5}
+              size={100}
+              thickness={14}
+              data={calculateDonutData()}
+              withLabels
+              withLabelsLine
+              labelsType="value"
+            />
+          </Group>
+        </Card>
+
+        {/* Card do dia */}
+        <Card shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
+          <Group style={{ flexDirection: "column" }}>
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-between",
+              }}
+            >
+              <Title order={3}>Hoje</Title>
+            </div>
+            <DonutChart
+              style={{ marginTop: "-50px" }}
+              paddingAngle={5}
+              size={100}
+              thickness={14}
+              data={calculateDonutData()}
+              withLabels
+              withLabelsLine
+              labelsType="value"
+            />
+          </Group>
+        </Card>
+      </Group>
+
+      <Group align="flex-start">
+        {/* Sidebar com o calendário */}
+        <Card shadow="sm" px="lg" py="xs" style={{ width: "300px" }}>
+          <DatePicker
+            value={selectedDate}
+            onChange={setSelectedDate}
+            renderDay={renderDay}
+          />
+        </Card>
+
+        {/* Detalhes do dia selecionado */}
+        <Card shadow="sm" px="lg" py="xs" style={{ width: "250px", flex: 1 }}>
+          <Group mb="md" style={{ justifyContent: "space-between" }}>
+            <Title order={2}>
+              {selectedDate
+                ? selectedDate.toLocaleDateString("pt-BR", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "Nenhuma data selecionada"}
+            </Title>
+            <Group style={{ alignItems: "center", gap: "10px" }}>
+              <Tooltip label="Total de agendamentos" withArrow>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <IconCalendar size={20} color="blue" />
+                  <Text size="sm">{totalAppointments}</Text>
+                </div>
+              </Tooltip>
+              <Tooltip label="Total de concluídos" withArrow>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <IconCheck size={20} color="green" />
+                  <Text size="sm">{completedAppointments}</Text>
+                </div>
+              </Tooltip>
+              <Tooltip label="Total de cancelados" withArrow>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <IconX size={20} color="red" />
+                  <Text size="sm">{canceledAppointments}</Text>
+                </div>
+              </Tooltip>
+              <Tooltip label="Total de faltas" withArrow>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <IconAlertCircle size={20} color="yellow" />
+                  <Text size="sm">{missedAppointments}</Text>
+                </div>
+              </Tooltip>
+            </Group>
+          </Group>
+          <Card withBorder px="lg" py="xs" style={{ textAlign: "center" }}>
+            {appointments
+              .filter(
+                (appointment) =>
+                  selectedDate &&
+                  new Date(appointment.startTime).toDateString() ===
+                    selectedDate.toDateString()
+              )
+              .sort(
+                (a, b) =>
+                  new Date(a.startTime).getTime() -
+                  new Date(b.startTime).getTime()
+              )
+              .map((appointment, index) => (
+                <Card
+                  key={appointment.id}
+                  shadow="sm"
+                  padding="md"
+                  mb="sm"
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "flex-start",
+                    gap: "10px",
+                    border:
+                      index === 0 &&
+                      new Date(appointment.startTime) > new Date()
+                        ? "2px solid green"
+                        : undefined,
+                  }}
+                >
+                  <Text size="sm" color="dimmed" mt="xs">
+                    {new Date(appointment.startTime).toLocaleTimeString(
+                      "pt-BR",
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}{" "}
+                    -{" "}
+                    {new Date(appointment.endTime).toLocaleTimeString("pt-BR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+
+                  <Group
+                    style={{
+                      flexDirection: "row",
+                      gap: "5px",
+                      alignItems: "flex-start",
+                      flex: 1,
+                    }}
+                  >
+                    <Avatar
+                      src={appointment.avatar}
+                      alt={`Avatar de ${appointment.client}`}
+                      radius="xl"
+                    />
+                    <Group
+                      style={{
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: "5px",
+                        marginTop: "5px",
+                        flex: 1,
+                      }}
+                    >
+                      <Group style={{ flex: 1 }}>
+                        <Text>{appointment.client}</Text>
+                        <Text
+                          size="sm"
+                          color="dimmed"
+                          style={{
+                            flex: 1,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <IconMapPin size={16} color="blue" />
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                              appointment.address
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              textDecoration: "none",
+                              color: "inherit",
+                            }}
+                          >
+                            {appointment.address}
+                          </a>
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Button
+                          size="xs"
+                          variant="light"
+                          color="green"
+                          onClick={() => handleCheckIn(appointment.id)}
+                        >
+                          Check-in
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="light"
+                          color="yellow"
+                          onClick={() =>
+                            handleOpenReasonModal("absence", appointment.id)
+                          }
+                        >
+                          Falta
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="light"
+                          color="red"
+                          onClick={() =>
+                            handleOpenReasonModal("cancel", appointment.id)
+                          }
+                        >
+                          Cancelar
+                        </Button>
+                      </Group>
+                    </Group>
+                  </Group>
+                  <Tooltip label="Editar atendimento" withArrow>
+                    <IconEdit
+                      size={20}
+                      color="blue"
+                      style={{
+                        cursor: "pointer",
+                        alignSelf: "flex-start",
+                      }}
+                      onClick={() => handleEditAppointment(appointment)}
+                    />
+                  </Tooltip>
+                </Card>
+              ))}
+            <Button
+              variant="outline"
+              c="blue"
+              onClick={() => setIsModalOpen(true)}
+              mt="md"
+            >
+              + Agendar atendimento
+            </Button>
+          </Card>
+        </Card>
+      </Group>
+
+      {/* Modal para agendar atendimento */}
+      <Modal
+        opened={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Agendar Atendimento"
+        size="lg"
+      >
+        <Select
+          label="Cliente"
+          placeholder="Selecione o cliente"
+          searchable // Adicionado para permitir busca
+          data={[
+            { value: "cliente1", label: "Cliente 1" },
+            { value: "cliente2", label: "Cliente 2" },
+            { value: "cliente3", label: "Cliente 3" },
+          ]}
+          value={selectedClient}
+          onChange={setSelectedClient}
+        />
+        <Group mt="md" grow>
+          <div>
+            <Text size="sm" mb="xs">
+              Data
+            </Text>
+            <DatePicker
+              value={selectedDate || new Date()} // Define a data atual como padrão
+              onChange={setSelectedDate}
+            />
+          </div>
+          <div style={{ width: "100%" }}>
+            <Text size="sm" mb="xs">
+              Local
+            </Text>
+            <input
+              ref={inputRef}
+              placeholder="Digite o local (ex: Smart Fit)"
+              style={{
+                width: "100%",
+                padding: "8px",
+                border: "1px solid #ced4da",
+                borderRadius: "4px",
+              }}
+            />
+            <Group mt="md" grow>
+              <TimeInput
+                label="Horário de Início"
+                value={appointmentTime || ""}
+                onChange={(event) =>
+                  setAppointmentTime(event.currentTarget.value)
+                }
+                style={{ width: "100%" }}
+              />
+              <TimeInput
+                label="Horário de Término"
+                value={appointmentTime || ""}
+                onChange={(event) =>
+                  setAppointmentTime(event.currentTarget.value)
+                }
+                style={{ width: "100%" }}
+              />
+            </Group>
+          </div>
+        </Group>
+
+        <TextInput
+          label="Detalhes"
+          placeholder="Faça observações, se necessário"
+          value={appointmentDetails}
+          onChange={(event) => setAppointmentDetails(event.currentTarget.value)}
+          mt="md"
+        />
+        <Button mt="md" fullWidth onClick={handleScheduleAppointment}>
+          Confirmar
+        </Button>
+      </Modal>
+
+      {/* Modal para registrar motivo */}
+      <Modal
+        opened={isReasonModalOpen}
+        onClose={() => setIsReasonModalOpen(false)}
+        title={
+          currentAction.type === "cancel"
+            ? "Motivo do Cancelamento"
+            : "Motivo da Falta"
+        }
+      >
+        <TextInput
+          label="Motivo"
+          placeholder="Descreva o motivo (opcional)"
+          value={reason}
+          onChange={(event) => setReason(event.currentTarget.value)}
+        />
+        <Button mt="md" fullWidth onClick={handleConfirmReason}>
+          Confirmar
+        </Button>
+      </Modal>
+    </div>
+  );
+};
+
+export default CalendarPage;

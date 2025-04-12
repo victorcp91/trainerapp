@@ -10,16 +10,28 @@ import {
   Title,
   Group,
   Center,
+  RingProgress,
+  Badge,
 } from "@mantine/core";
+import { useRouter } from "next/navigation";
+import {
+  IconUsers,
+  IconGymnastics,
+  IconCalendar,
+  IconClock,
+  IconBell,
+} from "@tabler/icons-react";
 
 const DashboardPage = () => {
+  const router = useRouter();
+
   return (
     <Container size="lg" py="xl">
       <Title order={2} mb="md">
-        Welcome back, John Doe
+        Bem-vindo de volta, John Doe
       </Title>
-      <Text color="dimmed" mb="xl">
-        Thursday, April 10, 2025
+      <Text c="dimmed" mb="xl">
+        Quinta-feira, 10 de abril de 2025
       </Text>
 
       <Grid gutter="md" align="stretch">
@@ -28,15 +40,24 @@ const DashboardPage = () => {
           className="col-mobile-50"
         >
           <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
-            <Title order={4} mb="sm">
-              Active Clients
-            </Title>
+            <Group align="center" gap={5} mb="sm">
+              <IconUsers size={24} color="blue" />
+              <Title
+                order={4}
+                style={{ cursor: "pointer" }}
+                onClick={() => router.push("/dashboard/clientes")}
+              >
+                Clientes Ativos
+              </Title>
+            </Group>
             <Group>
-              <Text size="lg">Active Clients</Text>
               <Text size="xl">3</Text>
+              <Badge color="blue" variant="light">
+                Total
+              </Badge>
             </Group>
-            <Text color="dimmed" size="sm">
-              Total registered clients
+            <Text c="dimmed" size="sm">
+              Total de clientes registrados
             </Text>
           </Card>
         </Grid.Col>
@@ -46,36 +67,41 @@ const DashboardPage = () => {
           className="col-mobile-50"
         >
           <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
-            <Title order={4} mb="sm">
-              Pending Workouts
-            </Title>
-            <Text size="lg">2</Text>
-            <Text color="dimmed" size="sm">
-              Workouts to be prepared soon
-            </Text>
-            <Text size="lg" mt="sm">
-              1
-            </Text>
-            <Text color="dimmed" size="sm">
-              Overdue workouts
-            </Text>
-          </Card>
-        </Grid.Col>
-
-        <Grid.Col
-          style={{ flex: "1 1 25%", maxWidth: "25%" }}
-          className="col-mobile-50"
-        >
-          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
-            <Title order={4} mb="sm">
-              Attendance Rate
-            </Title>
+            <Group align="center" gap={5} mb="sm">
+              <IconGymnastics size={24} color="orange" />
+              <Title order={4}>Treinos Pendentes</Title>
+            </Group>
             <Group>
-              <Text size="lg">Attendance Rate</Text>
-              <Text size="xl">100%</Text>
+              <Text size="xl">2</Text>
+              <Badge
+                color="orange"
+                variant="light"
+                style={{ cursor: "pointer" }}
+                onClick={() =>
+                  router.push("/dashboard/clients?seriesStatus=near_due")
+                }
+              >
+                Em breve
+              </Badge>
             </Group>
-            <Text color="dimmed" size="sm">
-              From 3 total sessions
+            <Text c="dimmed" size="sm">
+              Treinos a serem preparados em breve
+            </Text>
+            <Group mt="sm">
+              <Text size="lg">1</Text>
+              <Badge
+                color="red"
+                variant="light"
+                style={{ cursor: "pointer" }}
+                onClick={() =>
+                  router.push("/dashboard/clients?seriesStatus=overdue")
+                }
+              >
+                Atrasados
+              </Badge>
+            </Group>
+            <Text c="dimmed" size="sm">
+              Treinos atrasados
             </Text>
           </Card>
         </Grid.Col>
@@ -85,15 +111,36 @@ const DashboardPage = () => {
           className="col-mobile-50"
         >
           <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
-            <Title order={4} mb="sm">
-              Next Session
-            </Title>
-            <Group>
-              <Text size="lg">Next Session</Text>
-              <Text size="xl">--:--</Text>
+            <Group align="center" gap={5} mb="sm">
+              <IconCalendar size={24} color="green" />
+              <Title order={4}>Atendimentos hoje</Title>
             </Group>
-            <Text color="dimmed" size="sm">
-              No more sessions today
+            <RingProgress
+              sections={[{ value: 90, color: "green" }]}
+              label={
+                <Text size="xl" style={{ textAlign: "center" }}>
+                  90%
+                </Text>
+              }
+            />
+            <Text c="dimmed" size="sm" mt="sm">
+              De 3 sessões totais
+            </Text>
+          </Card>
+        </Grid.Col>
+
+        <Grid.Col
+          style={{ flex: "1 1 25%", maxWidth: "25%" }}
+          className="col-mobile-50"
+        >
+          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
+            <Group align="center" gap={5} mb="sm">
+              <IconClock size={24} color="gray" />
+              <Title order={4}>Próxima Sessão</Title>
+            </Group>
+            <Text size="xl">--:--</Text>
+            <Text c="dimmed" size="sm">
+              Sem mais sessões hoje
             </Text>
           </Card>
         </Grid.Col>
@@ -102,24 +149,26 @@ const DashboardPage = () => {
       <Grid gutter="md" align="stretch">
         <Grid.Col style={{ flexBasis: "50%", maxWidth: "50%" }}>
           <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
-            <Title order={4} mb="sm">
-              Today&apos;s Schedule
-            </Title>
+            <Group align="center" gap={5} mb="sm">
+              <IconBell size={24} color="blue" />
+              <Title order={4}>Agenda de Hoje</Title>
+            </Group>
             <Center>
-              <Text color="dimmed">No sessions scheduled for today</Text>
+              <Text c="dimmed">Nenhuma sessão agendada para hoje</Text>
             </Center>
           </Card>
         </Grid.Col>
 
         <Grid.Col style={{ flexBasis: "50%", maxWidth: "50%" }}>
           <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
-            <Title order={4} mb="sm">
-              Notifications
-            </Title>
-            <Text color="dimmed" size="sm">
+            <Group align="center" gap={5} mb="sm">
+              <IconBell size={24} color="orange" />
+              <Title order={4}>Notificações</Title>
+            </Group>
+            <Text c="dimmed" size="sm">
               Maria: Novo treino em 2 dias
             </Text>
-            <Text color="dimmed" size="sm">
+            <Text c="dimmed" size="sm">
               Carlos: Falta na última sessão
             </Text>
           </Card>
@@ -130,61 +179,61 @@ const DashboardPage = () => {
         <Grid.Col>
           <Card shadow="sm" padding="lg">
             <Title order={4} mb="sm">
-              Weekly Schedule
+              Agenda Semanal
             </Title>
             <Grid gutter="xs">
               <Grid.Col span={6}>
-                <Text>Monday</Text>
-                <Text color="dimmed" size="sm">
-                  10:00 AM - 11:00 AM
+                <Text>Segunda-feira</Text>
+                <Text c="dimmed" size="sm">
+                  10:00 - 11:00
                 </Text>
-                <Text color="dimmed" size="sm">
-                  3:00 PM - 4:00 PM
-                </Text>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text>Tuesday</Text>
-                <Text color="dimmed" size="sm">
-                  2:00 PM - 3:00 PM
-                </Text>
-                <Text color="dimmed" size="sm">
-                  5:00 PM - 6:00 PM
+                <Text c="dimmed" size="sm">
+                  15:00 - 16:00
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Wednesday</Text>
-                <Text color="dimmed" size="sm">
-                  9:00 AM - 10:00 AM
+                <Text>Terça-feira</Text>
+                <Text c="dimmed" size="sm">
+                  14:00 - 15:00
                 </Text>
-                <Text color="dimmed" size="sm">
-                  1:00 PM - 2:00 PM
-                </Text>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text>Thursday</Text>
-                <Text color="dimmed" size="sm">
-                  4:00 PM - 5:00 PM
+                <Text c="dimmed" size="sm">
+                  17:00 - 18:00
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Friday</Text>
-                <Text color="dimmed" size="sm">
-                  1:00 PM - 2:00 PM
+                <Text>Quarta-feira</Text>
+                <Text c="dimmed" size="sm">
+                  09:00 - 10:00
                 </Text>
-                <Text color="dimmed" size="sm">
-                  6:00 PM - 7:00 PM
-                </Text>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text>Saturday</Text>
-                <Text color="dimmed" size="sm">
-                  10:00 AM - 11:00 AM
+                <Text c="dimmed" size="sm">
+                  13:00 - 14:00
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Sunday</Text>
-                <Text color="dimmed" size="sm">
-                  No sessions
+                <Text>Quinta-feira</Text>
+                <Text c="dimmed" size="sm">
+                  16:00 - 17:00
+                </Text>
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Text>Sexta-feira</Text>
+                <Text c="dimmed" size="sm">
+                  13:00 - 14:00
+                </Text>
+                <Text c="dimmed" size="sm">
+                  18:00 - 19:00
+                </Text>
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Text>Sábado</Text>
+                <Text c="dimmed" size="sm">
+                  10:00 - 11:00
+                </Text>
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Text>Domingo</Text>
+                <Text c="dimmed" size="sm">
+                  Sem sessões
                 </Text>
               </Grid.Col>
             </Grid>

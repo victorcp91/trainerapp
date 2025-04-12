@@ -17,7 +17,9 @@
     "@mantine/form": "^7.17.4",
     "@mantine/hooks": "^7.17.4",
     "@mantine/modals": "^7.17.4",
+    "@mantine/notifications": "^7.17.4",
     "@mantine/nprogress": "^7.17.4",
+    "@react-google-maps/api": "^2.20.6",
     "@tabler/icons-react": "^3.31.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
@@ -27,7 +29,8 @@
     "next-intl": "^4.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "recharts": "^2.15.2"
+    "recharts": "^2.15.2",
+    "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -326,6 +326,12 @@ export default function NewPlanPage() {
           </Stack>
           <Stack style={{ flex: 1 }}>
             <Group>
+              <IconStar size={20} />
+              <Text size="sm">
+                <strong>Foco:</strong> Peitoral e Costas
+              </Text>
+            </Group>
+            <Group>
               <IconHeart size={20} />
               <Text size="sm">
                 <strong>Cardio:</strong> Esteira, Bicicleta
@@ -334,13 +340,7 @@ export default function NewPlanPage() {
             <Group>
               <IconAlertCircle size={20} />
               <Text size="sm">
-                <strong>Lesões:</strong> Nenhuma
-              </Text>
-            </Group>
-            <Group>
-              <IconStar size={20} />
-              <Text size="sm">
-                <strong>Foco:</strong> Peitoral e Costas
+                <strong>Restrições:</strong> Nenhuma
               </Text>
             </Group>
           </Stack>
@@ -388,7 +388,7 @@ export default function NewPlanPage() {
           <Group mt="md">
             <Button
               variant="outline"
-              color="blue"
+              c="blue"
               leftSection={<IconStar />}
               onClick={() => console.log("Rascunho salvo")}
             >
@@ -396,7 +396,7 @@ export default function NewPlanPage() {
             </Button>
             <Button
               variant="filled"
-              color="green"
+              c="green"
               leftSection={<IconHeart />}
               onClick={() => setPublishModalOpened(true)} // Abre o modal de confirmação
               disabled={!startDate || !endDate || !selectedTrainingType} // Valida os campos obrigatórios e o tipo de treino
@@ -425,7 +425,7 @@ export default function NewPlanPage() {
           >
             Cancelar
           </Button>
-          <Button variant="filled" color="green" onClick={handlePublish}>
+          <Button variant="filled" c="green" onClick={handlePublish}>
             Confirmar
           </Button>
         </Group>

@@ -7,7 +7,7 @@ import {
 } from "@mantine/core";
 
 interface ISelectClearable {
-  options: string[];
+  options: { value: string; label: string }[];
   value: string | null;
   setValue: (s: string | null) => void;
 }
@@ -21,9 +21,12 @@ export function SelectClearable({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
 
+  // Adicionado para mapear o valor selecionado para sua label correspondente
+  const selectedOption = options.find((opt) => opt.value === value);
+
   const renderedOptions = options.map((item) => (
-    <Combobox.Option value={item} key={item}>
-      {item}
+    <Combobox.Option value={item.value} key={item.value}>
+      {item.label}
     </Combobox.Option>
   ));
 
@@ -56,7 +59,11 @@ export function SelectClearable({
           onClick={() => combobox.toggleDropdown()}
           rightSectionPointerEvents={value === null ? "none" : "all"}
         >
-          {value || <Input.Placeholder size={2}>Todos</Input.Placeholder>}
+          {selectedOption ? (
+            selectedOption.label
+          ) : (
+            <Input.Placeholder>Todos</Input.Placeholder>
+          )}
         </InputBase>
       </Combobox.Target>
 
