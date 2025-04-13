@@ -30,6 +30,7 @@ import {
   IconAlertCircle,
   IconPlus, // adição: ícone para adicionar exercício
   IconGripVertical, // adicionado para indicar arrastabilidade
+  IconTrash, // adicionado para exclusão
 } from "@tabler/icons-react"; // Importar ícones
 import { withAuth } from "@/utils/withAuth";
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -278,6 +279,10 @@ function NewPlanPage() {
         arrayMove(exercises, Number(active.id), Number(over.id))
       );
     }
+  };
+
+  const handleRemoveExercise = (index: number) => {
+    setTempExercises((prev) => prev.filter((_, i) => i !== index));
   };
 
   const filteredExercises = [
@@ -652,13 +657,12 @@ function NewPlanPage() {
               style={{
                 flex: 1,
                 borderRight: "1px solid #ccc",
-                paddingRight: "10px",
+                padding: "10px",
                 overflowY: "auto",
                 height: "100%",
                 backgroundColor: "#f7f7f7",
               }}
             >
-              <Text size="md">Lista do Treino</Text>
               {selectedDay ? (
                 tempExercises.length ? (
                   <DndContext
@@ -684,15 +688,36 @@ function NewPlanPage() {
                                 marginBottom: "8px",
                                 position: "relative",
                                 minHeight: "90px",
+                                cursor: "grab", // indica que é arrastável
                               }}
                             >
+                              {/* Botão de exclusão */}
+                              <Button
+                                variant="subtle"
+                                c="red"
+                                size="xs"
+                                onPointerDown={(e) => e.stopPropagation()} // evita o início do arraste
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveExercise(index);
+                                }}
+                                style={{
+                                  position: "absolute",
+                                  right: "0px",
+                                  bottom: "10px",
+                                  zIndex: 1,
+                                  pointerEvents: "auto",
+                                }}
+                              >
+                                <IconTrash size={16} />
+                              </Button>
                               {/* Ícone de arrastar */}
                               <IconGripVertical
                                 size={16}
                                 style={{
                                   position: "absolute",
-                                  right: "10px",
-                                  top: "10px",
+                                  right: "15px",
+                                  top: "15px",
                                 }}
                               />
                               <Text
@@ -825,7 +850,6 @@ function NewPlanPage() {
                         cursor: "pointer",
                         position: "relative",
                       }}
-                      onClick={() => handleDirectAddExercise(exercise.id)}
                     >
                       <Button
                         variant="subtle"
@@ -834,16 +858,17 @@ function NewPlanPage() {
                           e.stopPropagation();
                           toggleFavorite(exercise.id);
                         }}
+                        c="yellow"
                         style={{
                           position: "absolute",
-                          top: "5px",
-                          right: "5px",
+                          top: "10px",
+                          right: "0px",
                         }}
                       >
                         {favoriteExercises.includes(exercise.id) ? (
-                          <IconStarFilled />
+                          <IconStarFilled size={20} />
                         ) : (
-                          <IconStar />
+                          <IconStar size={20} />
                         )}
                       </Button>
                       <Text size="sm">{exercise.name}</Text>
@@ -862,10 +887,10 @@ function NewPlanPage() {
                         style={{
                           position: "absolute",
                           bottom: "5px",
-                          right: "5px",
+                          right: "0px",
                         }}
                       >
-                        <IconPlus />
+                        <IconPlus size={20} />
                       </Button>
                     </Card>
                   ))}
