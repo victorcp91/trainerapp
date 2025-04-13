@@ -3,15 +3,15 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 
-export function withAuth(Component: React.ComponentType, isPublic: boolean) {
+export function withAuth(Component: React.ComponentType, isPrivate: boolean) {
   return function AuthWrapper() {
     const router = useRouter();
 
     useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user && isPublic) {
+        if (user && !isPrivate) {
           router.replace("/dashboard");
-        } else if (!user && !isPublic) {
+        } else if (!user && isPrivate) {
           router.replace("/login");
         }
       });

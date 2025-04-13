@@ -102,4 +102,4 @@ const HomePage = () => {
   );
 };
 
-export default withAuth(HomePage, true);
+export default withAuth(HomePage, false);

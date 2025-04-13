@@ -16,6 +16,8 @@ import {
   IconUsers,
   IconCalendar,
   IconMessageCircle,
+  IconSettings, // adicionado o ícone de configurações
+  IconLogout, // adicionado o ícone de logout
 } from "@tabler/icons-react";
 
 export default function DashboardLayout({
@@ -40,6 +42,7 @@ export default function DashboardLayout({
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
+          alignItems: "flex-start", // adicionado alinhamento à esquerda
           backgroundColor: "#1A1B1E", // Cor de fundo ajustada
           color: "#FFFFFF", // Cor do texto ajustada
         }}
@@ -86,15 +89,22 @@ export default function DashboardLayout({
             <Button
               variant="subtle"
               c="dark"
-              onClick={() => (window.location.href = "/profile")}
+              onClick={() => (window.location.href = "/dashboard/account")}
               style={{ color: "#FFFFFF" }}
             >
               John Doe
             </Button>
           </Group>
+          <NavLink
+            label="Configurações"
+            href="/dashboard/settings"
+            leftSection={<IconSettings size={16} />}
+            style={{ color: "#FFFFFF" }}
+          />
           <Button
             variant="subtle"
             c="red"
+            leftSection={<IconLogout size={16} />} // adicionado ícone de logout
             onClick={() => console.log("Logout")}
             style={{ color: "#FFFFFF" }}
           >
@@ -102,7 +112,6 @@ export default function DashboardLayout({
           </Button>
         </Stack>
       </AppShell.Navbar>
-
       <AppShell.Main style={{ backgroundColor: "#f8f9fa" }}>
         {children}
       </AppShell.Main>

@@ -129,4 +129,4 @@ const RegisterPage = () => {
   );
 };
 
-export default withAuth(RegisterPage, true);
+export default withAuth(RegisterPage, false);

@@ -443,4 +443,4 @@ const ClientsPage = () => {
   );
 };
 
-export default withAuth(ClientsPage, false);
+export default withAuth(ClientsPage, true);

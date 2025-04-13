@@ -125,4 +125,4 @@ const LoginPage = () => {
   );
 };
 
-export default withAuth(LoginPage, true);
+export default withAuth(LoginPage, false);

@@ -33,8 +33,9 @@ import { useState } from "react";
 import { DateInput } from "@mantine/dates";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { showNotification } from "@mantine/notifications"; // Importação para notificações
+import { withAuth } from "@/utils/withAuth";
 
-export default function ClientProfilePage() {
+function ClientProfilePage() {
   const [notes, setNotes] = useState<string[]>([]);
   const [newNote, setNewNote] = useState<string>(""); // Estado para a nova anotação
   const [newNoteDate, setNewNoteDate] = useState<Date | null>(new Date()); // Estado para a data da nova anotação
@@ -192,7 +193,7 @@ export default function ClientProfilePage() {
                   style={{ justifyContent: "space-between" }}
                 >
                   <Stack style={{ flex: 1, gap: "4px" }}>
-                    <Text>Sexo: Masculino</Text>
+                    <Text>Gênero: Masculino</Text>
                     <Group>
                       <Text>Telefone: </Text>
                       <a
@@ -1050,3 +1051,5 @@ export default function ClientProfilePage() {
     </Stack>
   );
 }
+
+export default withAuth(ClientProfilePage, true);

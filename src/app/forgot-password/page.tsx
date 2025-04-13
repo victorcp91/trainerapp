@@ -92,4 +92,4 @@ const ForgotPasswordPage = () => {
   );
 };
 
-export default withAuth(ForgotPasswordPage, true);
+export default withAuth(ForgotPasswordPage, false);
