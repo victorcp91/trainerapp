@@ -691,13 +691,17 @@ function NewPlanPage() {
                                 size={16}
                                 style={{
                                   position: "absolute",
-                                  left: "8px",
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                  cursor: "grab",
+                                  right: "10px",
+                                  top: "10px",
                                 }}
                               />
-                              <Text size="sm" style={{ marginLeft: "28px" }}>
+                              <Text
+                                size="sm"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
                                 {ex.name}
                               </Text>
                               <Text size="xs" c="dimmed">
