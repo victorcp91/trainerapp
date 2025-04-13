@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect } from "react";
+import { Fragment } from "react";
 import {
   Card,
   Text,
@@ -29,7 +29,7 @@ import {
   IconHeart,
   IconAlertCircle,
   IconPlus, // adição: ícone para adicionar exercício
-  IconTrash, // adição: ícone para remover exercício da lista
+  IconGripVertical, // adicionado para indicar arrastabilidade
 } from "@tabler/icons-react"; // Importar ícones
 import { withAuth } from "@/utils/withAuth";
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -93,7 +93,6 @@ function NewPlanPage() {
   const [replicationOption, setReplicationOption] = useState<string | null>(
     null
   );
-  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [exerciseDetails, setExerciseDetails] = useState({
     series: "",
     reps: "",
@@ -101,7 +100,7 @@ function NewPlanPage() {
     notes: "",
     restTime: "",
   });
-  const [favoriteExercises, setFavoriteExercises] = useState<string[]>([]); // Estado para exercícios favoritos
+  const [favoriteExercises, setFavoriteExercises] = useState<number[]>([]); // Estado para exercícios favoritos
   const [untilFailure, setUntilFailure] = useState(false); // Estado para "Até a falha"
   const [editingExerciseIndex, setEditingExerciseIndex] = useState<
     number | null
@@ -113,11 +112,11 @@ function NewPlanPage() {
   const [showErrors, setShowErrors] = useState(false); // Novo estado para controle de erros
   const [tempExercises, setTempExercises] = useState<Exercise[]>([]); // Estado para manter as alterações no modal
 
-  const toggleFavorite = (exerciseName: string) => {
+  const toggleFavorite = (exerciseId: number) => {
     setFavoriteExercises((prev) =>
-      prev.includes(exerciseName)
-        ? prev.filter((name) => name !== exerciseName)
-        : [...prev, exerciseName]
+      prev.includes(exerciseId)
+        ? prev.filter((id) => id !== exerciseId)
+        : [...prev, exerciseId]
     );
   };
 
@@ -131,39 +130,25 @@ function NewPlanPage() {
     }
   };
 
-  const openExerciseModal = (
-    day: Date,
-    editIndex: number | null = null,
-    exercise?: Exercise
-  ) => {
+  const openExerciseModal = (day: Date) => {
     setSelectedDay(day);
     const dayData = trainingDays.find(
       (d) => d.date.getTime() === day.getTime()
     );
     setTempExercises(dayData ? [...dayData.exercises] : []);
-    setEditingExerciseIndex(editIndex);
-    if (exercise) {
-      setExerciseDetails({
-        series: String(exercise.series),
-        reps: String(exercise.reps),
-        advancedTechnique: exercise.advancedTechnique,
-        notes: exercise.notes,
-        restTime: String(exercise.restTime || 0),
-      });
-    } else {
-      setExerciseDetails({
-        series: "",
-        reps: "",
-        advancedTechnique: "",
-        notes: "",
-        restTime: "",
-      });
-    }
+
+    setExerciseDetails({
+      series: "",
+      reps: "",
+      advancedTechnique: "",
+      notes: "",
+      restTime: "",
+    });
     setShowErrors(false);
     setExerciseModalOpened(true);
   };
 
-  const handleDirectAddExercise = (exerciseName: string) => {
+  const handleDirectAddExercise = (exerciseId: number) => {
     if (!selectedDay) return;
     if (
       exerciseDetails.series === "" ||
@@ -177,10 +162,12 @@ function NewPlanPage() {
       return;
     }
     setFieldsError("");
+    const exercise = filteredExercises.find((ex) => ex.id === exerciseId);
+    if (!exercise) return;
     setTempExercises((prev) => [
       ...prev,
       {
-        name: exerciseName,
+        name: exercise.name,
         series: Number(exerciseDetails.series),
         reps: Number(exerciseDetails.reps),
         advancedTechnique: exerciseDetails.advancedTechnique,
@@ -188,10 +175,6 @@ function NewPlanPage() {
         restTime: Number(exerciseDetails.restTime),
       },
     ]);
-  };
-
-  const handleDeleteExerciseInModal = (index: number) => {
-    setTempExercises((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleModalSave = () => {
@@ -299,72 +282,84 @@ function NewPlanPage() {
 
   const filteredExercises = [
     {
+      id: 1,
       name: "Remada Sentada",
       group: "Costas",
       subGroup: "Cabo",
       equipment: "Cabo",
     },
     {
+      id: 2,
       name: "Barra Fixa",
       group: "Costas",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
     },
     {
+      id: 3,
       name: "Levantamento Terra",
       group: "Costas",
       subGroup: "Barra",
       equipment: "Barra",
     },
     {
+      id: 4,
       name: "Agachamento",
       group: "Pernas",
       subGroup: "Barra",
       equipment: "Barra",
     },
     {
+      id: 5,
       name: "Leg Press",
       group: "Pernas",
       subGroup: "Máquina",
       equipment: "Máquina",
     },
     {
+      id: 6,
       name: "Avanço",
       group: "Pernas",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
     },
     {
+      id: 7,
       name: "Rosca Direta",
       group: "Braços",
       subGroup: "Halteres",
       equipment: "Halteres",
     },
     {
+      id: 8,
       name: "Extensão de Tríceps",
       group: "Braços",
       subGroup: "Cabo",
       equipment: "Cabo",
     },
     {
+      id: 9,
       name: "Desenvolvimento de Ombro",
       group: "Ombros",
       subGroup: "Halteres",
       equipment: "Halteres",
     },
     {
+      id: 10,
       name: "Elevação Lateral",
       group: "Ombros",
       subGroup: "Halteres",
       equipment: "Halteres",
     },
     {
+      id: 11,
       name: "Prancha",
       group: "Core",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
     },
     {
+      id: 12,
       name: "Torção Russa",
       group: "Core",
       subGroup: "Peso corporal",
@@ -378,7 +373,7 @@ function NewPlanPage() {
       (!filters.equipment || exercise.equipment === filters.equipment) &&
       (!filters.search ||
         exercise.name.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.favorite || favoriteExercises.includes(exercise.name))
+      (!filters.favorite || favoriteExercises.includes(exercise.id))
   );
 
   const availableDays = ["segunda-feira", "quarta-feira", "sexta-feira"]; // Dias disponíveis
@@ -691,7 +686,20 @@ function NewPlanPage() {
                                 minHeight: "90px",
                               }}
                             >
-                              <Text size="sm">{ex.name}</Text>
+                              {/* Ícone de arrastar */}
+                              <IconGripVertical
+                                size={16}
+                                style={{
+                                  position: "absolute",
+                                  left: "8px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  cursor: "grab",
+                                }}
+                              />
+                              <Text size="sm" style={{ marginLeft: "28px" }}>
+                                {ex.name}
+                              </Text>
                               <Text size="xs" c="dimmed">
                                 {ex.series} x{" "}
                                 {ex.reps === 0 ? "falha" : ex.reps}
@@ -803,9 +811,9 @@ function NewPlanPage() {
                 }}
               >
                 <SimpleGrid cols={2} spacing="md" mb="md">
-                  {filteredExercises.map((exercise, index) => (
+                  {filteredExercises.map((exercise) => (
                     <Card
-                      key={index}
+                      key={exercise.id}
                       shadow="sm"
                       padding="lg"
                       style={{
@@ -813,14 +821,14 @@ function NewPlanPage() {
                         cursor: "pointer",
                         position: "relative",
                       }}
-                      onClick={() => handleDirectAddExercise(exercise.name)}
+                      onClick={() => handleDirectAddExercise(exercise.id)}
                     >
                       <Button
                         variant="subtle"
                         size="xs"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleFavorite(exercise.name);
+                          toggleFavorite(exercise.id);
                         }}
                         style={{
                           position: "absolute",
@@ -828,7 +836,7 @@ function NewPlanPage() {
                           right: "5px",
                         }}
                       >
-                        {favoriteExercises.includes(exercise.name) ? (
+                        {favoriteExercises.includes(exercise.id) ? (
                           <IconStarFilled />
                         ) : (
                           <IconStar />
@@ -845,7 +853,7 @@ function NewPlanPage() {
                         c="green" // cor ajustada para ação de adicionar
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDirectAddExercise(exercise.name);
+                          handleDirectAddExercise(exercise.id);
                         }}
                         style={{
                           position: "absolute",
