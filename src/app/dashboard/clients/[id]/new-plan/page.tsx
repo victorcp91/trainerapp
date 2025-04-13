@@ -32,6 +32,14 @@ import {
   IconTrash, // adição: ícone para remover exercício da lista
 } from "@tabler/icons-react"; // Importar ícones
 import { withAuth } from "@/utils/withAuth";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Exercise {
   name: string;
@@ -40,6 +48,26 @@ interface Exercise {
   advancedTechnique: string;
   notes: string;
   restTime?: number;
+}
+
+function SortableItem({
+  id,
+  children,
+}: {
+  id: number | string;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
 }
 
 function NewPlanPage() {
@@ -162,67 +190,6 @@ function NewPlanPage() {
     ]);
   };
 
-  const handleAddExercise = () => {
-    if (!selectedDay) return;
-    if (
-      exerciseDetails.series === "" ||
-      (!untilFailure && exerciseDetails.reps === "") ||
-      exerciseDetails.restTime === ""
-    ) {
-      setFieldsError(
-        "Preencha os campos obrigatórios: Séries, Repetições/Até a falha e Tempo de Descanso"
-      );
-      setShowErrors(true);
-      return;
-    }
-    setFieldsError("");
-    setShowErrors(false);
-    setTempExercises((prev) => [
-      ...prev,
-      {
-        name: selectedExercise!,
-        series: Number(exerciseDetails.series),
-        reps: Number(exerciseDetails.reps),
-        advancedTechnique: exerciseDetails.advancedTechnique,
-        notes: exerciseDetails.notes,
-        restTime: Number(exerciseDetails.restTime),
-      },
-    ]);
-  };
-
-  const handleEditExercise = () => {
-    if (selectedDay !== null && editingExerciseIndex !== null) {
-      if (
-        exerciseDetails.series === "" ||
-        (!untilFailure && exerciseDetails.reps === "") ||
-        exerciseDetails.restTime === ""
-      ) {
-        setFieldsError(
-          "Preencha os campos obrigatórios: Séries, Repetições/Até a falha e Tempo de Descanso"
-        );
-        setShowErrors(true);
-        return;
-      }
-      setFieldsError("");
-      setShowErrors(false);
-      setTempExercises((prev) =>
-        prev.map((exercise, index) =>
-          index === editingExerciseIndex
-            ? {
-                ...exercise,
-                series: Number(exerciseDetails.series),
-                reps: Number(exerciseDetails.reps),
-                advancedTechnique: exerciseDetails.advancedTechnique,
-                notes: exerciseDetails.notes,
-                restTime: Number(exerciseDetails.restTime),
-              }
-            : exercise
-        )
-      );
-      setEditingExerciseIndex(null);
-    }
-  };
-
   const handleDeleteExerciseInModal = (index: number) => {
     setTempExercises((prev) => prev.filter((_, i) => i !== index));
   };
@@ -319,6 +286,15 @@ function NewPlanPage() {
   const handlePublish = () => {
     console.log("Treino publicado");
     setPublishModalOpened(false);
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setTempExercises((exercises) =>
+        arrayMove(exercises, Number(active.id), Number(over.id))
+      );
+    }
   };
 
   const filteredExercises = [
@@ -607,25 +583,6 @@ function NewPlanPage() {
                               )}
                             </Text>
                           </Stack>
-                          <Group gap={0}>
-                            <Button
-                              variant="subtle"
-                              size="compact-xs"
-                              onClick={() =>
-                                openExerciseModal(date, index, exercise)
-                              }
-                            >
-                              Editar
-                            </Button>
-                            <Button
-                              variant="subtle"
-                              size="compact-xs"
-                              c="red"
-                              onClick={() => handleDeleteExerciseInModal(index)} // Chama a função de exclusão
-                            >
-                              Excluir
-                            </Button>
-                          </Group>
                         </Group>
                       ))}
                     </Stack>
@@ -709,53 +666,51 @@ function NewPlanPage() {
               <Text size="md">Lista do Treino</Text>
               {selectedDay ? (
                 tempExercises.length ? (
-                  tempExercises.map((ex, index) => {
-                    const matchedExercise = filteredExercises.find(
-                      (e) => e.name === ex.name
-                    );
-                    return (
-                      <Card
-                        key={index}
-                        shadow="sm"
-                        padding="lg"
-                        style={{
-                          border: "1px solid #ccc",
-                          marginBottom: "8px",
-                          position: "relative",
-                          minHeight: "90px", // Valor mínimo para evitar que os cards encolham
-                        }}
-                      >
-                        <Text size="sm">{ex.name}</Text>
-                        <Text size="xs" c="dimmed">
-                          {ex.series} x {ex.reps === 0 ? "falha" : ex.reps}
-                          {!!ex.advancedTechnique && (
-                            <> - {ex.advancedTechnique}</>
-                          )}
-                        </Text>
-                        {matchedExercise && (
-                          <Text size="xs" c="dimmed">
-                            {matchedExercise.group} - {matchedExercise.subGroup}
-                          </Text>
-                        )}
-                        {/* Botão de exclusão do exercício da lista */}
-                        <Button
-                          variant="subtle"
-                          size="xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteExerciseInModal(index);
-                          }}
-                          style={{
-                            position: "absolute",
-                            top: "5px",
-                            right: "5px",
-                          }}
-                        >
-                          <IconTrash color="red" />
-                        </Button>
-                      </Card>
-                    );
-                  })
+                  <DndContext
+                    onDragEnd={handleDragEnd}
+                    collisionDetection={closestCenter}
+                  >
+                    <SortableContext
+                      items={tempExercises.map((_, index) => index)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {tempExercises.map((ex, index) => {
+                        const matchedExercise = filteredExercises.find(
+                          (e) => e.name === ex.name
+                        );
+                        return (
+                          <SortableItem key={index} id={index}>
+                            <Card
+                              key={index}
+                              shadow="sm"
+                              padding="lg"
+                              style={{
+                                border: "1px solid #ccc",
+                                marginBottom: "8px",
+                                position: "relative",
+                                minHeight: "90px",
+                              }}
+                            >
+                              <Text size="sm">{ex.name}</Text>
+                              <Text size="xs" c="dimmed">
+                                {ex.series} x{" "}
+                                {ex.reps === 0 ? "falha" : ex.reps}
+                                {!!ex.advancedTechnique && (
+                                  <> - {ex.advancedTechnique}</>
+                                )}
+                              </Text>
+                              {matchedExercise && (
+                                <Text size="xs" c="dimmed">
+                                  {matchedExercise.group} -{" "}
+                                  {matchedExercise.subGroup}
+                                </Text>
+                              )}
+                            </Card>
+                          </SortableItem>
+                        );
+                      })}
+                    </SortableContext>
+                  </DndContext>
                 ) : (
                   <Text size="sm" c="dimmed">
                     Nenhum exercício adicionado.
