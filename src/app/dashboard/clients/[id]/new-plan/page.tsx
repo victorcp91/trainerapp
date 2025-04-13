@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment, useEffect } from "react";
 import {
   Card,
   Text,
@@ -32,21 +33,20 @@ import {
 } from "@tabler/icons-react"; // Importar ícones
 import { withAuth } from "@/utils/withAuth";
 
+interface Exercise {
+  name: string;
+  series: number;
+  reps: number;
+  advancedTechnique: string;
+  notes: string;
+  restTime?: number;
+}
+
 function NewPlanPage() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [trainingDays, setTrainingDays] = useState<
-    {
-      date: Date;
-      exercises: {
-        name: string;
-        series: number;
-        reps: number;
-        advancedTechnique: string;
-        notes: string;
-        restTime?: number;
-      }[];
-    }[]
+    { date: Date; exercises: Exercise[] }[]
   >([]);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [exerciseModalOpened, setExerciseModalOpened] = useState(false);
@@ -82,6 +82,8 @@ function NewPlanPage() {
     string | null
   >(null); // Estado para o tipo de treino
   const [fieldsError, setFieldsError] = useState<string>("");
+  const [showErrors, setShowErrors] = useState(false); // Novo estado para controle de erros
+  const [tempExercises, setTempExercises] = useState<Exercise[]>([]); // Estado para manter as alterações no modal
 
   const toggleFavorite = (exerciseName: string) => {
     setFavoriteExercises((prev) =>
@@ -101,6 +103,38 @@ function NewPlanPage() {
     }
   };
 
+  const openExerciseModal = (
+    day: Date,
+    editIndex: number | null = null,
+    exercise?: Exercise
+  ) => {
+    setSelectedDay(day);
+    const dayData = trainingDays.find(
+      (d) => d.date.getTime() === day.getTime()
+    );
+    setTempExercises(dayData ? [...dayData.exercises] : []);
+    setEditingExerciseIndex(editIndex);
+    if (exercise) {
+      setExerciseDetails({
+        series: String(exercise.series),
+        reps: String(exercise.reps),
+        advancedTechnique: exercise.advancedTechnique,
+        notes: exercise.notes,
+        restTime: String(exercise.restTime || 0),
+      });
+    } else {
+      setExerciseDetails({
+        series: "",
+        reps: "",
+        advancedTechnique: "",
+        notes: "",
+        restTime: "",
+      });
+    }
+    setShowErrors(false);
+    setExerciseModalOpened(true);
+  };
+
   const handleDirectAddExercise = (exerciseName: string) => {
     if (!selectedDay) return;
     if (
@@ -109,31 +143,23 @@ function NewPlanPage() {
       exerciseDetails.restTime === ""
     ) {
       setFieldsError(
-        "Preencha os campos obrigatórios: Séries, Repetições/Ate a falha e Tempo de Descanso"
+        "Preencha os campos obrigatórios: Séries, Repetições/Até a falha e Tempo de Descanso"
       );
+      setShowErrors(true);
       return;
     }
     setFieldsError("");
-    setTrainingDays((prev) =>
-      prev.map((day) =>
-        day.date.getTime() === selectedDay.getTime()
-          ? {
-              ...day,
-              exercises: [
-                ...day.exercises,
-                {
-                  name: exerciseName,
-                  series: Number(exerciseDetails.series),
-                  reps: Number(exerciseDetails.reps),
-                  advancedTechnique: exerciseDetails.advancedTechnique,
-                  notes: exerciseDetails.notes,
-                  restTime: Number(exerciseDetails.restTime),
-                },
-              ],
-            }
-          : day
-      )
-    );
+    setTempExercises((prev) => [
+      ...prev,
+      {
+        name: exerciseName,
+        series: Number(exerciseDetails.series),
+        reps: Number(exerciseDetails.reps),
+        advancedTechnique: exerciseDetails.advancedTechnique,
+        notes: exerciseDetails.notes,
+        restTime: Number(exerciseDetails.restTime),
+      },
+    ]);
   };
 
   const handleAddExercise = () => {
@@ -144,32 +170,24 @@ function NewPlanPage() {
       exerciseDetails.restTime === ""
     ) {
       setFieldsError(
-        "Preencha os campos obrigatórios: Séries, Repetições/Ate a falha e Tempo de Descanso"
+        "Preencha os campos obrigatórios: Séries, Repetições/Até a falha e Tempo de Descanso"
       );
+      setShowErrors(true);
       return;
     }
     setFieldsError("");
-    setTrainingDays((prev) =>
-      prev.map((day) =>
-        day.date.getTime() === selectedDay.getTime()
-          ? {
-              ...day,
-              exercises: [
-                ...day.exercises,
-                {
-                  name: selectedExercise!,
-                  series: Number(exerciseDetails.series),
-                  reps: Number(exerciseDetails.reps),
-                  advancedTechnique: exerciseDetails.advancedTechnique,
-                  notes: exerciseDetails.notes,
-                  restTime: Number(exerciseDetails.restTime),
-                },
-              ],
-            }
-          : day
-      )
-    );
-    setExerciseModalOpened(false);
+    setShowErrors(false);
+    setTempExercises((prev) => [
+      ...prev,
+      {
+        name: selectedExercise!,
+        series: Number(exerciseDetails.series),
+        reps: Number(exerciseDetails.reps),
+        advancedTechnique: exerciseDetails.advancedTechnique,
+        notes: exerciseDetails.notes,
+        restTime: Number(exerciseDetails.restTime),
+      },
+    ]);
   };
 
   const handleEditExercise = () => {
@@ -180,59 +198,51 @@ function NewPlanPage() {
         exerciseDetails.restTime === ""
       ) {
         setFieldsError(
-          "Preencha os campos obrigatórios: Séries, Repetições/Ate a falha e Tempo de Descanso"
+          "Preencha os campos obrigatórios: Séries, Repetições/Até a falha e Tempo de Descanso"
         );
+        setShowErrors(true);
         return;
       }
       setFieldsError("");
-      setTrainingDays((prev) =>
-        prev.map((day) =>
-          day.date.getTime() === selectedDay.getTime()
+      setShowErrors(false);
+      setTempExercises((prev) =>
+        prev.map((exercise, index) =>
+          index === editingExerciseIndex
             ? {
-                ...day,
-                exercises: day.exercises.map((exercise, index) =>
-                  index === editingExerciseIndex
-                    ? {
-                        ...exercise,
-                        series: Number(exerciseDetails.series),
-                        reps: Number(exerciseDetails.reps),
-                        advancedTechnique: exerciseDetails.advancedTechnique,
-                        notes: exerciseDetails.notes,
-                        restTime: Number(exerciseDetails.restTime),
-                      }
-                    : exercise
-                ),
+                ...exercise,
+                series: Number(exerciseDetails.series),
+                reps: Number(exerciseDetails.reps),
+                advancedTechnique: exerciseDetails.advancedTechnique,
+                notes: exerciseDetails.notes,
+                restTime: Number(exerciseDetails.restTime),
               }
-            : day
+            : exercise
         )
       );
       setEditingExerciseIndex(null);
-      setExerciseModalOpened(false);
     }
   };
 
-  const handleDeleteExercise = (day: Date, index: number) => {
-    setTrainingDays((prev) =>
-      prev.map((trainingDay) =>
-        trainingDay.date.getTime() === day.getTime()
-          ? {
-              ...trainingDay,
-              exercises: trainingDay.exercises.filter((_, i) => i !== index),
-            }
-          : trainingDay
-      )
-    );
+  const handleDeleteExerciseInModal = (index: number) => {
+    setTempExercises((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const toggleReplicationDate = (date: Date) => {
-    setSelectedReplicationDates((prev) => {
-      const exists = prev.some((d) => d.toDateString() === date.toDateString());
-      if (exists) {
-        return prev.filter((d) => d.toDateString() !== date.toDateString());
-      } else {
-        return [...prev, date];
-      }
-    });
+  const handleModalSave = () => {
+    if (!selectedDay) return;
+    setTrainingDays((prev) =>
+      prev.map((day) =>
+        day.date.getTime() === selectedDay.getTime()
+          ? { ...day, exercises: tempExercises }
+          : day
+      )
+    );
+    setExerciseModalOpened(false);
+  };
+
+  const handleModalClose = () => {
+    setExerciseModalOpened(false);
+    setTempExercises([]);
+    setEditingExerciseIndex(null);
   };
 
   const handleReplicateTraining = () => {
@@ -544,7 +554,7 @@ function NewPlanPage() {
             );
 
             return (
-              <>
+              <Fragment key={date.toISOString()}>
                 <Card
                   key={date.toISOString()}
                   shadow="sm"
@@ -601,19 +611,9 @@ function NewPlanPage() {
                             <Button
                               variant="subtle"
                               size="compact-xs"
-                              onClick={() => {
-                                setSelectedDay(date);
-                                setEditingExerciseIndex(index); // Define o índice do exercício em edição
-                                setExerciseDetails({
-                                  ...exercise,
-                                  series: String(exercise.series), // Converter series para string
-                                  reps: String(exercise.reps), // Converter reps para string
-                                  restTime: String(exercise.restTime || 0), // Converter restTime para string
-                                  advancedTechnique: exercise.advancedTechnique,
-                                  notes: exercise.notes,
-                                }); // Preenche os detalhes do exercício no modal
-                                setExerciseModalOpened(true);
-                              }}
+                              onClick={() =>
+                                openExerciseModal(date, index, exercise)
+                              }
                             >
                               Editar
                             </Button>
@@ -621,7 +621,7 @@ function NewPlanPage() {
                               variant="subtle"
                               size="compact-xs"
                               c="red"
-                              onClick={() => handleDeleteExercise(date, index)} // Chama a função de exclusão
+                              onClick={() => handleDeleteExerciseInModal(index)} // Chama a função de exclusão
                             >
                               Excluir
                             </Button>
@@ -632,10 +632,7 @@ function NewPlanPage() {
                     <Button
                       variant="light"
                       c="green" // cor ajustada para ação de adicionar
-                      onClick={() => {
-                        setSelectedDay(date);
-                        setExerciseModalOpened(true);
-                      }}
+                      onClick={() => openExerciseModal(date)}
                     >
                       Adicionar Exercício
                     </Button>
@@ -684,7 +681,7 @@ function NewPlanPage() {
                     </Stack>
                   </Card>
                 )}
-              </>
+              </Fragment>
             );
           })}
         </SimpleGrid>
@@ -692,11 +689,7 @@ function NewPlanPage() {
         {/* Modal para adicionar/editar exercícios */}
         <Modal
           opened={exerciseModalOpened}
-          onClose={() => {
-            setExerciseModalOpened(false);
-            setSelectedExercise(null);
-            setEditingExerciseIndex(null);
-          }}
+          onClose={handleModalClose}
           title="Adicionar Exercício"
           closeOnClickOutside
           size="100%"
@@ -709,71 +702,65 @@ function NewPlanPage() {
                 borderRight: "1px solid #ccc",
                 paddingRight: "10px",
                 overflowY: "auto",
-                height: "100%", // área com altura total do modal
-                backgroundColor: "#f7f7f7", // fundo diferenciado e clean
+                height: "100%",
+                backgroundColor: "#f7f7f7",
               }}
             >
               <Text size="md">Lista do Treino</Text>
               {selectedDay ? (
-                (() => {
-                  const currentDay = trainingDays.find(
-                    (day) =>
-                      day.date.toDateString() === selectedDay.toDateString()
-                  );
-                  return currentDay && currentDay.exercises.length ? (
-                    currentDay.exercises.map((ex, index) => {
-                      const matchedExercise = filteredExercises.find(
-                        (e) => e.name === ex.name
-                      );
-                      return (
-                        <Card
-                          key={index}
-                          shadow="sm"
-                          padding="lg"
+                tempExercises.length ? (
+                  tempExercises.map((ex, index) => {
+                    const matchedExercise = filteredExercises.find(
+                      (e) => e.name === ex.name
+                    );
+                    return (
+                      <Card
+                        key={index}
+                        shadow="sm"
+                        padding="lg"
+                        style={{
+                          border: "1px solid #ccc",
+                          marginBottom: "8px",
+                          position: "relative",
+                          minHeight: "90px", // Valor mínimo para evitar que os cards encolham
+                        }}
+                      >
+                        <Text size="sm">{ex.name}</Text>
+                        <Text size="xs" c="dimmed">
+                          {ex.series} x {ex.reps === 0 ? "falha" : ex.reps}
+                          {!!ex.advancedTechnique && (
+                            <> - {ex.advancedTechnique}</>
+                          )}
+                        </Text>
+                        {matchedExercise && (
+                          <Text size="xs" c="dimmed">
+                            {matchedExercise.group} - {matchedExercise.subGroup}
+                          </Text>
+                        )}
+                        {/* Botão de exclusão do exercício da lista */}
+                        <Button
+                          variant="subtle"
+                          size="xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteExerciseInModal(index);
+                          }}
                           style={{
-                            border: "1px solid #ccc",
-                            marginBottom: "8px",
-                            position: "relative",
+                            position: "absolute",
+                            top: "5px",
+                            right: "5px",
                           }}
                         >
-                          <Text size="sm">{ex.name}</Text>
-                          <Text size="xs" c="dimmed">
-                            {ex.series} x {ex.reps === 0 ? "falha" : ex.reps}
-                            {!!ex.advancedTechnique && (
-                              <> - {ex.advancedTechnique}</>
-                            )}
-                          </Text>
-                          {matchedExercise && (
-                            <Text size="xs" c="dimmed">
-                              {matchedExercise.group} -{" "}
-                              {matchedExercise.subGroup}
-                            </Text>
-                          )}
-                          {/* Botão de exclusão do exercício da lista */}
-                          <Button
-                            variant="subtle"
-                            size="xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteExercise(selectedDay, index);
-                            }}
-                            style={{
-                              position: "absolute",
-                              top: "5px",
-                              right: "5px",
-                            }}
-                          >
-                            <IconTrash color="red" />
-                          </Button>
-                        </Card>
-                      );
-                    })
-                  ) : (
-                    <Text size="sm" c="dimmed">
-                      Nenhum exercício adicionado.
-                    </Text>
-                  );
-                })()
+                          <IconTrash color="red" />
+                        </Button>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <Text size="sm" c="dimmed">
+                    Nenhum exercício adicionado.
+                  </Text>
+                )
               ) : (
                 <Text size="sm" c="dimmed">
                   Selecione um dia
@@ -922,8 +909,8 @@ function NewPlanPage() {
             <Stack style={{ flex: 1 }}>
               <Group grow>
                 <NumberInput
-                  label="Séries"
-                  placeholder="0"
+                  label="Séries*" // campo obrigatório
+                  placeholder=""
                   value={exerciseDetails.series}
                   onChange={(value) =>
                     setExerciseDetails((prev) => ({
@@ -932,12 +919,14 @@ function NewPlanPage() {
                     }))
                   }
                   error={
-                    exerciseDetails.series === "" ? "Campo obrigatório" : null
+                    showErrors && exerciseDetails.series === ""
+                      ? "Campo obrigatório"
+                      : null
                   }
                 />
                 <NumberInput
-                  label="Repetições"
-                  placeholder="0"
+                  label="Repetições*"
+                  placeholder=""
                   value={exerciseDetails.reps}
                   onChange={(value) =>
                     setExerciseDetails((prev) => ({
@@ -947,7 +936,7 @@ function NewPlanPage() {
                   }
                   disabled={untilFailure}
                   error={
-                    !untilFailure && exerciseDetails.reps === ""
+                    !untilFailure && showErrors && exerciseDetails.reps === ""
                       ? "Campo obrigatório"
                       : null
                   }
@@ -961,7 +950,11 @@ function NewPlanPage() {
                 }}
               >
                 <label
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
                 >
                   <input
                     type="checkbox"
@@ -980,46 +973,24 @@ function NewPlanPage() {
               </div>
               <Group grow>
                 <NumberInput
-                  label="Descanso: Minutos"
+                  label="Descanso (segundos)*"
                   placeholder="0"
-                  value={Math.floor(Number(exerciseDetails.restTime) || 0 / 60)}
+                  value={
+                    exerciseDetails.restTime === ""
+                      ? 0
+                      : Number(exerciseDetails.restTime)
+                  }
                   onChange={(value) =>
                     setExerciseDetails((prev) => ({
                       ...prev,
-                      restTime:
-                        typeof value === "number"
-                          ? String(
-                              value * 60 + ((Number(prev.restTime) || 0) % 60)
-                            )
-                          : prev.restTime,
+                      restTime: value === null ? "" : String(value),
                     }))
                   }
                   min={0}
                   error={
-                    exerciseDetails.restTime === "" ? "Campo obrigatório" : null
-                  }
-                />
-                <NumberInput
-                  label="Segundos"
-                  placeholder="0"
-                  value={(Number(exerciseDetails.restTime) || 0) % 60}
-                  onChange={(value) =>
-                    setExerciseDetails((prev) => ({
-                      ...prev,
-                      restTime:
-                        typeof value === "number"
-                          ? String(
-                              Math.floor((Number(prev.restTime) || 0) / 60) *
-                                60 +
-                                value
-                            )
-                          : prev.restTime,
-                    }))
-                  }
-                  min={0}
-                  max={59}
-                  error={
-                    exerciseDetails.restTime === "" ? "Campo obrigatório" : null
+                    showErrors && exerciseDetails.restTime === ""
+                      ? "Campo obrigatório"
+                      : null
                   }
                 />
               </Group>
@@ -1048,24 +1019,23 @@ function NewPlanPage() {
                   }))
                 }
               />
-              <Button
-                variant="filled"
-                c="green"
-                fullWidth
-                mt="md"
-                onClick={
-                  editingExerciseIndex !== null
-                    ? handleEditExercise
-                    : handleAddExercise
-                }
-                disabled={
-                  exerciseDetails.series === "" ||
-                  (!untilFailure && exerciseDetails.reps === "") ||
-                  exerciseDetails.restTime === ""
-                }
-              >
-                Concluir
-              </Button>
+              <Group mt="md">
+                <Button variant="outline" onClick={handleModalClose}>
+                  Cancelar
+                </Button>
+                <Button
+                  variant="filled"
+                  c="green"
+                  onClick={handleModalSave}
+                  disabled={
+                    exerciseDetails.series === "" ||
+                    (!untilFailure && exerciseDetails.reps === "") ||
+                    exerciseDetails.restTime === ""
+                  }
+                >
+                  Salvar Alterações
+                </Button>
+              </Group>
               {fieldsError && (
                 <Text size="xs" color="red">
                   {fieldsError}
