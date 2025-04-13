@@ -565,26 +565,40 @@ function NewPlanPage() {
                         </Text>
                       </Group>
                     </Group>
-                    <Divider my="sm" />
-                    <Stack>
-                      {exercises.map((exercise, index) => (
-                        <Group
-                          key={index}
-                          justify="space-between"
-                          align="center"
-                        >
-                          <Stack gap={0}>
+                    <Divider mt="sm" />
+                    <Stack style={{ maxHeight: "200px", overflowY: "auto" }}>
+                      {exercises.map((exercise, index) => {
+                        const matchedExercise = filteredExercises.find(
+                          (e) => e.name === exercise.name
+                        );
+                        return (
+                          <Card
+                            key={index}
+                            shadow="sm"
+                            padding="lg"
+                            style={{
+                              border: "1px solid #ccc",
+                              position: "relative",
+                              minHeight: "90px",
+                            }}
+                          >
                             <Text size="sm">{exercise.name}</Text>
-                            <Text size="sm" c="dimmed">
+                            <Text size="xs" c="dimmed">
                               {exercise.series} x{" "}
                               {exercise.reps === 0 ? "falha" : exercise.reps}
                               {!!exercise.advancedTechnique && (
                                 <> - {exercise.advancedTechnique}</>
                               )}
                             </Text>
-                          </Stack>
-                        </Group>
-                      ))}
+                            {matchedExercise && (
+                              <Text size="xs" c="dimmed">
+                                {matchedExercise.group} -{" "}
+                                {matchedExercise.subGroup}
+                              </Text>
+                            )}
+                          </Card>
+                        );
+                      })}
                     </Stack>
                     <Button
                       variant="light"
