@@ -52,6 +52,10 @@ function NewPlanPage() {
   const [replicateModalOpened, setReplicateModalOpened] = useState(false);
   const [publishModalOpened, setPublishModalOpened] = useState(false); // Estado para o modal de confirmação
 
+  // Estado para modal de mover treino
+  const [moveModalOpened, setMoveModalOpened] = useState(false);
+  const [moveTargetDate, setMoveTargetDate] = useState<Date | null>(null);
+
   const [selectedReplicationDates, setSelectedReplicationDates] = useState<
     Date[]
   >([]);
@@ -192,7 +196,7 @@ function NewPlanPage() {
   const levels = [
     { value: "iniciante", label: "Iniciante" },
     { value: "intermediario", label: "Intermediário" },
-    { value: "avancado", label: "Avançado" },
+    { value: "avançado", label: "Avançado" },
   ];
 
   // Filtro das séries
@@ -367,6 +371,34 @@ function NewPlanPage() {
 
       return newTrainingDays;
     });
+  };
+
+  // Função para mover treino para outra data
+  const handleMoveTraining = () => {
+    if (
+      !selectedDay ||
+      !moveTargetDate ||
+      selectedDay.getTime() === moveTargetDate.getTime()
+    )
+      return;
+    setTrainingDays((prev) => {
+      const sourceDayIdx = prev.findIndex(
+        (d) => d.date.getTime() === selectedDay.getTime()
+      );
+      const targetDayIdx = prev.findIndex(
+        (d) => d.date.getTime() === moveTargetDate.getTime()
+      );
+      if (sourceDayIdx === -1 || targetDayIdx === -1) return prev;
+      const sourceExercises = prev[sourceDayIdx].exercises;
+      // Remove do dia de origem e adiciona no destino
+      return prev.map((d, idx) => {
+        if (idx === sourceDayIdx) return { ...d, exercises: [] };
+        if (idx === targetDayIdx) return { ...d, exercises: sourceExercises };
+        return d;
+      });
+    });
+    setMoveModalOpened(false);
+    setMoveTargetDate(null);
   };
 
   const handlePublish = () => {
@@ -708,8 +740,52 @@ function NewPlanPage() {
                             setReplicateModalOpened(true);
                           }}
                           disabled={exercises.length === 0} // Desabilitar se não houver exercícios
+                          style={
+                            exercises.length === 0
+                              ? { opacity: 0.5, pointerEvents: "none" }
+                              : {}
+                          }
                         >
                           Replicar Treino
+                        </Button>
+                        <Button
+                          variant="subtle"
+                          size="compact-xs"
+                          c="orange"
+                          onClick={() => {
+                            setSelectedDay(date);
+                            setMoveModalOpened(true);
+                          }}
+                          disabled={exercises.length === 0}
+                          style={
+                            exercises.length === 0
+                              ? { opacity: 0.5, pointerEvents: "none" }
+                              : {}
+                          }
+                        >
+                          Mover Treino
+                        </Button>
+                        <Button
+                          variant="subtle"
+                          size="compact-xs"
+                          c="red"
+                          onClick={() => {
+                            setTrainingDays((prev) =>
+                              prev.map((day) =>
+                                day.date.getTime() === date.getTime()
+                                  ? { ...day, exercises: [] }
+                                  : day
+                              )
+                            );
+                          }}
+                          disabled={exercises.length === 0}
+                          style={
+                            exercises.length === 0
+                              ? { opacity: 0.5, pointerEvents: "none" }
+                              : {}
+                          }
+                        >
+                          Limpar Treino
                         </Button>
                         <Text size="sm" c="dimmed">
                           {format(date, "dd/MM/yyyy")}
@@ -784,17 +860,36 @@ function NewPlanPage() {
                               false
                             )
                           }
+                          disabled={trainingDays
+                            .slice(index - 6, index + 1)
+                            .every((day) => day.exercises.length === 0)}
+                          style={
+                            trainingDays
+                              .slice(index - 6, index + 1)
+                              .every((day) => day.exercises.length === 0)
+                              ? { opacity: 0.5, pointerEvents: "none" }
+                              : {}
+                          }
                         >
                           Replicar para a Próxima Semana
                         </Button>
                         <Button
                           variant="filled"
-                          c="green"
                           onClick={() =>
                             handleReplicateWeek(
                               trainingDays[index - 6].date,
                               true
                             )
+                          }
+                          disabled={trainingDays
+                            .slice(index - 6, index + 1)
+                            .every((day) => day.exercises.length === 0)}
+                          style={
+                            trainingDays
+                              .slice(index - 6, index + 1)
+                              .every((day) => day.exercises.length === 0)
+                              ? { opacity: 0.5, pointerEvents: "none" }
+                              : {}
                           }
                         >
                           Replicar para Todas as Semanas
@@ -898,6 +993,73 @@ function NewPlanPage() {
             }
           >
             Confirmar Replicação
+          </Button>
+        </Modal>
+        {/* Modal para mover treino */}
+        <Modal
+          opened={moveModalOpened}
+          onClose={() => {
+            setMoveModalOpened(false);
+            setMoveTargetDate(null);
+          }}
+          title="Mover Treino"
+          closeOnClickOutside
+        >
+          <Text size="sm" mb="sm">
+            Selecione a data para onde deseja mover o treino. O treino será
+            removido da data atual e adicionado à data escolhida.
+          </Text>
+          {startDate && endDate ? (
+            <Calendar
+              locale="pt-BR"
+              minDate={startDate}
+              maxDate={endDate}
+              __onDayClick={(event, day: Date) => {
+                setMoveTargetDate(day);
+              }}
+              renderDay={(date) => {
+                const isSelected =
+                  moveTargetDate &&
+                  moveTargetDate.toDateString() === date.toDateString();
+                return (
+                  <div
+                    style={{
+                      backgroundColor: isSelected ? "#ff9800" : undefined,
+                      color: isSelected ? "white" : "inherit",
+                      borderRadius: "50%",
+                      width: "32px",
+                      height: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {format(date, "d")}
+                  </div>
+                );
+              }}
+            />
+          ) : (
+            <Text size="sm" c="dimmed">
+              Defina as datas de início e expiração para mover o treino.
+            </Text>
+          )}
+          <Divider my="sm" />
+          <Button
+            variant="filled"
+            c="orange"
+            fullWidth
+            mt="md"
+            onClick={handleMoveTraining}
+            disabled={
+              !selectedDay ||
+              !moveTargetDate ||
+              (selectedDay &&
+                moveTargetDate &&
+                selectedDay.toDateString() === moveTargetDate.toDateString())
+            }
+          >
+            Confirmar Movimentação
           </Button>
         </Modal>
       </Stack>
