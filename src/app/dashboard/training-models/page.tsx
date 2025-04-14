@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 import { withAuth } from "@/utils/withAuth";
-import { Flex, Title, Card, Text, MultiSelect } from "@mantine/core";
+import { Flex, Title, Card, Text, MultiSelect, Button } from "@mantine/core";
 import {
   IconFolder,
   IconStar,
   IconChevronUp,
   IconChevronDown,
   IconTrash,
+  IconPlus,
 } from "@tabler/icons-react";
 import {
   useDroppable,
@@ -16,6 +17,7 @@ import {
   DndContext,
   DragOverlay,
 } from "@dnd-kit/core";
+import { ExerciseModal } from "@/components/shared";
 
 const trainingModels = [
   {
@@ -184,11 +186,19 @@ const TrainingModelsPage = () => {
     {}
   );
 
+  const [exerciseModalOpened, setExerciseModalOpened] = useState(false);
+
   const toggleSeriesExpansion = (id: string) => {
     setExpandedSeries((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const handleSeriesNameClick = (serieId: string) => {
+    if (hasDroppedItems(serieId)) {
+      toggleSeriesExpansion(serieId);
+    }
   };
 
   const handleDragStart = (event: any) => {
@@ -232,6 +242,12 @@ const TrainingModelsPage = () => {
         updated[serieId] = updated[serieId].filter(
           (_, index) => index !== position
         );
+        if (updated[serieId].length === 0) {
+          setExpandedSeries((prevExpanded) => ({
+            ...prevExpanded,
+            [serieId]: false,
+          }));
+        }
       }
       return updated;
     });
@@ -282,9 +298,29 @@ const TrainingModelsPage = () => {
           overflow: "hidden",
         }}
       >
-        <Title order={2} mb="lg" style={{ width: "100%" }}>
-          Modelos de Treino
-        </Title>
+        <Flex align="center" justify="space-between" style={{ width: "100%" }}>
+          <Title order={2} mb="lg">
+            Modelos de Treino
+          </Title>
+          <Flex gap="md">
+            <Button
+              variant="filled"
+              color="green"
+              leftSection={<IconPlus size={16} />} // Ícone para "Criar Treino"
+              onClick={() => setExerciseModalOpened(true)}
+            >
+              Criar Treino
+            </Button>
+            <Button
+              variant="filled"
+              color="blue" // Cor para "Criar Série"
+              leftSection={<IconFolder size={16} />} // Ícone para "Criar Série"
+              onClick={() => console.log("Criar Série")}
+            >
+              Criar Série
+            </Button>
+          </Flex>
+        </Flex>
         <Flex flex={1} style={{ overflow: "hidden" }}>
           {" "}
           {/* Impede o scroll no container principal */}
@@ -478,7 +514,15 @@ const TrainingModelsPage = () => {
                           color="teal"
                           style={{ marginRight: "0.5rem" }}
                         />
-                        <Title order={4}>{serie.name}</Title>
+                        <Title
+                          order={4}
+                          style={{ cursor: "pointer" }}
+                          onClick={() =>
+                            handleSeriesNameClick(`serie-${index}`)
+                          }
+                        >
+                          {serie.name}
+                        </Title>
                       </Flex>
                       <Flex align="center" gap="sm">
                         <Text size="sm" color="dimmed">
@@ -522,6 +566,7 @@ const TrainingModelsPage = () => {
                             id={`serie-${index}-${item}`}
                             align="center"
                             justify="space-between"
+                            style={{ marginBottom: "1rem" }} // Adicionado espaçamento entre os itens
                           >
                             <Text size="sm" color="dimmed">
                               {idx + 1}. {item}
@@ -581,6 +626,12 @@ const TrainingModelsPage = () => {
           </Card>
         ) : null}
       </DragOverlay>
+      <ExerciseModal
+        handleModalClose={() => setExerciseModalOpened(false)}
+        handleModalSave={(tempExercises) => console.log(tempExercises)}
+        modalOpened={exerciseModalOpened}
+        editingExercises={[]}
+      />
     </DndContext>
   );
 };
