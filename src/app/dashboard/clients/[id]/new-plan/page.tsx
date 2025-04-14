@@ -12,8 +12,6 @@ import {
   Select,
   Textarea,
   SimpleGrid,
-  TextInput,
-  NumberInput,
 } from "@mantine/core";
 import { DateInput, Calendar, DatesProvider } from "@mantine/dates"; // adicionado Calendar
 import { useState } from "react";
@@ -22,25 +20,15 @@ import { ptBR } from "date-fns/locale";
 import "dayjs/locale/pt-br"; // Adicionado para formatação de datas em português
 import {
   IconStar,
-  IconStarFilled,
   IconCalendar,
   IconClock,
   IconBell,
   IconHeart,
   IconAlertCircle,
-  IconPlus, // adição: ícone para adicionar exercício
-  IconGripVertical, // adicionado para indicar arrastabilidade
-  IconTrash, // adicionado para exclusão
 } from "@tabler/icons-react"; // Importar ícones
 import { withAuth } from "@/utils/withAuth";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+
+import { ExerciseModal } from "@/components/shared/ExerciseModal";
 
 interface Exercise {
   name: string;
@@ -49,26 +37,6 @@ interface Exercise {
   advancedTechnique: string;
   notes: string;
   restTime?: number;
-}
-
-function SortableItem({
-  id,
-  children,
-}: {
-  id: number | string;
-  children: React.ReactNode;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
-    </div>
-  );
 }
 
 function NewPlanPage() {
@@ -81,45 +49,17 @@ function NewPlanPage() {
   const [exerciseModalOpened, setExerciseModalOpened] = useState(false);
   const [replicateModalOpened, setReplicateModalOpened] = useState(false);
   const [publishModalOpened, setPublishModalOpened] = useState(false); // Estado para o modal de confirmação
-  const [filters, setFilters] = useState({
-    muscleGroup: "",
-    subMuscleGroup: "",
-    equipment: "",
-    search: "",
-    favorite: false,
-  });
+
   const [selectedReplicationDates, setSelectedReplicationDates] = useState<
     Date[]
   >([]);
   const [replicationOption, setReplicationOption] = useState<string | null>(
     null
   );
-  const [exerciseDetails, setExerciseDetails] = useState({
-    series: "",
-    reps: "",
-    advancedTechnique: "",
-    notes: "",
-    restTime: "",
-  });
-  const [favoriteExercises, setFavoriteExercises] = useState<number[]>([]); // Estado para exercícios favoritos
-  const [untilFailure, setUntilFailure] = useState(false); // Estado para "Até a falha"
-  const [editingExerciseIndex, setEditingExerciseIndex] = useState<
-    number | null
-  >(null); // Índice do exercício em edição
+  const [editingExercises, setEditingExercises] = useState<Exercise[]>([]);
   const [selectedTrainingType, setSelectedTrainingType] = useState<
     string | null
-  >(null); // Estado para o tipo de treino
-  const [fieldsError, setFieldsError] = useState<string>("");
-  const [showErrors, setShowErrors] = useState(false); // Novo estado para controle de erros
-  const [tempExercises, setTempExercises] = useState<Exercise[]>([]); // Estado para manter as alterações no modal
-
-  const toggleFavorite = (exerciseId: number) => {
-    setFavoriteExercises((prev) =>
-      prev.includes(exerciseId)
-        ? prev.filter((id) => id !== exerciseId)
-        : [...prev, exerciseId]
-    );
-  };
+  >(null);
 
   const handleDateChange = (start: Date | null, end: Date | null) => {
     if (start && end) {
@@ -136,49 +76,11 @@ function NewPlanPage() {
     const dayData = trainingDays.find(
       (d) => d.date.getTime() === day.getTime()
     );
-    setTempExercises(dayData ? [...dayData.exercises] : []);
-
-    setExerciseDetails({
-      series: "",
-      reps: "",
-      advancedTechnique: "",
-      notes: "",
-      restTime: "",
-    });
-    setShowErrors(false);
+    setEditingExercises(dayData ? [...dayData.exercises] : []);
     setExerciseModalOpened(true);
   };
 
-  const handleDirectAddExercise = (exerciseId: number) => {
-    if (!selectedDay) return;
-    if (
-      exerciseDetails.series === "" ||
-      (!untilFailure && exerciseDetails.reps === "") ||
-      exerciseDetails.restTime === ""
-    ) {
-      setFieldsError(
-        "Preencha os campos obrigatórios: Séries, Repetições/Até a falha e Tempo de Descanso"
-      );
-      setShowErrors(true);
-      return;
-    }
-    setFieldsError("");
-    const exercise = filteredExercises.find((ex) => ex.id === exerciseId);
-    if (!exercise) return;
-    setTempExercises((prev) => [
-      ...prev,
-      {
-        name: exercise.name,
-        series: Number(exerciseDetails.series),
-        reps: Number(exerciseDetails.reps),
-        advancedTechnique: exerciseDetails.advancedTechnique,
-        notes: exerciseDetails.notes,
-        restTime: Number(exerciseDetails.restTime),
-      },
-    ]);
-  };
-
-  const handleModalSave = () => {
+  const handleModalSave = (tempExercises: any) => {
     if (!selectedDay) return;
     setTrainingDays((prev) =>
       prev.map((day) =>
@@ -192,8 +94,6 @@ function NewPlanPage() {
 
   const handleModalClose = () => {
     setExerciseModalOpened(false);
-    setTempExercises([]);
-    setEditingExerciseIndex(null);
   };
 
   const handleReplicateTraining = () => {
@@ -272,116 +172,11 @@ function NewPlanPage() {
     setPublishModalOpened(false);
   };
 
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setTempExercises((exercises) =>
-        arrayMove(exercises, Number(active.id), Number(over.id))
-      );
-    }
-  };
-
-  const handleRemoveExercise = (index: number) => {
-    setTempExercises((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const filteredExercises = [
-    {
-      id: 1,
-      name: "Remada Sentada",
-      group: "Costas",
-      subGroup: "Cabo",
-      equipment: "Cabo",
-    },
-    {
-      id: 2,
-      name: "Barra Fixa",
-      group: "Costas",
-      subGroup: "Peso corporal",
-      equipment: "Peso corporal",
-    },
-    {
-      id: 3,
-      name: "Levantamento Terra",
-      group: "Costas",
-      subGroup: "Barra",
-      equipment: "Barra",
-    },
-    {
-      id: 4,
-      name: "Agachamento",
-      group: "Pernas",
-      subGroup: "Barra",
-      equipment: "Barra",
-    },
-    {
-      id: 5,
-      name: "Leg Press",
-      group: "Pernas",
-      subGroup: "Máquina",
-      equipment: "Máquina",
-    },
-    {
-      id: 6,
-      name: "Avanço",
-      group: "Pernas",
-      subGroup: "Peso corporal",
-      equipment: "Peso corporal",
-    },
-    {
-      id: 7,
-      name: "Rosca Direta",
-      group: "Braços",
-      subGroup: "Halteres",
-      equipment: "Halteres",
-    },
-    {
-      id: 8,
-      name: "Extensão de Tríceps",
-      group: "Braços",
-      subGroup: "Cabo",
-      equipment: "Cabo",
-    },
-    {
-      id: 9,
-      name: "Desenvolvimento de Ombro",
-      group: "Ombros",
-      subGroup: "Halteres",
-      equipment: "Halteres",
-    },
-    {
-      id: 10,
-      name: "Elevação Lateral",
-      group: "Ombros",
-      subGroup: "Halteres",
-      equipment: "Halteres",
-    },
-    {
-      id: 11,
-      name: "Prancha",
-      group: "Core",
-      subGroup: "Peso corporal",
-      equipment: "Peso corporal",
-    },
-    {
-      id: 12,
-      name: "Torção Russa",
-      group: "Core",
-      subGroup: "Peso corporal",
-      equipment: "Peso corporal",
-    },
-  ].filter(
-    (exercise) =>
-      (!filters.muscleGroup || exercise.group === filters.muscleGroup) &&
-      (!filters.subMuscleGroup ||
-        exercise.subGroup === filters.subMuscleGroup) &&
-      (!filters.equipment || exercise.equipment === filters.equipment) &&
-      (!filters.search ||
-        exercise.name.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.favorite || favoriteExercises.includes(exercise.id))
-  );
-
   const availableDays = ["segunda-feira", "quarta-feira", "sexta-feira"]; // Dias disponíveis
+
+  function toggleReplicationDate(day: Date): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <DatesProvider settings={{ locale: "pt-br" }}>
@@ -568,9 +363,6 @@ function NewPlanPage() {
                     <Divider mt="sm" />
                     <Stack style={{ maxHeight: "200px", overflowY: "auto" }}>
                       {exercises.map((exercise, index) => {
-                        const matchedExercise = filteredExercises.find(
-                          (e) => e.name === exercise.name
-                        );
                         return (
                           <Card
                             key={index}
@@ -593,12 +385,12 @@ function NewPlanPage() {
                                 ? ` | Descanso: ${exercise.restTime}s`
                                 : ""}
                             </Text>
-                            {matchedExercise && (
+                            {/* {matchedExercise && (
                               <Text size="xs" c="dimmed">
                                 {matchedExercise.group} -{" "}
                                 {matchedExercise.subGroup}
                               </Text>
-                            )}
+                            )} */}
                           </Card>
                         );
                       })}
@@ -660,402 +452,12 @@ function NewPlanPage() {
           })}
         </SimpleGrid>
 
-        {/* Modal para adicionar/editar exercícios */}
-        <Modal
-          opened={exerciseModalOpened}
-          onClose={handleModalClose}
-          title="Adicionar Exercício"
-          closeOnClickOutside
-          size="100%"
-        >
-          <Group align="center" grow style={{ height: "80vh" }}>
-            {/* Nova coluna: Lista do Treino */}
-            <Stack
-              style={{
-                flex: 1,
-                borderRight: "1px solid #ccc",
-                padding: "10px",
-                overflowY: "auto",
-                height: "100%",
-                backgroundColor: "#f7f7f7",
-              }}
-            >
-              {selectedDay ? (
-                tempExercises.length ? (
-                  <DndContext
-                    onDragEnd={handleDragEnd}
-                    collisionDetection={closestCenter}
-                  >
-                    <SortableContext
-                      items={tempExercises.map((_, index) => index)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      {tempExercises.map((ex, index) => {
-                        const matchedExercise = filteredExercises.find(
-                          (e) => e.name === ex.name
-                        );
-                        return (
-                          <SortableItem key={index} id={index}>
-                            <Card
-                              key={index}
-                              shadow="sm"
-                              padding="lg"
-                              style={{
-                                border: "1px solid #ccc",
-                                position: "relative",
-                                minHeight: "90px",
-                                cursor: "grab", // indica que é arrastável
-                              }}
-                            >
-                              {/* Botão de exclusão */}
-                              <Button
-                                variant="subtle"
-                                c="red"
-                                size="xs"
-                                onPointerDown={(e) => e.stopPropagation()} // evita o início do arraste
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveExercise(index);
-                                }}
-                                style={{
-                                  position: "absolute",
-                                  right: "0px",
-                                  bottom: "10px",
-                                  zIndex: 1,
-                                  pointerEvents: "auto",
-                                }}
-                              >
-                                <IconTrash size={16} />
-                              </Button>
-                              {/* Ícone de arrastar */}
-                              <IconGripVertical
-                                size={16}
-                                style={{
-                                  position: "absolute",
-                                  right: "15px",
-                                  top: "15px",
-                                }}
-                              />
-                              <Text
-                                size="sm"
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                }}
-                              >
-                                {ex.name}
-                              </Text>
-                              <Text size="xs" c="dimmed">
-                                {ex.series} x{" "}
-                                {ex.reps === 0 ? "falha" : ex.reps}
-                                {!!ex.advancedTechnique && (
-                                  <> - {ex.advancedTechnique}</>
-                                )}
-                                {ex.restTime
-                                  ? ` | Descanso: ${ex.restTime}s`
-                                  : ""}
-                              </Text>
-                              {matchedExercise && (
-                                <Text size="xs" c="dimmed">
-                                  {matchedExercise.group} -{" "}
-                                  {matchedExercise.subGroup}
-                                </Text>
-                              )}
-                            </Card>
-                          </SortableItem>
-                        );
-                      })}
-                    </SortableContext>
-                  </DndContext>
-                ) : (
-                  <Text size="sm" c="dimmed">
-                    Nenhum exercício adicionado.
-                  </Text>
-                )
-              ) : (
-                <Text size="sm" c="dimmed">
-                  Selecione um dia
-                </Text>
-              )}
-            </Stack>
-            {/* Coluna com filtros e lista de exercícios */}
-            <Stack
-              mt="xs"
-              style={{ maxWidth: "50%", height: "100%", overflow: "hidden" }}
-            >
-              <Group grow mb="md">
-                <Select
-                  placeholder="Grupo Muscular"
-                  data={["Peito", "Costas", "Pernas"]}
-                  value={filters.muscleGroup || ""}
-                  onChange={(value) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      muscleGroup: value || "",
-                    }))
-                  }
-                  clearable
-                />
-                <Select
-                  placeholder="Subgrupo Muscular"
-                  data={[
-                    "Peitoral superior",
-                    "Halteres",
-                    "Cabo",
-                    "Peso corporal",
-                  ]}
-                  value={filters.subMuscleGroup || ""}
-                  onChange={(value) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      subMuscleGroup: value || "",
-                    }))
-                  }
-                  clearable
-                />
-                <Select
-                  placeholder="Equipamento"
-                  data={["Barra", "Halteres", "Cabo", "Peso corporal"]}
-                  value={filters.equipment || ""}
-                  onChange={(value) =>
-                    setFilters((prev) => ({ ...prev, equipment: value || "" }))
-                  }
-                  clearable
-                />
-              </Group>
-              <Group>
-                <TextInput
-                  placeholder="Buscar exercício"
-                  value={filters.search || ""}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      search: e.currentTarget.value,
-                    }))
-                  }
-                  style={{ flex: 1 }}
-                />
-                <label
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.favorite || false}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        favorite: e.target.checked,
-                      }))
-                    }
-                  />
-                  <Text size="sm">Favoritos</Text>
-                </label>
-              </Group>
-              <div
-                style={{
-                  overflowY: "auto",
-                  height: "calc(100% - 150px)",
-                  paddingRight: "10px",
-                }}
-              >
-                <SimpleGrid cols={2} spacing="md" mb="md">
-                  {filteredExercises.map((exercise) => (
-                    <Card
-                      key={exercise.id}
-                      shadow="sm"
-                      padding="lg"
-                      style={{
-                        border: "1px solid #ccc",
-                        cursor: "pointer",
-                        position: "relative",
-                      }}
-                    >
-                      <Button
-                        variant="subtle"
-                        size="xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(exercise.id);
-                        }}
-                        c="yellow"
-                        style={{
-                          position: "absolute",
-                          top: "10px",
-                          right: "0px",
-                        }}
-                      >
-                        {favoriteExercises.includes(exercise.id) ? (
-                          <IconStarFilled size={20} />
-                        ) : (
-                          <IconStar size={20} />
-                        )}
-                      </Button>
-                      <Text size="sm">{exercise.name}</Text>
-                      <Text size="xs" c="dimmed">
-                        {exercise.group} - {exercise.subGroup}
-                      </Text>
-                      {/* Botão de adição do exercício */}
-                      <Button
-                        variant="subtle"
-                        size="xs"
-                        c="green" // cor ajustada para ação de adicionar
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDirectAddExercise(exercise.id);
-                        }}
-                        style={{
-                          position: "absolute",
-                          bottom: "5px",
-                          right: "0px",
-                        }}
-                      >
-                        <IconPlus size={20} />
-                      </Button>
-                    </Card>
-                  ))}
-                </SimpleGrid>
-              </div>
-            </Stack>
-            {/* Formulário de adição de exercícios */}
-            <Stack style={{ flex: 1 }}>
-              <Group grow>
-                <NumberInput
-                  label="Séries*" // campo obrigatório
-                  placeholder=""
-                  value={exerciseDetails.series}
-                  onChange={(value) =>
-                    setExerciseDetails((prev) => ({
-                      ...prev,
-                      series: value === null ? "" : String(value),
-                    }))
-                  }
-                  error={
-                    showErrors && exerciseDetails.series === ""
-                      ? "Campo obrigatório"
-                      : null
-                  }
-                />
-                <NumberInput
-                  label="Repetições*"
-                  placeholder=""
-                  value={exerciseDetails.reps}
-                  onChange={(value) =>
-                    setExerciseDetails((prev) => ({
-                      ...prev,
-                      reps: value === null ? "" : String(value),
-                    }))
-                  }
-                  disabled={untilFailure}
-                  error={
-                    !untilFailure && showErrors && exerciseDetails.reps === ""
-                      ? "Campo obrigatório"
-                      : null
-                  }
-                />
-              </Group>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  marginTop: "5px",
-                }}
-              >
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={untilFailure}
-                    onChange={(e) => {
-                      setUntilFailure(e.target.checked);
-                      if (e.target.checked) {
-                        setExerciseDetails((prev) => ({ ...prev, reps: "" }));
-                      }
-                    }}
-                  />
-                  <Text size="sm" mr="xl">
-                    Até a falha
-                  </Text>
-                </label>
-              </div>
-              <Group grow>
-                <NumberInput
-                  label="Descanso (segundos)*"
-                  placeholder="0"
-                  value={
-                    exerciseDetails.restTime === ""
-                      ? 0
-                      : Number(exerciseDetails.restTime)
-                  }
-                  onChange={(value) =>
-                    setExerciseDetails((prev) => ({
-                      ...prev,
-                      restTime: value === null ? "" : String(value),
-                    }))
-                  }
-                  min={0}
-                  error={
-                    showErrors && exerciseDetails.restTime === ""
-                      ? "Campo obrigatório"
-                      : null
-                  }
-                />
-              </Group>
-              <Group grow>
-                <Select
-                  label="Técnica Avançada"
-                  placeholder="Selecione"
-                  data={["Drop set", "Rest-pause", "Super set"]}
-                  value={exerciseDetails.advancedTechnique || ""}
-                  onChange={(value) =>
-                    setExerciseDetails((prev) => ({
-                      ...prev,
-                      advancedTechnique: value || "",
-                    }))
-                  }
-                />
-              </Group>
-              <Textarea
-                label="Notas"
-                placeholder="Adicione notas (opcional)"
-                value={exerciseDetails.notes ?? ""}
-                onChange={(e) =>
-                  setExerciseDetails((prev) => ({
-                    ...prev,
-                    notes: e.target.value,
-                  }))
-                }
-              />
-              <Group mt="md">
-                <Button variant="outline" onClick={handleModalClose}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant="filled"
-                  c="green"
-                  onClick={handleModalSave}
-                  disabled={
-                    exerciseDetails.series === "" ||
-                    (!untilFailure && exerciseDetails.reps === "") ||
-                    exerciseDetails.restTime === ""
-                  }
-                >
-                  Salvar Alterações
-                </Button>
-              </Group>
-              {fieldsError && (
-                <Text size="xs" color="red">
-                  {fieldsError}
-                </Text>
-              )}
-            </Stack>
-          </Group>
-        </Modal>
-
+        <ExerciseModal
+          handleModalClose={handleModalClose}
+          handleModalSave={handleModalSave}
+          modalOpened={exerciseModalOpened}
+          editingExercises={editingExercises}
+        />
         {/* Modal para replicar treinos */}
         <Modal
           opened={replicateModalOpened}
