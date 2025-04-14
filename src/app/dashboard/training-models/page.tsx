@@ -2,7 +2,17 @@
 
 import React, { useState } from "react";
 import { withAuth } from "@/utils/withAuth";
-import { Flex, Title, Card, Text, MultiSelect, Button } from "@mantine/core";
+import {
+  Flex,
+  Title,
+  Card,
+  Text,
+  MultiSelect,
+  Button,
+  Modal,
+  TextInput,
+  Select,
+} from "@mantine/core";
 import {
   IconFolder,
   IconStar,
@@ -16,6 +26,8 @@ import {
   useDraggable,
   DndContext,
   DragOverlay,
+  DragStartEvent,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import { ExerciseModal } from "@/components/shared";
 
@@ -180,13 +192,32 @@ const TrainingModelsPage = () => {
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>(
     {}
   );
-  const [activeDragItem, setActiveDragItem] = useState<any>(null);
+  const [activeDragItem, setActiveDragItem] = useState<
+    (typeof trainingModels)[0] | null
+  >(null);
 
   const [expandedSeries, setExpandedSeries] = useState<Record<string, boolean>>(
     {}
   );
 
   const [exerciseModalOpened, setExerciseModalOpened] = useState(false);
+
+  const [seriesModalOpened, setSeriesModalOpened] = useState(false);
+  const [newSeriesName, setNewSeriesName] = useState("");
+  const [newSeriesDescription, setNewSeriesDescription] = useState("");
+  const [newSeriesLevel, setNewSeriesLevel] = useState("");
+
+  const handleCreateSeries = () => {
+    console.log({
+      name: newSeriesName,
+      description: newSeriesDescription,
+      level: newSeriesLevel,
+    });
+    setSeriesModalOpened(false);
+    setNewSeriesName("");
+    setNewSeriesDescription("");
+    setNewSeriesLevel("");
+  };
 
   const toggleSeriesExpansion = (id: string) => {
     setExpandedSeries((prev) => ({
@@ -201,21 +232,23 @@ const TrainingModelsPage = () => {
     }
   };
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const draggedItem = trainingModels.find(
       (model) => model.name === active.id
     );
-    setActiveDragItem(draggedItem);
+    if (draggedItem) {
+      setActiveDragItem(draggedItem);
+    }
   };
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDragItem(null);
 
     if (over) {
-      const sourceId = active.id;
-      const targetId = over.id;
+      const sourceId: string = String(active.id); // Converte UniqueIdentifier para string
+      const targetId: string = String(over.id); // Converte UniqueIdentifier para string
 
       setDroppedItems((prev) => {
         const updated = { ...prev };
@@ -315,7 +348,7 @@ const TrainingModelsPage = () => {
               variant="filled"
               color="blue" // Cor para "Criar Série"
               leftSection={<IconFolder size={16} />} // Ícone para "Criar Série"
-              onClick={() => console.log("Criar Série")}
+              onClick={() => setSeriesModalOpened(true)}
             >
               Criar Série
             </Button>
@@ -631,7 +664,43 @@ const TrainingModelsPage = () => {
         handleModalSave={(tempExercises) => console.log(tempExercises)}
         modalOpened={exerciseModalOpened}
         editingExercises={[]}
+        trainingModel
       />
+      <Modal
+        opened={seriesModalOpened}
+        onClose={() => setSeriesModalOpened(false)}
+        title="Criar Série"
+      >
+        <TextInput
+          label="Nome da Série"
+          placeholder="Digite o nome da série"
+          value={newSeriesName}
+          onChange={(e) => setNewSeriesName(e.target.value)}
+          required
+        />
+        <TextInput
+          label="Descrição"
+          placeholder="Digite a descrição da série"
+          value={newSeriesDescription}
+          onChange={(e) => setNewSeriesDescription(e.target.value)}
+        />
+        <Select
+          label="Nível da Série"
+          placeholder="Selecione o nível"
+          data={levels}
+          value={newSeriesLevel}
+          onChange={(value) => setNewSeriesLevel(value || "")}
+        />
+        <Button
+          variant="filled"
+          color="green"
+          fullWidth
+          mt="md"
+          onClick={handleCreateSeries}
+        >
+          Salvar
+        </Button>
+      </Modal>
     </DndContext>
   );
 };

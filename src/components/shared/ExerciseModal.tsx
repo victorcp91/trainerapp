@@ -1,4 +1,4 @@
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
@@ -48,10 +48,11 @@ function SortableItem({
   );
 }
 interface IExerciseModal {
-  handleModalSave: (temp: any) => void;
+  handleModalSave: (temp: Exercise[]) => void;
   handleModalClose: () => void;
   modalOpened: boolean;
   editingExercises: Exercise[];
+  trainingModel?: boolean;
 }
 interface Exercise {
   name: string;
@@ -67,6 +68,7 @@ export function ExerciseModal({
   handleModalSave,
   modalOpened,
   editingExercises,
+  trainingModel,
 }: IExerciseModal) {
   const [untilFailure, setUntilFailure] = useState(false); // Estado para "Até a falha"
   const [fieldsError, setFieldsError] = useState<string>("");
@@ -87,6 +89,8 @@ export function ExerciseModal({
   });
   const [favoriteExercises, setFavoriteExercises] = useState<number[]>([]);
   const [showErrors, setShowErrors] = useState(false); // Novo estado para controle de erros
+  const [modelName, setModelName] = useState("");
+  const [modelDescription, setModelDescription] = useState("");
 
   useEffect(() => {
     setTempExercises(editingExercises);
@@ -188,7 +192,7 @@ export function ExerciseModal({
       (!filters.favorite || favoriteExercises.includes(exercise.id))
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setTempExercises((exercises) =>
@@ -240,12 +244,44 @@ export function ExerciseModal({
     <Modal
       opened={modalOpened}
       onClose={handleModalClose}
-      title="Adicionar Exercício"
+      title={trainingModel ? "Criar Modelo de Treino" : "Adicionar Exercício"}
       closeOnClickOutside
       size="100%"
     >
-      <Group align="center" grow style={{ height: "80vh" }}>
-        {/* Nova coluna: Lista do Treino */}
+      <Group>
+        {trainingModel && (
+          <Stack
+            style={{
+              flex: 1,
+              marginBottom: "1rem",
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            <TextInput
+              label="Nome do Modelo"
+              placeholder="Digite o nome do modelo"
+              value={modelName}
+              onChange={(e) => setModelName(e.currentTarget.value)}
+              required
+              flex={0.5}
+            />
+            <TextInput
+              label="Descrição do Modelo"
+              placeholder="Digite a descrição do modelo"
+              value={modelDescription}
+              onChange={(e) => setModelDescription(e.currentTarget.value)}
+              required
+              flex={1}
+            />
+          </Stack>
+        )}
+      </Group>
+      <Group
+        align="center"
+        grow
+        style={{ height: trainingModel ? "70vh" : "80vh" }}
+      >
         <Stack
           style={{
             flex: 1,
@@ -344,12 +380,11 @@ export function ExerciseModal({
             </Text>
           )}
         </Stack>
-        {/* Coluna com filtros e lista de exercícios */}
         <Stack
           mt="xs"
           style={{ maxWidth: "50%", height: "100%", overflow: "hidden" }}
         >
-          <Group grow mb="md">
+          <Group grow>
             <Select
               placeholder="Grupo Muscular"
               data={["Peito", "Costas", "Pernas"]}
@@ -415,7 +450,9 @@ export function ExerciseModal({
           <div
             style={{
               overflowY: "auto",
-              height: "calc(100% - 150px)",
+              height: trainingModel
+                ? "calc(100% - 130px)"
+                : "calc(100% - 150px)",
               paddingRight: "10px",
             }}
           >
@@ -477,7 +514,6 @@ export function ExerciseModal({
             </SimpleGrid>
           </div>
         </Stack>
-        {/* Formulário de adição de exercícios */}
         <Stack style={{ flex: 1 }}>
           <Group grow>
             <NumberInput
@@ -596,9 +632,13 @@ export function ExerciseModal({
               Cancelar
             </Button>
             <Button
-              variant="filled"
-              c="green"
-              onClick={() => handleModalSave(tempExercises)}
+              onClick={() => {
+                if (trainingModel && (!modelName || !modelDescription)) {
+                  setFieldsError("Preencha o nome e a descrição do modelo.");
+                  return;
+                }
+                handleModalSave(tempExercises);
+              }}
               disabled={
                 exerciseDetails.series === "" ||
                 (!untilFailure && exerciseDetails.reps === "") ||
