@@ -56,70 +56,60 @@ const series = [
   {
     name: "Série 1",
     description: "Descrição da série 1.",
-    items: ["Item 1", "Item 2", "Item 3"],
     isFavorite: true,
     createdAt: "2023-03-01",
   },
   {
     name: "Série 2",
     description: "Descrição da série 2.",
-    items: ["Item 1", "Item 2"],
     isFavorite: false,
     createdAt: "2023-02-15",
   },
   {
     name: "Série 3",
     description: "Descrição da série 3.",
-    items: ["Item 1", "Item 2", "Item 3", "Item 4"],
     isFavorite: true,
     createdAt: "2023-01-20",
   },
   {
     name: "Série 4",
     description: "Descrição da série 4.",
-    items: ["Item 1", "Item 2", "Item 3"],
     isFavorite: false,
     createdAt: "2023-03-01",
   },
   {
     name: "Série 5",
     description: "Descrição da série 5.",
-    items: ["Item 1", "Item 2"],
     isFavorite: true,
     createdAt: "2023-02-15",
   },
   {
     name: "Série 6",
     description: "Descrição da série 6.",
-    items: ["Item 1", "Item 2", "Item 3", "Item 4"],
     isFavorite: false,
     createdAt: "2023-01-20",
   },
   {
     name: "Série 7",
     description: "Descrição da série 7.",
-    items: ["Item 1", "Item 2", "Item 3"],
     isFavorite: true,
     createdAt: "2023-03-01",
   },
   {
     name: "Série 8",
     description: "Descrição da série 8.",
-    items: ["Item 1", "Item 2"],
     isFavorite: false,
     createdAt: "2023-02-15",
   },
   {
     name: "Série 9",
     description: "Descrição da série 9.",
-    items: ["Item 1", "Item 2", "Item 3", "Item 4"],
     isFavorite: true,
     createdAt: "2023-01-20",
   },
   {
     name: "Série 10",
     description: "Descrição da série 10.",
-    items: ["Item 1", "Item 2", "Item 3"],
     isFavorite: false,
     createdAt: "2023-03-01",
   },
@@ -221,10 +211,25 @@ const TrainingModelsPage = () => {
         if (!updated[targetId]) {
           updated[targetId] = [];
         }
-        updated[targetId].push(sourceId);
+        // Adiciona o modelo sem restrições de duplicidade
+        updated[targetId] = [...updated[targetId], sourceId];
         return updated;
       });
+
+      // Expande automaticamente o card ao adicionar um novo modelo
+      setExpandedSeries((prev) => ({
+        ...prev,
+        [targetId]: true,
+      }));
     }
+  };
+
+  const hasDroppedItems = (serieId: string) => {
+    return droppedItems[serieId] && droppedItems[serieId].length > 0;
+  };
+
+  const getDroppedItemCount = (serieId: string) => {
+    return droppedItems[serieId]?.length || 0;
   };
 
   const filteredTrainingModels = trainingModels
@@ -464,31 +469,33 @@ const TrainingModelsPage = () => {
                       </Flex>
                       <Flex align="center" gap="sm">
                         <Text size="sm" color="dimmed">
-                          {serie.items.length} treinos
+                          {getDroppedItemCount(`serie-${index}`)} modelos
                         </Text>
                         <IconStar
                           size={20}
                           color="#FFD700"
                           style={{ cursor: "pointer" }}
                         />
-                        <button
-                          onClick={() =>
-                            toggleSeriesExpansion(`serie-${index}`)
-                          }
-                          style={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          {expandedSeries[`serie-${index}`] ? (
-                            <IconChevronUp size={20} color="gray" />
-                          ) : (
-                            <IconChevronDown size={20} color="gray" />
-                          )}
-                        </button>
+                        {hasDroppedItems(`serie-${index}`) && (
+                          <button
+                            onClick={() =>
+                              toggleSeriesExpansion(`serie-${index}`)
+                            }
+                            style={{
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            {expandedSeries[`serie-${index}`] ? (
+                              <IconChevronUp size={20} color="gray" />
+                            ) : (
+                              <IconChevronDown size={20} color="gray" />
+                            )}
+                          </button>
+                        )}
                       </Flex>
                     </Flex>
                     <Text size="sm" color="dimmed">
