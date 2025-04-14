@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { withAuth } from "@/utils/withAuth";
 import {
   Button,
@@ -15,6 +15,7 @@ import {
   Group,
   Textarea,
   Select,
+  Loader,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { SelectClearable } from "@/components/shared";
@@ -29,9 +30,45 @@ import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { showNotification } from "@mantine/notifications";
 
+const clients = [
+  {
+    name: "Alice Johnson",
+    age: 28,
+    gender: "Female",
+    email: "alice@example.com",
+    phone: "555-123-4567",
+    tags: ["Weight Loss", "Muscle Tone"],
+    status: "on_track",
+    type: "online",
+    profilePicture: "",
+  },
+  {
+    name: "Bob Smith",
+    age: 35,
+    gender: "Male",
+    email: "bob@example.com",
+    phone: "555-987-6543",
+    tags: ["Muscle Building", "Strength"],
+    status: "near_due",
+    type: "in_person",
+    profilePicture: "",
+    startDate: "2023-01-15", // Example start date
+  },
+  {
+    name: "Carol Wilson",
+    age: 42,
+    gender: "Female",
+    email: "carol@example.com",
+    phone: "555-456-7890",
+    tags: ["Flexibility", "Core Strength"],
+    status: "overdue",
+    type: "hybrid",
+    profilePicture: "",
+  },
+];
+
 const ClientsPage = () => {
   const r = useRouter();
-  const searchParams = useSearchParams();
 
   const [showClientType, setShowClientType] = useState<string | null>("");
   const [showSeriesStatus, setShowSeriesStatus] = useState<string | null>("");
@@ -42,27 +79,28 @@ const ClientsPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortOption, setSortOption] = useState<string | null>("");
+  const [loadedClients, setLoadedClients] = useState(clients.slice(0, 6)); // Estado para clientes carregados
+  const [isLoading, setIsLoading] = useState(false); // Estado para o indicador de carregamento
 
-  useEffect(() => {
-    if (!searchParams) return;
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-    const seriesStatusQuery = searchParams.get("seriesStatus");
-    const paymentStatusQuery = searchParams.get("paymentStatus");
+  const handleLoadMore = () => {
+    if (isLoading || loadedClients.length >= clients.length) return; // Verifica se todos os clientes já foram carregados
 
-    if (
-      seriesStatusQuery &&
-      ["on_track", "near_due", "overdue"].includes(seriesStatusQuery)
-    ) {
-      setShowSeriesStatus(seriesStatusQuery);
-    }
+    setIsLoading(true);
+    setTimeout(() => {
+      const nextClients = clients.slice(
+        loadedClients.length,
+        loadedClients.length + 6
+      );
 
-    if (
-      paymentStatusQuery &&
-      ["late", "on_time"].includes(paymentStatusQuery)
-    ) {
-      setShowFollowUpStatus(paymentStatusQuery);
-    }
-  }, [searchParams]);
+      if (nextClients.length > 0) {
+        setLoadedClients((prev) => [...prev, ...nextClients]);
+      }
+
+      setIsLoading(false); // Garante que o loading seja desativado
+    }, 500);
+  };
 
   const clientTypes = [
     { value: "online", label: "Online" },
@@ -95,43 +133,6 @@ const ClientsPage = () => {
     { value: "createdAt", label: "Tempo de Acompanhamento" },
   ];
 
-  const clients = [
-    {
-      name: "Alice Johnson",
-      age: 28,
-      gender: "Female",
-      email: "alice@example.com",
-      phone: "555-123-4567",
-      tags: ["Weight Loss", "Muscle Tone"],
-      status: "on_track",
-      type: "online",
-      profilePicture: "",
-    },
-    {
-      name: "Bob Smith",
-      age: 35,
-      gender: "Male",
-      email: "bob@example.com",
-      phone: "555-987-6543",
-      tags: ["Muscle Building", "Strength"],
-      status: "near_due",
-      type: "in_person",
-      profilePicture: "",
-      startDate: "2023-01-15", // Example start date
-    },
-    {
-      name: "Carol Wilson",
-      age: 42,
-      gender: "Female",
-      email: "carol@example.com",
-      phone: "555-456-7890",
-      tags: ["Flexibility", "Core Strength"],
-      status: "overdue",
-      type: "hybrid",
-      profilePicture: "",
-    },
-  ];
-
   const form = useForm({
     initialValues: {
       fullName: "",
@@ -155,6 +156,27 @@ const ClientsPage = () => {
     setIsModalOpen(false);
     form.reset();
   };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoading) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [loadMoreRef, isLoading]);
 
   return (
     <>
@@ -227,8 +249,8 @@ const ClientsPage = () => {
           />
         </div>
       </Flex>
-      <Grid>
-        {clients
+      <Grid gutter="md">
+        {loadedClients
           .filter((client) => {
             if (showClientType && client.type !== showClientType) return false;
             if (showSeriesStatus && client.status !== showSeriesStatus)
@@ -266,7 +288,7 @@ const ClientsPage = () => {
             }
           })
           .map((client, index) => (
-            <Grid.Col key={index} span={4}>
+            <Grid.Col key={index} span={{ xs: 6, lg: 3 }}>
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Link href="/dashboard/clients/clientId">
                   <Flex align="center" gap="sm">
@@ -370,6 +392,8 @@ const ClientsPage = () => {
             </Grid.Col>
           ))}
       </Grid>
+      {isLoading && <Loader size="lg" mt="lg" />}
+      <div ref={loadMoreRef} style={{ height: "1px" }} />
       <Modal
         opened={isModalOpen}
         onClose={() => setIsModalOpen(false)}
