@@ -60,7 +60,7 @@ const CalendarPage = () => {
       address: "Rua das Flores, 123 - São Paulo, SP",
       startTime: new Date().toISOString(), // Horário inicial
       endTime: new Date(new Date().getTime() + 3600000).toISOString(), // Horário final (1h depois)
-      avatar: "https://via.placeholder.com/40",
+      avatar: "",
     },
     {
       id: 2,
@@ -72,7 +72,7 @@ const CalendarPage = () => {
       endTime: new Date(
         new Date().setDate(new Date().getDate() + 1) + 3600000
       ).toISOString(),
-      avatar: "https://via.placeholder.com/40",
+      avatar: "",
     },
   ]);
 
@@ -106,9 +106,10 @@ const CalendarPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!window?.google || !inputRef.current) return;
-    const autocomplete = new google.maps.places.Autocomplete(
-      inputRef.current!,
+    if (typeof window === "undefined" || !window.google || !inputRef.current)
+      return;
+    const autocomplete = new window.google.maps.places.Autocomplete(
+      inputRef.current,
       {
         types: ["establishment"],
         componentRestrictions: { country: "br" },
@@ -126,8 +127,7 @@ const CalendarPage = () => {
         });
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputRef.current, window?.google]);
+  }, [inputRef.current]);
 
   const calculateDonutData = () => {
     const total = totalAppointments || 1; // Evitar divisão por zero
@@ -269,7 +269,7 @@ const CalendarPage = () => {
 
       <Group mb="lg" grow style={{ alignItems: "stretch" }}>
         {/* Card do ano */}
-        <Card shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
+        <Card withBorder shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
           <Group style={{ flexDirection: "column" }}>
             <div
               style={{
@@ -298,7 +298,7 @@ const CalendarPage = () => {
         </Card>
 
         {/* Card do mês */}
-        <Card shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
+        <Card withBorder shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
           <Group style={{ flexDirection: "column" }}>
             <div
               style={{
@@ -333,7 +333,7 @@ const CalendarPage = () => {
         </Card>
 
         {/* Card do dia */}
-        <Card shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
+        <Card withBorder shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
           <Group style={{ flexDirection: "column" }}>
             <div
               style={{
@@ -360,7 +360,7 @@ const CalendarPage = () => {
 
       <Group align="flex-start">
         {/* Sidebar com o calendário */}
-        <Card shadow="sm" px="lg" py="xs" style={{ width: "300px" }}>
+        <Card withBorder shadow="sm" px="lg" py="xs" style={{ width: "300px" }}>
           <DatePicker
             value={selectedDate}
             onChange={setSelectedDate}
@@ -369,7 +369,13 @@ const CalendarPage = () => {
         </Card>
 
         {/* Detalhes do dia selecionado */}
-        <Card shadow="sm" px="lg" py="xs" style={{ width: "250px", flex: 1 }}>
+        <Card
+          withBorder
+          shadow="sm"
+          px="lg"
+          py="xs"
+          style={{ width: "250px", flex: 1 }}
+        >
           <Group mb="md" style={{ justifyContent: "space-between" }}>
             <Title order={2}>
               {selectedDate
@@ -416,7 +422,7 @@ const CalendarPage = () => {
               </Tooltip>
             </Group>
           </Group>
-          <Card withBorder px="lg" py="xs" style={{ textAlign: "center" }}>
+          <Card style={{ textAlign: "center" }}>
             {appointments
               .filter(
                 (appointment) =>
@@ -429,9 +435,10 @@ const CalendarPage = () => {
                   new Date(a.startTime).getTime() -
                   new Date(b.startTime).getTime()
               )
-              .map((appointment, index) => (
+              .map((appointment) => (
                 <Card
                   key={appointment.id}
+                  withBorder
                   shadow="sm"
                   padding="md"
                   mb="sm"
@@ -440,41 +447,17 @@ const CalendarPage = () => {
                     flexDirection: "row",
                     alignItems: "flex-start",
                     gap: "10px",
-                    border:
-                      index === 0 &&
-                      new Date(appointment.startTime) > new Date()
-                        ? "2px solid green"
-                        : undefined,
                   }}
                 >
-                  <Text size="sm" color="dimmed" mt="xs">
-                    {new Date(appointment.startTime).toLocaleTimeString(
-                      "pt-BR",
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}{" "}
-                    -{" "}
-                    {new Date(appointment.endTime).toLocaleTimeString("pt-BR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </Text>
-
                   <Group
                     style={{
                       flexDirection: "row",
                       gap: "5px",
                       alignItems: "flex-start",
                       flex: 1,
+                      marginTop: "-10px",
                     }}
                   >
-                    <Avatar
-                      src={appointment.avatar}
-                      alt={`Avatar de ${appointment.client}`}
-                      radius="xl"
-                    />
                     <Group
                       style={{
                         flexDirection: "column",
@@ -484,7 +467,36 @@ const CalendarPage = () => {
                         flex: 1,
                       }}
                     >
+                      <Group>
+                        <Text
+                          size="sm"
+                          color="dimmed"
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          {new Date(appointment.startTime).toLocaleTimeString(
+                            "pt-BR",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                          {" - "}
+                          {new Date(appointment.endTime).toLocaleTimeString(
+                            "pt-BR",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </Text>
+                      </Group>
                       <Group style={{ flex: 1 }}>
+                        <Avatar
+                          src={appointment.avatar}
+                          alt={`Avatar de ${appointment.client}`}
+                          radius="xl"
+                          size={40}
+                        />
                         <Text>{appointment.client}</Text>
                         <Text
                           size="sm"
@@ -515,7 +527,7 @@ const CalendarPage = () => {
                           </a>
                         </Text>
                       </Group>
-                      <Group>
+                      <Group mt="xs">
                         <Button
                           size="xs"
                           variant="light"

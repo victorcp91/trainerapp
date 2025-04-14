@@ -180,6 +180,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{
                   flex: 1,
 
@@ -250,6 +252,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{
                   flex: 1,
 
@@ -277,6 +281,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{
                   flex: 1,
 
@@ -348,6 +354,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{
                   flex: 1,
 
@@ -390,7 +398,7 @@ function ClientProfilePage() {
             align="flex-start"
             style={{ alignItems: "stretch" }}
           >
-            <Card shadow="sm" padding="lg">
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Text size="md">Informações de Treino</Text>
               <Divider my="sm" />
               <Group align="flex-start" style={{ alignItems: "stretch" }}>
@@ -433,6 +441,8 @@ function ClientProfilePage() {
             <Card
               shadow="sm"
               padding="lg"
+              radius="md"
+              withBorder
               style={{
                 flex: 1,
                 display: "flex",
@@ -566,7 +576,13 @@ function ClientProfilePage() {
             style={{ alignItems: "stretch" }}
           >
             {/* Current Training Card */}
-            <Card shadow="sm" padding="lg" style={{ flex: 1 }}>
+            <Card
+              shadow="sm"
+              padding="lg"
+              radius="md"
+              withBorder
+              style={{ flex: 1 }}
+            >
               <Text size="md">Série Atual: Hipertrofia</Text>
               <Divider my="sm" />
               <Stack>
@@ -623,7 +639,13 @@ function ClientProfilePage() {
             </Card>
 
             {/* Drafts Card */}
-            <Card shadow="sm" padding="lg" style={{ flex: 1 }}>
+            <Card
+              shadow="sm"
+              padding="lg"
+              radius="md"
+              withBorder
+              style={{ flex: 1 }}
+            >
               <Text size="md">Rascunhos</Text>
               <Divider my="sm" />
               <Stack>
@@ -692,6 +714,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{ flex: 1, display: "flex", flexDirection: "column" }}
               >
                 <Text size="md">🧠 Objetivo e Experiência</Text>
@@ -733,6 +757,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{ flex: 1, display: "flex", flexDirection: "column" }}
               >
                 <Text size="md">📅 Frequência e Tempo</Text>
@@ -766,6 +792,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{ flex: 1, display: "flex", flexDirection: "column" }}
               >
                 <Text size="md">🏋️ Foco Muscular e Treino</Text>
@@ -825,6 +853,8 @@ function ClientProfilePage() {
               <Card
                 shadow="sm"
                 padding="lg"
+                radius="md"
+                withBorder
                 style={{ flex: 1, display: "flex", flexDirection: "column" }}
               >
                 <Text size="md">🫀 Cardio</Text>
@@ -871,7 +901,7 @@ function ClientProfilePage() {
 
             <Group grow align="flex-start">
               {/* 🚫 Restrições */}
-              <Card shadow="sm" padding="lg">
+              <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Text size="md">🚫 Restrições</Text>
                 <Divider my="sm" />
                 <TextInput
@@ -892,7 +922,7 @@ function ClientProfilePage() {
         <Tabs.Panel value="evolution" pt="md">
           <Stack>
             {/* Progress Photos */}
-            <Card shadow="sm" padding="lg">
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Text size="md">Progresso</Text>
               <Divider my="sm" />
               <Group>

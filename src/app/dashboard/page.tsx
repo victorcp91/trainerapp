@@ -39,7 +39,7 @@ const DashboardPage = () => {
           style={{ flex: "1 1 25%", maxWidth: "25%" }}
           className="col-mobile-50"
         >
-          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
+          <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconUsers size={24} color="blue" />
               <Title
@@ -66,7 +66,7 @@ const DashboardPage = () => {
           style={{ flex: "1 1 25%", maxWidth: "25%" }}
           className="col-mobile-50"
         >
-          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
+          <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconGymnastics size={24} color="orange" />
               <Title order={4}>Treinos Pendentes</Title>
@@ -110,7 +110,7 @@ const DashboardPage = () => {
           style={{ flex: "1 1 25%", maxWidth: "25%" }}
           className="col-mobile-50"
         >
-          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
+          <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconCalendar size={24} color="green" />
               <Title order={4}>Atendimentos hoje</Title>
@@ -133,7 +133,7 @@ const DashboardPage = () => {
           style={{ flex: "1 1 25%", maxWidth: "25%" }}
           className="col-mobile-50"
         >
-          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
+          <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconClock size={24} color="gray" />
               <Title order={4}>Próxima Sessão</Title>
@@ -148,7 +148,7 @@ const DashboardPage = () => {
 
       <Grid gutter="md" align="stretch">
         <Grid.Col style={{ flexBasis: "50%", maxWidth: "50%" }}>
-          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
+          <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconBell size={24} color="blue" />
               <Title order={4}>Agenda de Hoje</Title>
@@ -160,7 +160,7 @@ const DashboardPage = () => {
         </Grid.Col>
 
         <Grid.Col style={{ flexBasis: "50%", maxWidth: "50%" }}>
-          <Card shadow="sm" padding="lg" style={{ height: "100%" }}>
+          <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconBell size={24} color="orange" />
               <Title order={4}>Notificações</Title>
@@ -177,7 +177,7 @@ const DashboardPage = () => {
 
       <Grid gutter="md">
         <Grid.Col>
-          <Card shadow="sm" padding="lg">
+          <Card withBorder shadow="sm" padding="lg">
             <Title order={4} mb="sm">
               Agenda Semanal
             </Title>

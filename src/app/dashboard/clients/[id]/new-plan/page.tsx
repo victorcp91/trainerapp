@@ -589,6 +589,9 @@ function NewPlanPage() {
                               {!!exercise.advancedTechnique && (
                                 <> - {exercise.advancedTechnique}</>
                               )}
+                              {exercise.restTime
+                                ? ` | Descanso: ${exercise.restTime}s`
+                                : ""}
                             </Text>
                             {matchedExercise && (
                               <Text size="xs" c="dimmed">
@@ -605,7 +608,7 @@ function NewPlanPage() {
                       c="green" // cor ajustada para ação de adicionar
                       onClick={() => openExerciseModal(date)}
                     >
-                      Adicionar Exercício
+                      {exercises.length > 0 ? "Editar treino" : "Criar treino"}
                     </Button>
                   </Stack>
                 </Card>
@@ -699,7 +702,6 @@ function NewPlanPage() {
                               padding="lg"
                               style={{
                                 border: "1px solid #ccc",
-                                marginBottom: "8px",
                                 position: "relative",
                                 minHeight: "90px",
                                 cursor: "grab", // indica que é arrastável
@@ -749,6 +751,9 @@ function NewPlanPage() {
                                 {!!ex.advancedTechnique && (
                                   <> - {ex.advancedTechnique}</>
                                 )}
+                                {ex.restTime
+                                  ? ` | Descanso: ${ex.restTime}s`
+                                  : ""}
                               </Text>
                               {matchedExercise && (
                                 <Text size="xs" c="dimmed">

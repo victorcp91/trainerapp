@@ -75,8 +75,8 @@ export default function DashboardLayout({
             style={{ color: "#FFFFFF" }}
           />
           <NavLink
-            href="/dashboard/messages"
-            label="Planos de treino"
+            href="/dashboard/training-models"
+            label="Modelos de treinos"
             leftSection={<IconMessageCircle size={16} />}
             style={{ color: "#FFFFFF" }}
           />
