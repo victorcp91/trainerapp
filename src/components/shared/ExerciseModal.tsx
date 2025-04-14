@@ -72,7 +72,14 @@ export function ExerciseModal({
 }: IExerciseModal) {
   const [untilFailure, setUntilFailure] = useState(false); // Estado para "Até a falha"
   const [fieldsError, setFieldsError] = useState<string>("");
-  const [tempExercises, setTempExercises] = useState<Exercise[]>([]); // Estado para manter as alterações no modal
+  const [tempExercises, setTempExercises] = useState<Exercise[]>(
+    editingExercises || []
+  ); // Inicializa com um array vazio caso editingExercises seja null ou undefined
+
+  useEffect(() => {
+    setTempExercises(editingExercises || []); // Garante que tempExercises seja sempre um array
+  }, [editingExercises]);
+
   const [filters, setFilters] = useState({
     muscleGroup: "",
     subMuscleGroup: "",
@@ -91,10 +98,6 @@ export function ExerciseModal({
   const [showErrors, setShowErrors] = useState(false); // Novo estado para controle de erros
   const [modelName, setModelName] = useState("");
   const [modelDescription, setModelDescription] = useState("");
-
-  useEffect(() => {
-    setTempExercises(editingExercises);
-  }, [editingExercises]);
 
   const filteredExercises = [
     {

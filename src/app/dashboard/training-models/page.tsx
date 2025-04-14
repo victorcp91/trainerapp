@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { withAuth } from "@/utils/withAuth";
 import {
   Flex,
@@ -31,6 +31,7 @@ import {
   DragStartEvent,
   DragEndEvent,
 } from "@dnd-kit/core";
+import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { ExerciseModal } from "@/components/shared";
 
 const trainingModels = [
@@ -135,7 +136,9 @@ const series = [
 // Definição dos tipos para os componentes DraggableCard e DroppableCard
 interface DraggableCardProps {
   id: string;
-  children: React.ReactNode;
+  children:
+    | React.ReactNode
+    | ((listeners: SyntheticListenerMap) => React.ReactNode);
 }
 
 interface DroppableCardProps {
@@ -147,13 +150,12 @@ const DraggableCard: React.FC<DraggableCardProps> = ({ id, children }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({ id });
 
   const style: React.CSSProperties = {
-    cursor: "grab",
     userSelect: "none",
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      {children}
+    <div ref={setNodeRef} style={style} {...attributes}>
+      {typeof children === "function" ? children(listeners ?? {}) : children}
     </div>
   );
 };
@@ -210,7 +212,9 @@ const TrainingModelsPage = () => {
   const [newSeriesLevel, setNewSeriesLevel] = useState("");
 
   const [editModalOpened, setEditModalOpened] = useState(false);
-  const [editingModel, setEditingModel] = useState(null);
+  const [editingModel, setEditingModel] = useState<
+    (typeof trainingModels)[number] | null
+  >(null);
 
   const handleCreateSeries = () => {
     console.log({
@@ -245,32 +249,39 @@ const TrainingModelsPage = () => {
     if (draggedItem) {
       setActiveDragItem(draggedItem);
     }
+    // Adiciona uma classe ao body para desativar interações indesejadas
+    document.body.classList.add("dragging");
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDragItem(null);
 
+    // Remove a classe ao finalizar o arraste
+    document.body.classList.remove("dragging");
+
     if (over) {
-      const sourceId: string = String(active.id); // Converte UniqueIdentifier para string
-      const targetId: string = String(over.id); // Converte UniqueIdentifier para string
+      const sourceId: string = String(active.id);
+      const targetId: string = String(over.id);
 
       setDroppedItems((prev) => {
         const updated = { ...prev };
         if (!updated[targetId]) {
           updated[targetId] = [];
         }
-        // Adiciona o modelo ao final da lista, mantendo a ordem
         updated[targetId] = [...updated[targetId], sourceId];
         return updated;
       });
 
-      // Expande automaticamente o card ao adicionar um novo modelo
       setExpandedSeries((prev) => ({
         ...prev,
         [targetId]: true,
       }));
     }
+  };
+
+  const handleCardClick = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Impede que o clique no card ative o arraste
   };
 
   const handleRemoveDroppedItem = (serieId: string, position: number) => {
@@ -299,10 +310,31 @@ const TrainingModelsPage = () => {
     return droppedItems[serieId]?.length || 0;
   };
 
-  const handleEditModel = (model) => {
+  const handleEditModel = (
+    model: (typeof trainingModels)[number],
+    event: React.MouseEvent
+  ) => {
+    event.preventDefault(); // Previne o comportamento padrão
+    event.stopPropagation(); // Impede que o evento de clique interfira no arrastar
     setEditingModel(model);
     setEditModalOpened(true);
   };
+
+  const toggleFavorite = (
+    model: (typeof trainingModels)[number],
+    event: React.MouseEvent
+  ) => {
+    event.preventDefault(); // Previne o comportamento padrão
+    event.stopPropagation(); // Impede que o evento de clique interfira no arrastar
+    model.isFavorite = !model.isFavorite;
+    console.log(`${model.name} favorito: ${model.isFavorite}`);
+  };
+
+  useEffect(() => {
+    if (editingModel) {
+      setExerciseModalOpened(true);
+    }
+  }, [editingModel]);
 
   const filteredTrainingModels = trainingModels
     .filter((model) =>
@@ -444,44 +476,52 @@ const TrainingModelsPage = () => {
             >
               {sortedTrainingModels.map((model, index) => (
                 <DraggableCard id={model.name} key={index}>
-                  <Card
-                    shadow="sm"
-                    padding="lg"
-                    radius="md"
-                    withBorder
-                    style={{
-                      border: "1px solid #e0e0e0",
-                      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <Flex align="center" justify="space-between">
-                      <Flex align="center">
-                        <Title order={4}>{model.name}</Title>
-                        <IconEdit
-                          size={20}
-                          color="gray"
-                          style={{ cursor: "pointer", marginLeft: "0.5rem" }}
-                          onClick={() => handleEditModel(model)}
-                        />
+                  {(dragListeners) => (
+                    <Card
+                      shadow="sm"
+                      padding="lg"
+                      radius="md"
+                      withBorder
+                      style={{
+                        border: "1px solid #e0e0e0",
+                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                        borderRadius: "8px",
+                      }}
+                      onClick={handleCardClick}
+                    >
+                      <Flex align="center" justify="space-between">
+                        <Flex align="center">
+                          <Title order={4}>{model.name}</Title>
+                          <IconEdit
+                            size={20}
+                            color="gray"
+                            style={{ cursor: "pointer", marginLeft: "0.5rem" }}
+                            onClick={(event) => handleEditModel(model, event)}
+                          />
+                        </Flex>
+                        <Flex>
+                          <IconStar
+                            size={20}
+                            color="#FFD700"
+                            style={{ cursor: "pointer" }}
+                            onClick={(event) => toggleFavorite(model, event)}
+                          />
+                          <IconGripVertical
+                            size={20}
+                            color="gray"
+                            style={{
+                              cursor: "grab",
+                              marginLeft: "0.5rem",
+                            }}
+                            {...dragListeners}
+                          />
+                        </Flex>
                       </Flex>
-                      <Flex>
-                        <IconStar
-                          size={20}
-                          color="#FFD700"
-                          style={{ cursor: "pointer" }}
-                        />
-                        <IconGripVertical
-                          size={20}
-                          color="gray"
-                          style={{ cursor: "grab", marginLeft: "0.5rem" }} // Ícone de drag and drop
-                        />
-                      </Flex>
-                    </Flex>
-                    <Text size="sm" color="dimmed">
-                      {model.description}
-                    </Text>
-                  </Card>
+                      <Text size="sm" color="dimmed">
+                        {model.description}
+                      </Text>
+                    </Card>
+                  )}
                 </DraggableCard>
               ))}
             </div>
@@ -648,8 +688,8 @@ const TrainingModelsPage = () => {
           </Flex>
         </Flex>
       </Flex>
-      <DragOverlay>
-        {activeDragItem ? (
+      <DragOverlay dropAnimation={null}>
+        {activeDragItem && (
           <Card
             shadow="sm"
             padding="lg"
@@ -660,6 +700,7 @@ const TrainingModelsPage = () => {
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
               borderRadius: "8px",
               backgroundColor: "#ffffff",
+              pointerEvents: "none", // Garante que o overlay não interfira nos cliques
             }}
           >
             <Flex align="center" justify="space-between">
@@ -678,20 +719,20 @@ const TrainingModelsPage = () => {
               {activeDragItem.description}
             </Text>
           </Card>
-        ) : null}
+        )}
       </DragOverlay>
       <ExerciseModal
         handleModalClose={() => setExerciseModalOpened(false)}
         handleModalSave={(tempExercises) => console.log(tempExercises)}
         modalOpened={exerciseModalOpened}
-        editingExercises={[]}
+        editingExercises={[]} // Garante que seja um array vazio caso editingModel seja null ou undefined
         trainingModel
       />
       <ExerciseModal
         handleModalClose={() => setEditModalOpened(false)}
         handleModalSave={(updatedModel) => console.log(updatedModel)}
         modalOpened={editModalOpened}
-        editingExercises={editingModel}
+        editingExercises={editingModel ? [] : []} // Corrigido para sempre passar um array
         trainingModel
       />
       <Modal
