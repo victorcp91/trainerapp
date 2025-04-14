@@ -20,6 +20,8 @@ import {
   IconChevronDown,
   IconTrash,
   IconPlus,
+  IconGripVertical,
+  IconEdit,
 } from "@tabler/icons-react";
 import {
   useDroppable,
@@ -207,6 +209,9 @@ const TrainingModelsPage = () => {
   const [newSeriesDescription, setNewSeriesDescription] = useState("");
   const [newSeriesLevel, setNewSeriesLevel] = useState("");
 
+  const [editModalOpened, setEditModalOpened] = useState(false);
+  const [editingModel, setEditingModel] = useState(null);
+
   const handleCreateSeries = () => {
     console.log({
       name: newSeriesName,
@@ -292,6 +297,11 @@ const TrainingModelsPage = () => {
 
   const getDroppedItemCount = (serieId: string) => {
     return droppedItems[serieId]?.length || 0;
+  };
+
+  const handleEditModel = (model) => {
+    setEditingModel(model);
+    setEditModalOpened(true);
   };
 
   const filteredTrainingModels = trainingModels
@@ -448,12 +458,23 @@ const TrainingModelsPage = () => {
                     <Flex align="center" justify="space-between">
                       <Flex align="center">
                         <Title order={4}>{model.name}</Title>
+                        <IconEdit
+                          size={20}
+                          color="gray"
+                          style={{ cursor: "pointer", marginLeft: "0.5rem" }}
+                          onClick={() => handleEditModel(model)}
+                        />
                       </Flex>
                       <Flex>
                         <IconStar
                           size={20}
                           color="#FFD700"
                           style={{ cursor: "pointer" }}
+                        />
+                        <IconGripVertical
+                          size={20}
+                          color="gray"
+                          style={{ cursor: "grab", marginLeft: "0.5rem" }} // Ícone de drag and drop
                         />
                       </Flex>
                     </Flex>
@@ -664,6 +685,13 @@ const TrainingModelsPage = () => {
         handleModalSave={(tempExercises) => console.log(tempExercises)}
         modalOpened={exerciseModalOpened}
         editingExercises={[]}
+        trainingModel
+      />
+      <ExerciseModal
+        handleModalClose={() => setEditModalOpened(false)}
+        handleModalSave={(updatedModel) => console.log(updatedModel)}
+        modalOpened={editModalOpened}
+        editingExercises={editingModel}
         trainingModel
       />
       <Modal
