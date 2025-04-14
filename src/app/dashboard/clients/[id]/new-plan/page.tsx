@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import {
   Card,
   Text,
@@ -12,6 +12,8 @@ import {
   Select,
   Textarea,
   SimpleGrid,
+  MultiSelect,
+  TextInput,
 } from "@mantine/core";
 import { DateInput, Calendar, DatesProvider } from "@mantine/dates"; // adicionado Calendar
 import { useState } from "react";
@@ -60,6 +62,206 @@ function NewPlanPage() {
   const [selectedTrainingType, setSelectedTrainingType] = useState<
     string | null
   >(null);
+  // Estado para série/modelo de série selecionado
+  const [selectedSerieModel, setSelectedSerieModel] = useState<string | null>(
+    null
+  );
+
+  // Estado para mensagem de erro ao buscar modelo de série
+  const [serieModelError, setSerieModelError] = useState<string | null>(null);
+
+  // Estado para controle de tentativa de busca sem datas
+  const [triedSerieModelSearch, setTriedSerieModelSearch] = useState(false);
+
+  // Estados para modal de seleção de série
+  const [seriesModalOpened, setSeriesModalOpened] = useState(false);
+  const [seriesSearchTerm, setSeriesSearchTerm] = useState("");
+  const [seriesLevelFilter, setSeriesLevelFilter] = useState<string[]>([]);
+
+  // Estado para modal de aplicação do modelo de série
+  const [applySerieModalOpened, setApplySerieModalOpened] = useState(false);
+
+  // Novo estado para quantidade de dias de descanso entre treinos
+  const [daysBetweenTrainings, setDaysBetweenTrainings] = useState(1);
+
+  // Novo estado para armazenar a seleção de treino/descanso para cada dia do plano
+  const [dayAssignments, setDayAssignments] = useState<string[]>([]);
+
+  // Mock de sequência de treinos do modelo selecionado
+  const serieModelTrainings: {
+    [key: string]: { name: string; exercises: Exercise[] }[];
+  } = {
+    "serie-1": [
+      {
+        name: "Treino A",
+        exercises: [
+          {
+            name: "Supino",
+            series: 3,
+            reps: 12,
+            advancedTechnique: "",
+            notes: "",
+            restTime: 60,
+          },
+        ],
+      },
+      {
+        name: "Treino B",
+        exercises: [
+          {
+            name: "Agachamento",
+            series: 4,
+            reps: 10,
+            advancedTechnique: "",
+            notes: "",
+            restTime: 90,
+          },
+        ],
+      },
+      {
+        name: "Treino C",
+        exercises: [
+          {
+            name: "Remada",
+            series: 3,
+            reps: 12,
+            advancedTechnique: "",
+            notes: "",
+            restTime: 60,
+          },
+        ],
+      },
+    ],
+    "serie-2": [
+      {
+        name: "Treino X",
+        exercises: [
+          {
+            name: "Puxada",
+            series: 3,
+            reps: 10,
+            advancedTechnique: "",
+            notes: "",
+            restTime: 60,
+          },
+        ],
+      },
+      {
+        name: "Leg Press",
+        exercises: [
+          {
+            name: "Leg Press",
+            series: 4,
+            reps: 12,
+            advancedTechnique: "",
+            notes: "",
+            restTime: 90,
+          },
+        ],
+      },
+    ],
+    "serie-3": [
+      {
+        name: "Treino Z",
+        exercises: [
+          {
+            name: "Desenvolvimento",
+            series: 3,
+            reps: 8,
+            advancedTechnique: "",
+            notes: "",
+            restTime: 60,
+          },
+        ],
+      },
+    ],
+  };
+
+  // Estado para armazenar as escolhas do usuário ao aplicar o modelo
+  const [serieApplication, setSerieApplication] = useState<
+    { date: Date | null; rest: number }[]
+  >([]);
+
+  // Mock de séries/modelos de série
+  const serieModels = [
+    { value: "serie-1", label: "Série 1", level: "iniciante" },
+    { value: "serie-2", label: "Série 2", level: "intermediario" },
+    { value: "serie-3", label: "Série 3", level: "avancado" },
+  ];
+
+  const levels = [
+    { value: "iniciante", label: "Iniciante" },
+    { value: "intermediario", label: "Intermediário" },
+    { value: "avancado", label: "Avançado" },
+  ];
+
+  // Filtro das séries
+  const filteredSeriesModels = serieModels.filter(
+    (serie) =>
+      serie.label.toLowerCase().includes(seriesSearchTerm.toLowerCase()) &&
+      (seriesLevelFilter.length === 0 ||
+        seriesLevelFilter.includes(serie.level))
+  );
+
+  // Função para preencher automaticamente os 7 primeiros dias com os treinos do modelo
+  const autoAssignTrainingsToFirstWeek = () => {
+    if (!selectedSerieModel || trainingDays.length === 0) return;
+    const trainings = serieModelTrainings[selectedSerieModel] || [];
+    let treinoIdx = 0;
+    // Só os primeiros 7 dias
+    const firstWeekAssignments = trainingDays.slice(0, 7).map((d) => {
+      const dayName = format(d.date, "EEEE", { locale: ptBR }).toLowerCase();
+      const isAvailable = availableDays.includes(dayName);
+      if (isAvailable && treinoIdx < trainings.length) {
+        const treinoName = trainings[treinoIdx].name;
+        treinoIdx++;
+        return treinoName;
+      }
+      return "Descanso";
+    });
+    // Replicar para as semanas seguintes
+    const fullAssignments = trainingDays.map(
+      (_, idx) => firstWeekAssignments[idx % 7]
+    );
+    setDayAssignments(fullAssignments);
+  };
+
+  // Preenche automaticamente os seletores ao abrir o modal e quando mudar trainingDays/modelo/modal
+  useEffect(() => {
+    if (
+      applySerieModalOpened &&
+      selectedSerieModel &&
+      trainingDays.length > 0
+    ) {
+      autoAssignTrainingsToFirstWeek();
+    }
+    // eslint-disable-next-line
+  }, [applySerieModalOpened, selectedSerieModel, trainingDays.length]);
+
+  // Função para adicionar série ao plano (mock)
+  const handleAddSerieToPlan = (serieValue: string) => {
+    setSelectedSerieModel(serieValue);
+    setSeriesModalOpened(false);
+    setSerieModelError(null);
+    setApplySerieModalOpened(true);
+  };
+
+  // Função para aplicar o modelo de série nos dias do plano
+  const handleApplySerieToPlan = () => {
+    if (!selectedSerieModel) return;
+    const trainings = serieModelTrainings[selectedSerieModel] || [];
+    setTrainingDays((prev) =>
+      prev.map((day, idx) => {
+        const assign = dayAssignments[idx];
+        if (!assign || assign === "Descanso") return { ...day, exercises: [] };
+        const treino = trainings.find((t) => t.name === assign);
+        return treino
+          ? { ...day, exercises: treino.exercises }
+          : { ...day, exercises: [] };
+      })
+    );
+    setApplySerieModalOpened(false);
+  };
 
   const handleDateChange = (start: Date | null, end: Date | null) => {
     if (start && end) {
@@ -249,47 +451,201 @@ function NewPlanPage() {
             />
             <Group grow>
               <DateInput
-                locale="pt-BR" // alterado para string "pt-BR" para evitar erro
+                locale="pt-BR"
                 label="Data de Início"
                 value={startDate}
                 onChange={(date) => {
                   setStartDate(date);
                   handleDateChange(date, endDate);
+                  setTriedSerieModelSearch(false);
                 }}
+                error={
+                  triedSerieModelSearch && !startDate
+                    ? "Campo obrigatório"
+                    : undefined
+                }
+                styles={
+                  triedSerieModelSearch && !startDate
+                    ? { input: { borderColor: "red" } }
+                    : {}
+                }
               />
               <DateInput
-                locale="pt-BR" // alterado para string "pt-BR" para evitar erro
+                locale="pt-BR"
                 label="Data de Expiração"
                 value={endDate}
                 onChange={(date) => {
                   setEndDate(date);
                   handleDateChange(startDate, date);
+                  setTriedSerieModelSearch(false);
                 }}
+                error={
+                  triedSerieModelSearch && !endDate
+                    ? "Campo obrigatório"
+                    : undefined
+                }
+                styles={
+                  triedSerieModelSearch && !endDate
+                    ? { input: { borderColor: "red" } }
+                    : {}
+                }
               />
             </Group>
             <Textarea
               label="Observações"
               placeholder="Adicione observações sobre o treino"
             />
-            <Group mt="md">
+            <Group mt="md" justify="space-between">
               <Button
                 variant="outline"
-                c="blue"
-                leftSection={<IconStar />}
-                onClick={() => console.log("Rascunho salvo")}
+                c="gray"
+                onClick={() => {
+                  if (!startDate || !endDate) {
+                    setTriedSerieModelSearch(true);
+                  } else {
+                    setTriedSerieModelSearch(false);
+                    setSeriesModalOpened(true);
+                  }
+                }}
               >
-                Salvar Rascunho
+                Buscar e adicionar série do modelo
               </Button>
-              <Button
-                variant="filled"
-                c="green"
-                leftSection={<IconHeart />}
-                onClick={() => setPublishModalOpened(true)} // Abre o modal de confirmação
-                disabled={!startDate || !endDate || !selectedTrainingType} // Valida os campos obrigatórios e o tipo de treino
-              >
-                Publicar
-              </Button>
+              <Group gap="lg">
+                <Button
+                  variant="outline"
+                  c="blue"
+                  leftSection={<IconStar />}
+                  onClick={() => console.log("Rascunho salvo")}
+                >
+                  Salvar Rascunho
+                </Button>
+                <Button
+                  variant="filled"
+                  c="green"
+                  leftSection={<IconHeart />}
+                  onClick={() => setPublishModalOpened(true)}
+                  disabled={!startDate || !endDate || !selectedTrainingType}
+                >
+                  Publicar
+                </Button>
+              </Group>
             </Group>
+            {/* Exibe o modelo de série selecionado logo abaixo do grupo de botões */}
+            {selectedSerieModel && (
+              <div style={{ minWidth: 200 }}>
+                <Text size="sm">
+                  {
+                    serieModels.find((s) => s.value === selectedSerieModel)
+                      ?.label
+                  }
+                </Text>
+                <Text size="xs" c="dimmed">
+                  Nível:{" "}
+                  {
+                    levels.find(
+                      (l) =>
+                        l.value ===
+                        serieModels.find((s) => s.value === selectedSerieModel)
+                          ?.level
+                    )?.label
+                  }
+                </Text>
+              </div>
+            )}
+            {/* Exibe erro se necessário */}
+            {serieModelError && (
+              <Text size="xs" color="red">
+                {serieModelError}
+              </Text>
+            )}
+            {/* Modal de busca e filtro de séries */}
+            <Modal
+              opened={seriesModalOpened}
+              onClose={() => setSeriesModalOpened(false)}
+              title="Buscar série do modelo"
+            >
+              <TextInput
+                placeholder="Buscar por nome da série"
+                value={seriesSearchTerm}
+                onChange={(e) => setSeriesSearchTerm(e.target.value)}
+                mb="md"
+              />
+              <MultiSelect
+                data={levels}
+                value={seriesLevelFilter}
+                onChange={setSeriesLevelFilter}
+                placeholder="Filtrar por nível"
+                clearable
+                mb="md"
+              />
+              <Stack>
+                {filteredSeriesModels.length === 0 && (
+                  <Text size="sm" c="dimmed">
+                    Nenhuma série encontrada.
+                  </Text>
+                )}
+                {filteredSeriesModels.map((serie) => (
+                  <Button
+                    key={serie.value}
+                    variant="light"
+                    fullWidth
+                    onClick={() => handleAddSerieToPlan(serie.value)}
+                  >
+                    {serie.label} (
+                    {levels.find((l) => l.value === serie.level)?.label})
+                  </Button>
+                ))}
+              </Stack>
+            </Modal>
+            {selectedSerieModel && (
+              <Modal
+                opened={applySerieModalOpened}
+                onClose={() => setApplySerieModalOpened(false)}
+                title="Aplicar modelo de série"
+                size="lg"
+              >
+                <Stack>
+                  {trainingDays.slice(0, 7).map((d, idx) => {
+                    const dayName = format(d.date, "EEEE", { locale: ptBR });
+                    const treinoOptions = [
+                      ...(serieModelTrainings[selectedSerieModel]?.map(
+                        (t) => t.name
+                      ) || []),
+                      "Descanso",
+                    ];
+                    return (
+                      <Group key={d.date.toISOString()}>
+                        <Text style={{ minWidth: 120 }}>
+                          {dayName} ({format(d.date, "dd/MM")})
+                        </Text>
+                        <Select
+                          data={treinoOptions.map((t) => ({
+                            value: t,
+                            label: t,
+                          }))}
+                          value={dayAssignments[idx] || ""}
+                          onChange={(val) => {
+                            setDayAssignments((prev) => {
+                              const arr = [...prev];
+                              arr[idx] = val || "Descanso";
+                              return arr;
+                            });
+                          }}
+                          style={{ minWidth: 180 }}
+                        />
+                      </Group>
+                    );
+                  })}
+                  <Button
+                    mt="md"
+                    onClick={handleApplySerieToPlan}
+                    color="green"
+                  >
+                    Aplicar ao plano
+                  </Button>
+                </Stack>
+              </Modal>
+            )}
           </Stack>
         </Card>
 

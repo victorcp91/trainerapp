@@ -193,6 +193,9 @@ const TrainingModelsPage = () => {
   const [seriesSortOrder, setSeriesSortOrder] = useState("recent");
   const [showSeriesFavoritesOnly, setShowSeriesFavoritesOnly] = useState(false);
 
+  const [seriesLevelFilter, setSeriesLevelFilter] = useState<string[]>([]);
+  const [seriesNameFilter, setSeriesNameFilter] = useState("");
+
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>(
     {}
   );
@@ -354,7 +357,17 @@ const TrainingModelsPage = () => {
     .filter((serie) =>
       serie.name.toLowerCase().includes(seriesSearchTerm.toLowerCase())
     )
-    .filter((serie) => !showSeriesFavoritesOnly || serie.isFavorite);
+    .filter((serie) => !showSeriesFavoritesOnly || serie.isFavorite)
+    .filter(
+      (serie) =>
+        seriesNameFilter.trim() === "" ||
+        serie.name.toLowerCase().includes(seriesNameFilter.toLowerCase())
+    )
+    .filter(
+      (serie) =>
+        seriesLevelFilter.length === 0 ||
+        seriesLevelFilter.includes(serie.level)
+    );
 
   const sortedSeries = [...filteredSeries].sort((a, b) => {
     if (seriesSortOrder === "recent") {
@@ -578,6 +591,14 @@ const TrainingModelsPage = () => {
                   borderRadius: "4px",
                   border: "1px solid #ccc",
                 }}
+              />
+              <MultiSelect
+                data={levels}
+                value={seriesLevelFilter}
+                onChange={setSeriesLevelFilter}
+                placeholder="Filtrar por nível"
+                clearable
+                style={{ minWidth: 180 }}
               />
               <label style={{ display: "flex", alignItems: "center" }}>
                 <input
