@@ -2,7 +2,15 @@
 
 import React, { useState } from "react";
 import { withAuth } from "@/utils/withAuth";
-import { Button, Flex, Title, Card, Text, Tabs } from "@mantine/core";
+import {
+  Button,
+  Flex,
+  Title,
+  Card,
+  Text,
+  Tabs,
+  MultiSelect,
+} from "@mantine/core";
 
 const trainingModels = [
   {
@@ -19,8 +27,27 @@ const trainingModels = [
   },
 ];
 
+const levels = [
+  { value: "iniciante", label: "Iniciante" },
+  { value: "intermediario", label: "Intermediário" },
+  { value: "avancado", label: "Avançado" },
+];
+
+const muscleGroups = [
+  { value: "peito", label: "Peito" },
+  { value: "costas", label: "Costas" },
+  { value: "pernas", label: "Pernas" },
+  { value: "ombros", label: "Ombros" },
+  { value: "biceps", label: "Bíceps" },
+  { value: "triceps", label: "Tríceps" },
+];
+
 const TrainingModelsPage = () => {
   const [currentTab, setCurrentTab] = useState<string>("series");
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>(
+    []
+  );
 
   const handleTabChange = (value: string | null) => {
     if (value) {
@@ -52,6 +79,25 @@ const TrainingModelsPage = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="trainings" pt="md">
+          <Flex justify="space-between" align="center" mb="lg">
+            <Flex gap="md">
+              <MultiSelect
+                data={levels}
+                placeholder="Filtrar por Nível"
+                value={selectedLevels}
+                onChange={setSelectedLevels}
+                clearable
+              />
+              <MultiSelect
+                data={muscleGroups}
+                placeholder="Filtrar por Grupo Muscular"
+                value={selectedMuscleGroups}
+                onChange={setSelectedMuscleGroups}
+                clearable
+              />
+            </Flex>
+            <Button variant="filled">Criar Treino</Button>
+          </Flex>
           <Text>Conteúdo relacionado a treinos será exibido aqui.</Text>
         </Tabs.Panel>
       </Tabs>
