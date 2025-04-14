@@ -8,6 +8,7 @@ import {
   IconStar,
   IconChevronUp,
   IconChevronDown,
+  IconTrash,
 } from "@tabler/icons-react";
 import {
   useDroppable,
@@ -211,7 +212,7 @@ const TrainingModelsPage = () => {
         if (!updated[targetId]) {
           updated[targetId] = [];
         }
-        // Adiciona o modelo sem restrições de duplicidade
+        // Adiciona o modelo ao final da lista, mantendo a ordem
         updated[targetId] = [...updated[targetId], sourceId];
         return updated;
       });
@@ -222,6 +223,18 @@ const TrainingModelsPage = () => {
         [targetId]: true,
       }));
     }
+  };
+
+  const handleRemoveDroppedItem = (serieId: string, position: number) => {
+    setDroppedItems((prev) => {
+      const updated = { ...prev };
+      if (updated[serieId]) {
+        updated[serieId] = updated[serieId].filter(
+          (_, index) => index !== position
+        );
+      }
+      return updated;
+    });
   };
 
   const hasDroppedItems = (serieId: string) => {
@@ -469,7 +482,7 @@ const TrainingModelsPage = () => {
                       </Flex>
                       <Flex align="center" gap="sm">
                         <Text size="sm" color="dimmed">
-                          {getDroppedItemCount(`serie-${index}`)} modelos
+                          {getDroppedItemCount(`serie-${index}`)} treinos
                         </Text>
                         <IconStar
                           size={20}
@@ -504,9 +517,28 @@ const TrainingModelsPage = () => {
                     {expandedSeries[`serie-${index}`] && (
                       <div style={{ marginTop: "1rem" }}>
                         {droppedItems[`serie-${index}`]?.map((item, idx) => (
-                          <Text key={idx} size="sm" color="dimmed">
-                            {item}
-                          </Text>
+                          <Flex
+                            key={idx}
+                            id={`serie-${index}-${item}`}
+                            align="center"
+                            justify="space-between"
+                          >
+                            <Text size="sm" color="dimmed">
+                              {idx + 1}. {item}
+                            </Text>
+                            <button
+                              onClick={() =>
+                                handleRemoveDroppedItem(`serie-${index}`, idx)
+                              }
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <IconTrash size={20} color="red" />
+                            </button>
+                          </Flex>
                         ))}
                       </div>
                     )}
