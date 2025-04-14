@@ -16,6 +16,7 @@ import {
   Textarea,
   Select,
   Loader,
+  Text,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { SelectClearable } from "@/components/shared";
@@ -34,10 +35,10 @@ const clients = [
   {
     name: "Alice Johnson",
     age: 28,
-    gender: "Female",
+    gender: "Feminino",
     email: "alice@example.com",
     phone: "555-123-4567",
-    tags: ["Weight Loss", "Muscle Tone"],
+    tags: ["Emagrecimento", "Definição Muscular"],
     status: "on_track",
     type: "online",
     profilePicture: "",
@@ -45,22 +46,22 @@ const clients = [
   {
     name: "Bob Smith",
     age: 35,
-    gender: "Male",
+    gender: "Masculino",
     email: "bob@example.com",
     phone: "555-987-6543",
-    tags: ["Muscle Building", "Strength"],
+    tags: ["Hipertrofia", "Força"],
     status: "near_due",
     type: "in_person",
     profilePicture: "",
-    startDate: "2023-01-15", // Example start date
+    startDate: "2023-01-15", // Exemplo de data de início
   },
   {
     name: "Carol Wilson",
     age: 42,
-    gender: "Female",
+    gender: "Feminino",
     email: "carol@example.com",
     phone: "555-456-7890",
-    tags: ["Flexibility", "Core Strength"],
+    tags: ["Flexibilidade", "Core"],
     status: "overdue",
     type: "hybrid",
     profilePicture: "",
@@ -76,6 +77,7 @@ const ClientsPage = () => {
   const [showFollowUpStatus, setShowFollowUpStatus] = useState<string | null>(
     ""
   ); // Filtro de pagamento
+  const [showGender, setShowGender] = useState<string | null>(""); // Filtro de gênero
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortOption, setSortOption] = useState<string | null>("");
@@ -182,7 +184,9 @@ const ClientsPage = () => {
     <>
       <Flex justify="space-between" align="center" mb="lg">
         <Title order={2}>Clientes</Title>
-        <Button onClick={() => setIsModalOpen(true)}>+ Add Client</Button>
+        <Button onClick={() => setIsModalOpen(true)}>
+          + Adicionar Cliente
+        </Button>
       </Flex>
       <Flex mb="lg" gap="md">
         <div style={{ flex: 1 }}>
@@ -217,6 +221,20 @@ const ClientsPage = () => {
         </div>
         <div style={{ flex: 1 }}>
           <label style={{ display: "block", marginBottom: "4px" }}>
+            Gênero
+          </label>
+          <SelectClearable
+            options={[
+              { value: "Feminino", label: "Feminino" },
+              { value: "Masculino", label: "Masculino" },
+              { value: "Outro", label: "Outro" },
+            ]}
+            value={showGender}
+            setValue={setShowGender}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={{ display: "block", marginBottom: "4px" }}>
             Pagamento
           </label>
           <SelectClearable
@@ -232,7 +250,7 @@ const ClientsPage = () => {
             Buscar Clientes
           </label>
           <TextInput
-            placeholder="Search clients by name or email..."
+            placeholder="Buscar clientes por nome ou e-mail..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.currentTarget.value)}
           />
@@ -249,7 +267,7 @@ const ClientsPage = () => {
           />
         </div>
       </Flex>
-      <Grid gutter="md">
+      <Grid gutter="lg">
         {loadedClients
           .filter((client) => {
             if (showClientType && client.type !== showClientType) return false;
@@ -259,6 +277,7 @@ const ClientsPage = () => {
               return false;
             if (showFollowUpStatus && client.status !== showFollowUpStatus)
               return false;
+            if (showGender && client.gender !== showGender) return false;
             return true;
           })
           .sort((a, b) => {
@@ -288,62 +307,95 @@ const ClientsPage = () => {
             }
           })
           .map((client, index) => (
-            <Grid.Col key={index} span={{ xs: 6, lg: 3 }}>
-              <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Link href="/dashboard/clients/clientId">
-                  <Flex align="center" gap="sm">
-                    <Avatar
-                      src={client.profilePicture || ""}
-                      radius="xl"
-                      size="md"
-                    />
-                    <Title order={4}>{client.name}</Title>
-                  </Flex>
-                  <p>
-                    {client.age} years • {client.gender}
-                  </p>
-                </Link>
-                <Flex gap="xs" wrap="wrap" mb="sm">
+            <Grid.Col
+              key={index}
+              span={{ xs: 6, lg: 3 }}
+              style={{ display: "flex" }}
+            >
+              <Card
+                shadow="sm"
+                padding="lg"
+                radius="md"
+                withBorder
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  minHeight: 340,
+                  background: "#fff",
+                  boxShadow: "0 2px 8px 0 rgba(0,0,0,0.03)",
+                }}
+              >
+                <Flex align="center" gap="sm" mb="xs">
+                  <Avatar
+                    src={client.profilePicture || ""}
+                    radius="xl"
+                    size="md"
+                  />
+                  <div style={{ flex: 1 }}>
+                    <Title order={4} size="h6" style={{ marginBottom: 0 }}>
+                      {client.name}
+                    </Title>
+                    <Text size="sm" c="dimmed">
+                      {client.age} anos • {client.gender}
+                    </Text>
+                  </div>
+                </Flex>
+                <Flex
+                  gap="xs"
+                  wrap="wrap"
+                  mb="xs"
+                  style={{ minHeight: 40, alignItems: "center" }}
+                >
                   {client.tags.map((tag, idx) => (
-                    <Badge key={idx} c="blue" variant="light">
+                    <Badge key={idx} c="blue" variant="light" size="sm">
                       {tag}
                     </Badge>
                   ))}
                 </Flex>
-                <Badge c="gray" variant="outline" mb="sm">
-                  {client.type}
+                <Badge c="gray" variant="outline" mb="xs" size="sm">
+                  {client.type === "online"
+                    ? "Online"
+                    : client.type === "in_person"
+                    ? "Presencial"
+                    : "Híbrido"}
                 </Badge>
-                <Flex align="center" gap="xs" mb="sm">
+                <Flex align="center" gap="xs" mb="xs">
                   {client.status === "on_track" && (
                     <>
                       <IconCheck size={16} />
-                      <p style={{ color: "green" }}>
+                      <Text size="sm" c="green">
                         Série: <strong>Em Dia</strong>
-                      </p>
+                      </Text>
                     </>
                   )}
                   {client.status === "near_due" && (
                     <>
                       <IconAlertTriangle size={16} />
-                      <p style={{ color: "orange" }}>
-                        Série: <strong>Próximo ao Vencimento</strong>
-                      </p>
+                      <Text size="sm" c="orange">
+                        Série: <strong>Próx. do Vencimento</strong>
+                      </Text>
                     </>
                   )}
                   {client.status === "overdue" && (
                     <>
                       <IconAlertCircle size={16} />
-                      <p style={{ color: "red" }}>
+                      <Text size="sm" c="red">
                         Série: <strong>Vencida</strong>
-                      </p>
+                      </Text>
                     </>
                   )}
                 </Flex>
-                <p
+                <Text
+                  size="sm"
                   style={{
                     cursor: "pointer",
                     color: "orange",
                     textDecoration: "underline",
+                    marginBottom: 4,
+                    fontWeight: 500,
                   }}
                   onClick={() => {
                     navigator.clipboard.writeText(client.email);
@@ -357,8 +409,7 @@ const ClientsPage = () => {
                   }}
                 >
                   {client.email}
-                </p>
-
+                </Text>
                 <a
                   href={`https://wa.me/${client.phone.replace(/[^0-9]/g, "")}`}
                   target="_blank"
@@ -368,24 +419,26 @@ const ClientsPage = () => {
                     display: "flex",
                     alignItems: "center",
                     gap: "5px",
-                    marginTop: "5px",
-                    fontWeight: "bold",
+                    fontWeight: 600,
+                    fontSize: 15,
+                    marginBottom: 8,
                   }}
                 >
-                  <IconBrandWhatsapp size={20} /> {client.phone}
+                  <IconBrandWhatsapp size={18} /> {client.phone}
                 </a>
-                <Flex mt="md" gap="sm">
-                  <Button variant="outline" size="xs">
-                    Schedule
+                <Flex mt="auto" gap="sm">
+                  <Button variant="outline" size="xs" fullWidth>
+                    Agendar
                   </Button>
                   <Button
                     variant="outline"
                     size="xs"
+                    fullWidth
                     onClick={() =>
                       r.push(`/dashboard/clients/clientId?tab=training`)
                     }
                   >
-                    Workout Plan
+                    Treino
                   </Button>
                 </Flex>
               </Card>
