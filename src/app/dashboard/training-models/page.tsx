@@ -3,7 +3,12 @@
 import React, { useState } from "react";
 import { withAuth } from "@/utils/withAuth";
 import { Flex, Title, Card, Text, MultiSelect } from "@mantine/core";
-import { IconFolder, IconStar } from "@tabler/icons-react";
+import {
+  IconFolder,
+  IconStar,
+  IconChevronUp,
+  IconChevronDown,
+} from "@tabler/icons-react";
 import {
   useDroppable,
   useDraggable,
@@ -183,6 +188,17 @@ const TrainingModelsPage = () => {
     {}
   );
   const [activeDragItem, setActiveDragItem] = useState<any>(null);
+
+  const [expandedSeries, setExpandedSeries] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  const toggleSeriesExpansion = (id: string) => {
+    setExpandedSeries((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   const handleDragStart = (event: any) => {
     const { active } = event;
@@ -368,13 +384,12 @@ const TrainingModelsPage = () => {
               flex: 1,
               marginTop: "0rem",
               backgroundColor: "#ffffff",
-              padding: "1rem",
               borderRadius: "8px",
               height: "100%",
               overflow: "hidden", // Impede o scroll na área de séries inteira
             }}
           >
-            <Flex mb="lg" gap="md" align="flex-start">
+            <Flex mb="lg" gap="md" align="flex-start" p="md" pb="0">
               <Flex direction="column" style={{ flex: 1 }}>
                 <Text>Nível de Série</Text>
                 <MultiSelect
@@ -397,13 +412,13 @@ const TrainingModelsPage = () => {
                     width: "100%",
                   }}
                 >
-                  <option value="recent">Mais Recentes</option>
-                  <option value="oldest">Mais Antigos</option>
+                  <option value="recent">Recentes</option>
+                  <option value="oldest">Antigos</option>
                 </select>
               </Flex>
             </Flex>
 
-            <Flex mb="lg" gap="md" align="center">
+            <Flex mb="lg" gap="md" align="center" px="md">
               <input
                 type="text"
                 placeholder="Buscar por nome da série"
@@ -447,24 +462,47 @@ const TrainingModelsPage = () => {
                         />
                         <Title order={4}>{serie.name}</Title>
                       </Flex>
-                      <Flex>
+                      <Flex align="center" gap="sm">
+                        <Text size="sm" color="dimmed">
+                          {serie.items.length} treinos
+                        </Text>
                         <IconStar
                           size={20}
                           color="#FFD700"
                           style={{ cursor: "pointer" }}
                         />
+                        <button
+                          onClick={() =>
+                            toggleSeriesExpansion(`serie-${index}`)
+                          }
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          {expandedSeries[`serie-${index}`] ? (
+                            <IconChevronUp size={20} color="gray" />
+                          ) : (
+                            <IconChevronDown size={20} color="gray" />
+                          )}
+                        </button>
                       </Flex>
                     </Flex>
                     <Text size="sm" color="dimmed">
                       {serie.description}
                     </Text>
-                    <div>
-                      {droppedItems[`serie-${index}`]?.map((item, idx) => (
-                        <Text key={idx} size="sm" color="dimmed">
-                          {item}
-                        </Text>
-                      ))}
-                    </div>
+                    {expandedSeries[`serie-${index}`] && (
+                      <div style={{ marginTop: "1rem" }}>
+                        {droppedItems[`serie-${index}`]?.map((item, idx) => (
+                          <Text key={idx} size="sm" color="dimmed">
+                            {item}
+                          </Text>
+                        ))}
+                      </div>
+                    )}
                   </Card>
                 </DroppableCard>
               ))}
