@@ -199,6 +199,96 @@ function NewPlanPage() {
     { value: "avançado", label: "Avançado" },
   ];
 
+  // Mock de modelos de treino
+  const trainingModels = [
+    {
+      name: "Modelo de Força",
+      description: "Treino focado em ganho de força muscular.",
+      level: "iniciante",
+      exercises: [
+        {
+          name: "Supino Reto",
+          series: 4,
+          reps: 10,
+          advancedTechnique: "",
+          notes: "",
+          restTime: 60,
+        },
+        {
+          name: "Agachamento",
+          series: 4,
+          reps: 12,
+          advancedTechnique: "",
+          notes: "",
+          restTime: 90,
+        },
+      ],
+    },
+    {
+      name: "Modelo de Resistência",
+      description: "Treino para melhorar a resistência física.",
+      level: "intermediario",
+      exercises: [
+        {
+          name: "Corrida",
+          series: 1,
+          reps: 20,
+          advancedTechnique: "",
+          notes: "",
+          restTime: 0,
+        },
+        {
+          name: "Flexão",
+          series: 3,
+          reps: 15,
+          advancedTechnique: "",
+          notes: "",
+          restTime: 45,
+        },
+      ],
+    },
+    {
+      name: "Modelo de Hipertrofia",
+      description: "Treino voltado para aumento de massa muscular.",
+      level: "avancado",
+      exercises: [
+        {
+          name: "Levantamento Terra",
+          series: 5,
+          reps: 8,
+          advancedTechnique: "",
+          notes: "",
+          restTime: 120,
+        },
+        {
+          name: "Barra Fixa",
+          series: 4,
+          reps: 10,
+          advancedTechnique: "",
+          notes: "",
+          restTime: 90,
+        },
+      ],
+    },
+  ];
+
+  const [addModelModalOpened, setAddModelModalOpened] = useState(false);
+  const [modelSearchTerm, setModelSearchTerm] = useState("");
+  const [modelLevelFilter, setModelLevelFilter] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState<
+    (typeof trainingModels)[0] | null
+  >(null);
+  const [modelTargetDay, setModelTargetDay] = useState<Date | null>(null);
+
+  const filteredModelsForModal = trainingModels.filter((model) => {
+    const nameMatch = model.name
+      .toLowerCase()
+      .includes(modelSearchTerm.toLowerCase());
+    const levelMatch =
+      modelLevelFilter.length === 0 || modelLevelFilter.includes(model.level);
+    return nameMatch && levelMatch;
+  });
+
   // Filtro das séries
   const filteredSeriesModels = serieModels.filter(
     (serie) =>
@@ -793,6 +883,16 @@ function NewPlanPage() {
                       </Group>
                     </Group>
                     <Divider mt="sm" />
+                    <Button
+                      variant="outline"
+                      color="blue"
+                      onClick={() => {
+                        setModelTargetDay(date);
+                        setAddModelModalOpened(true);
+                      }}
+                    >
+                      Adicionar Modelo de Treino
+                    </Button>
                     <Stack style={{ maxHeight: "200px", overflowY: "auto" }}>
                       {exercises.map((exercise, index) => {
                         return (
@@ -817,12 +917,6 @@ function NewPlanPage() {
                                 ? ` | Descanso: ${exercise.restTime}s`
                                 : ""}
                             </Text>
-                            {/* {matchedExercise && (
-                              <Text size="xs" c="dimmed">
-                                {matchedExercise.group} -{" "}
-                                {matchedExercise.subGroup}
-                              </Text>
-                            )} */}
                           </Card>
                         );
                       })}
@@ -1060,6 +1154,92 @@ function NewPlanPage() {
             }
           >
             Confirmar Movimentação
+          </Button>
+        </Modal>
+        {/* Modal para adicionar modelo de treino */}
+        <Modal
+          opened={addModelModalOpened}
+          onClose={() => {
+            setAddModelModalOpened(false);
+            setModelSearchTerm("");
+            setModelLevelFilter([]);
+            setSelectedModel(null);
+            setModelTargetDay(null);
+          }}
+          title="Adicionar Modelo de Treino ao Dia"
+        >
+          <TextInput
+            placeholder="Buscar por nome do modelo"
+            value={modelSearchTerm}
+            onChange={(e) => setModelSearchTerm(e.target.value)}
+            mb="md"
+          />
+          <MultiSelect
+            data={levels}
+            value={modelLevelFilter}
+            onChange={setModelLevelFilter}
+            placeholder="Filtrar por nível"
+            clearable
+            mb="md"
+          />
+          <div style={{ maxHeight: 250, overflowY: "auto", marginBottom: 16 }}>
+            {filteredModelsForModal.length === 0 && (
+              <Text size="sm" c="dimmed">
+                Nenhum modelo encontrado.
+              </Text>
+            )}
+            {filteredModelsForModal.map((model, idx) => (
+              <Card
+                key={model.name + idx}
+                shadow="sm"
+                padding="md"
+                mb="sm"
+                style={{
+                  cursor: "pointer",
+                  border:
+                    selectedModel?.name === model.name
+                      ? "2px solid #1971c2"
+                      : "1px solid #eee",
+                }}
+                onClick={() => setSelectedModel(model)}
+              >
+                <Group align="center" justify="space-between">
+                  <div>
+                    <Text weight={500}>{model.name}</Text>
+                    <Text size="xs" c="dimmed">
+                      {model.description}
+                    </Text>
+                  </div>
+                  {selectedModel?.name === model.name && (
+                    <IconStar size={18} color="#1971c2" />
+                  )}
+                </Group>
+              </Card>
+            ))}
+          </div>
+          <Button
+            variant="filled"
+            color="green"
+            fullWidth
+            mt="md"
+            disabled={!selectedModel}
+            onClick={() => {
+              if (!modelTargetDay || !selectedModel) return;
+              setTrainingDays((prev) =>
+                prev.map((day) =>
+                  day.date.getTime() === modelTargetDay.getTime()
+                    ? { ...day, exercises: selectedModel.exercises }
+                    : day
+                )
+              );
+              setAddModelModalOpened(false);
+              setSelectedModel(null);
+              setModelSearchTerm("");
+              setModelLevelFilter([]);
+              setModelTargetDay(null);
+            }}
+          >
+            Adicionar ao Dia Atual
           </Button>
         </Modal>
       </Stack>
