@@ -649,7 +649,7 @@ const CalendarPage = () => {
         </Group>
 
         <TextInput
-          label="Detalhes"
+          label="Observações"
           placeholder="Faça observações, se necessário"
           value={appointmentDetails}
           onChange={(event) => setAppointmentDetails(event.currentTarget.value)}
