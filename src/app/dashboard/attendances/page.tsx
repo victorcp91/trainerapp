@@ -13,9 +13,11 @@ import {
   Avatar,
   Tooltip,
   Indicator,
+  MultiSelect,
+  Flex,
 } from "@mantine/core";
 import { DonutChart } from "@mantine/charts";
-import { DatePicker, TimeInput } from "@mantine/dates";
+import { DatePicker } from "@mantine/dates";
 import {
   IconCheck,
   IconX,
@@ -588,76 +590,209 @@ const CalendarPage = () => {
       <Modal
         opened={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Agendar Atendimento"
-        size="lg"
+        size="xl"
+        title={null}
       >
-        <Select
-          label="Cliente"
-          placeholder="Selecione o cliente"
-          searchable // Adicionado para permitir busca
-          data={[
-            { value: "cliente1", label: "Cliente 1" },
-            { value: "cliente2", label: "Cliente 2" },
-            { value: "cliente3", label: "Cliente 3" },
-          ]}
-          value={selectedClient}
-          onChange={setSelectedClient}
-        />
-        <Group mt="md" grow>
-          <div>
-            <Text size="sm" mb="xs">
-              Data
-            </Text>
+        <Flex align="center" gap="md" mb="md">
+          <Title order={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
+            Agendar atendimento
+          </Title>
+          <Select
+            placeholder="Selecione o cliente"
+            data={[
+              { value: "1", label: "João Silva" },
+              { value: "2", label: "Maria Oliveira" },
+              { value: "3", label: "Alice Johnson" },
+            ]}
+            value={selectedClient}
+            onChange={setSelectedClient}
+            style={{ minWidth: 220 }}
+            searchable
+            required
+            nothingFound="Nenhum cliente encontrado"
+            size="sm"
+          />
+        </Flex>
+        <Flex gap="lg" direction="row" align="flex-start">
+          <Group flex={1} justify="center">
+            <Text>Selecione o cliente e o dia do atendimento</Text>
             <DatePicker
-              value={selectedDate || new Date()} // Define a data atual como padrão
+              value={selectedDate}
               onChange={setSelectedDate}
+              minDate={new Date()}
+              renderDay={renderDay}
             />
-          </div>
-          <div style={{ width: "100%" }}>
-            <Text size="sm" mb="xs">
-              Local
-            </Text>
-            <input
-              ref={inputRef}
-              placeholder="Digite o local (ex: Smart Fit)"
+          </Group>
+          <Group flex={1}>
+            <div
               style={{
+                background: "#f8f9fa",
+                borderRadius: 10,
+                padding: 20,
+                minHeight: 120,
+                boxShadow: "0 1px 4px 0 rgba(0,0,0,0.03)",
+                border: "1px solid #f1f3f5",
                 width: "100%",
-                padding: "8px",
-                border: "1px solid #ced4da",
-                borderRadius: "4px",
+                display: "flex",
+                flexDirection: "column",
+                height: "340px",
               }}
-            />
-            <Group mt="md" grow>
-              <TimeInput
-                label="Horário de Início"
-                value={appointmentTime || ""}
-                onChange={(event) =>
-                  setAppointmentTime(event.currentTarget.value)
-                }
-                style={{ width: "100%" }}
-              />
-              <TimeInput
-                label="Horário de Término"
-                value={appointmentTime || ""}
-                onChange={(event) =>
-                  setAppointmentTime(event.currentTarget.value)
-                }
-                style={{ width: "100%" }}
+            >
+              <Text
+                fw={600}
+                mb={8}
+                size="sm"
+                style={{ flex: "none", letterSpacing: 0.2 }}
+              >
+                Intervalos ocupados:
+              </Text>
+              <div style={{ flex: 1, overflowY: "auto" }}>
+                {/* Aqui você pode exibir intervalos ocupados se desejar, usando lógica semelhante à página de clientes */}
+                <Text size="sm" c="dimmed" style={{ fontSize: 14, padding: 8 }}>
+                  Nenhum (mock)
+                </Text>
+              </div>
+            </div>
+          </Group>
+        </Flex>
+        {selectedDate && (
+          <>
+            <Group mt="md">
+              <div style={{ flex: 1 }}>
+                <label
+                  style={{
+                    fontWeight: 600,
+                    fontSize: 14,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  Horário de início
+                </label>
+                <input
+                  type="time"
+                  value={appointmentTime || ""}
+                  onChange={(e) => setAppointmentTime(e.target.value)}
+                  disabled={!selectedDate}
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    border: "1px solid #ced4da",
+                    fontSize: 15,
+                  }}
+                  placeholder="HH:mm"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label
+                  style={{
+                    fontWeight: 600,
+                    fontSize: 14,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  Horário final
+                </label>
+                <input
+                  type="time"
+                  value={appointmentTime || ""}
+                  onChange={(e) => setAppointmentTime(e.target.value)}
+                  disabled={!selectedDate}
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    border: "1px solid #ced4da",
+                    fontSize: 15,
+                  }}
+                  placeholder="HH:mm"
+                />
+              </div>
+            </Group>
+            <Group my="md">
+              <MultiSelect
+                label="Recorrência (dias da semana)"
+                placeholder="Selecione os dias"
+                data={[
+                  { value: "0", label: "Domingo" },
+                  { value: "1", label: "Segunda" },
+                  { value: "2", label: "Terça" },
+                  { value: "3", label: "Quarta" },
+                  { value: "4", label: "Quinta" },
+                  { value: "5", label: "Sexta" },
+                  { value: "6", label: "Sábado" },
+                ]}
+                value={[]}
+                onChange={() => {}}
+                clearable
               />
             </Group>
-          </div>
-        </Group>
-
-        <TextInput
-          label="Observações"
-          placeholder="Faça observações, se necessário"
-          value={appointmentDetails}
-          onChange={(event) => setAppointmentDetails(event.currentTarget.value)}
-          mt="md"
-        />
-        <Button mt="md" fullWidth onClick={handleScheduleAppointment}>
-          Confirmar
-        </Button>
+            <Group>
+              <div style={{ width: "100%" }}>
+                <label
+                  style={{
+                    fontWeight: 600,
+                    fontSize: 14,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  Localização
+                </label>
+                <input
+                  ref={inputRef}
+                  placeholder="Digite o local (ex: Smart Fit, Estúdio Y...)"
+                  value={appointmentLocation?.formatted_address || ""}
+                  onChange={() => {}}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    border: "1px solid #ced4da",
+                    fontSize: 15,
+                  }}
+                />
+              </div>
+            </Group>
+            <Group mt="md">
+              <div style={{ width: "100%" }}>
+                <label
+                  style={{
+                    fontWeight: 600,
+                    fontSize: 14,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  Observação
+                </label>
+                <textarea
+                  value={appointmentDetails}
+                  onChange={(e) => setAppointmentDetails(e.target.value)}
+                  placeholder="Digite observações relevantes para o atendimento (opcional)"
+                  style={{
+                    width: "100%",
+                    minHeight: 60,
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    border: "1px solid #ced4da",
+                    fontSize: 15,
+                  }}
+                />
+              </div>
+            </Group>
+            <Button
+              mt="md"
+              onClick={handleScheduleAppointment}
+              disabled={!selectedClient || !appointmentTime}
+            >
+              Agendar Atendimento
+            </Button>
+          </>
+        )}
       </Modal>
 
       {/* Modal para registrar motivo */}

@@ -775,11 +775,28 @@ const ClientsPage = () => {
       <Modal
         opened={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
-        title={`Agendar atendimento${
-          selectedClient ? ` para ${selectedClient.name}` : ""
-        }`}
         size="xl"
+        title={null}
       >
+        <Flex align="center" gap="md" mb="md">
+          <Title order={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
+            Agendar atendimento
+          </Title>
+          <Select
+            placeholder="Selecione o cliente"
+            data={clients.map((c) => ({ value: c.id, label: c.name }))}
+            value={selectedClient?.id || ""}
+            onChange={(id) => {
+              const client = clients.find((c) => c.id === id) || null;
+              setSelectedClient(client);
+            }}
+            style={{ minWidth: 220 }}
+            searchable
+            required
+            nothingFoundMessage="Nenhum cliente encontrado"
+            size="sm"
+          />
+        </Flex>
         <Flex gap="lg" direction="row" align="flex-start">
           <Group flex={1} justify="center">
             <Text>Selecione o dia do atendimento</Text>
