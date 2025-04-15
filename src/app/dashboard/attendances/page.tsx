@@ -38,10 +38,6 @@ const CalendarPage = () => {
     formatted_address: string;
     place_id: string;
   } | null>(null);
-  const [userLocation, setUserLocation] = useState<{
-    lat: number;
-    lng: number;
-  }>({ lat: -23.5505, lng: -46.6333 }); // São Paulo como padrão
   const [totalAppointments, setTotalAppointments] = useState(0);
   const [completedAppointments, setCompletedAppointments] = useState(0);
   const [canceledAppointments, setCanceledAppointments] = useState(0);
@@ -86,26 +82,6 @@ const CalendarPage = () => {
   }>({ type: "cancel", appointmentId: null });
 
   const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation({ lat: latitude, lng: longitude });
-        },
-        (error) => {
-          console.warn("Erro ao obter localização do usuário:", error);
-          // Fallback para São Paulo
-          setUserLocation({ lat: -23.5505, lng: -46.6333 });
-        }
-      );
-    } else {
-      console.warn("Geolocalização não suportada pelo navegador.");
-      // Fallback para São Paulo
-      setUserLocation({ lat: -23.5505, lng: -46.6333 });
-    }
-  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.google || !inputRef.current)
@@ -609,7 +585,7 @@ const CalendarPage = () => {
             style={{ minWidth: 220 }}
             searchable
             required
-            nothingFound="Nenhum cliente encontrado"
+            nothingFoundMessage="Nenhum cliente encontrado"
             size="sm"
           />
         </Flex>

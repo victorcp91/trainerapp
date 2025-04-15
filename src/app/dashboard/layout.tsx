@@ -15,9 +15,9 @@ import {
   IconDashboard,
   IconUsers,
   IconCalendar,
-  IconMessageCircle,
-  IconSettings, // adicionado o ícone de configurações
-  IconLogout, // adicionado o ícone de logout
+  IconBarbell,
+  IconSettings,
+  IconLogout,
 } from "@tabler/icons-react";
 
 export default function DashboardLayout({
@@ -37,60 +37,174 @@ export default function DashboardLayout({
       padding="md"
     >
       <AppShell.Navbar
-        p="md"
+        p={24}
+        pr={0}
         style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          alignItems: "flex-start", // adicionado alinhamento à esquerda
-          backgroundColor: "#1A1B1E", // Cor de fundo ajustada
-          color: "#FFFFFF", // Cor do texto ajustada
+          alignItems: "stretch",
+          background: "linear-gradient(180deg, #181A1B 80%, #23272F 100%)",
+          color: "#fff",
+          boxShadow: "2px 0 12px rgba(0,0,0,0.08)",
+          minHeight: "100vh",
         }}
       >
-        <div>
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Title order={1} mb="lg" style={{ color: "#FFFFFF" }}>
+        <Stack gap={32} style={{ flex: 1 }}>
+          <Group
+            justify="space-between"
+            align="center"
+            mb={24}
+            style={{ marginLeft: 2 }}
+          >
+            <Group gap={8} style={{ flexDirection: "column" }}>
+              <Burger
+                opened={opened}
+                onClick={toggle}
+                hiddenFrom="sm"
+                size="sm"
+              />
+              <Title
+                order={2}
+                style={{
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: 24,
+                  letterSpacing: 1,
+                  marginLeft: 4,
+                  marginTop: 2,
+                }}
+              >
+                FitUno
+              </Title>
+              <Group gap={12}>
+                <div
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: "#1327e7",
+                  }}
+                />
+                <div
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: "#40c057",
+                  }}
+                />
+                <div
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: "#fab005",
+                    border: "1px solid #b3a800",
+                  }}
+                />
+                <div
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: "#ed1100",
+                  }}
+                />
+              </Group>
+            </Group>
+          </Group>
+          <Stack gap={8}>
             <NavLink
-              label="Fituno"
               href="/dashboard"
-              style={{ color: "#FFFFFF" }}
+              label="Dashboard"
+              leftSection={<IconDashboard size={20} />}
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: 16,
+                borderRadius: 8,
+                padding: 10,
+                marginBottom: 2,
+                transition: "background .2s, color .2s",
+              }}
+              active={false}
+              className="sidebar-link"
             />
-          </Title>
-          <NavLink
-            href="/dashboard"
-            label="Dashboard"
-            leftSection={<IconDashboard size={16} />}
-            style={{ color: "#FFFFFF" }}
-          />
-          <NavLink
-            href="/dashboard/clients"
-            label="Clientes"
-            leftSection={<IconUsers size={16} />}
-            style={{ color: "#FFFFFF" }}
-          />
-          <NavLink
-            href="/dashboard/attendances"
-            label="Atendimentos"
-            leftSection={<IconCalendar size={16} />}
-            style={{ color: "#FFFFFF" }}
-          />
-          <NavLink
-            href="/dashboard/training-models"
-            label="Modelos de treinos"
-            leftSection={<IconMessageCircle size={16} />}
-            style={{ color: "#FFFFFF" }}
-          />
-        </div>
-        <Stack>
-          <Group>
-            <Avatar radius="xl" c="blue">
+            <NavLink
+              href="/dashboard/clients"
+              label="Clientes"
+              leftSection={<IconUsers size={20} />}
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: 16,
+                borderRadius: 8,
+                padding: 10,
+                marginBottom: 2,
+                transition: "background .2s, color .2s",
+              }}
+              active={false}
+              className="sidebar-link"
+            />
+            <NavLink
+              href="/dashboard/attendances"
+              label="Atendimentos"
+              leftSection={<IconCalendar size={20} />}
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: 16,
+                borderRadius: 8,
+                padding: 10,
+                marginBottom: 2,
+                transition: "background .2s, color .2s",
+              }}
+              active={false}
+              className="sidebar-link"
+            />
+            <NavLink
+              href="/dashboard/training-models"
+              label="Modelos de treinos"
+              leftSection={<IconBarbell size={20} />}
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: 16,
+                borderRadius: 8,
+                padding: 10,
+                marginBottom: 2,
+                transition: "background .2s, color .2s",
+              }}
+              active={false}
+              className="sidebar-link"
+            />
+          </Stack>
+        </Stack>
+        <Stack
+          gap={16}
+          style={{ borderTop: "1px solid #23272F", paddingTop: 24 }}
+        >
+          <Group gap={12} align="center">
+            <Avatar
+              radius="xl"
+              size={40}
+              c="blue"
+              style={{ border: "2px solid #2C2E33" }}
+            >
               J
             </Avatar>
             <Button
               variant="subtle"
               c="dark"
               onClick={() => (window.location.href = "/dashboard/account")}
-              style={{ color: "#FFFFFF" }}
+              style={{
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: 15,
+                padding: 0,
+                background: "none",
+              }}
             >
               John Doe
             </Button>
@@ -98,15 +212,33 @@ export default function DashboardLayout({
           <NavLink
             label="Configurações"
             href="/dashboard/settings"
-            leftSection={<IconSettings size={16} />}
-            style={{ color: "#FFFFFF" }}
+            leftSection={<IconSettings size={18} />}
+            style={{
+              color: "#fff",
+              fontWeight: 500,
+              fontSize: 15,
+              borderRadius: 8,
+              padding: 8,
+              transition: "background .2s, color .2s",
+            }}
+            active={false}
+            className="sidebar-link"
           />
           <Button
             variant="subtle"
             c="red"
-            leftSection={<IconLogout size={16} />} // adicionado ícone de logout
+            leftSection={<IconLogout size={18} />}
             onClick={() => console.log("Logout")}
-            style={{ color: "#FFFFFF" }}
+            style={{
+              color: "#fff",
+              fontWeight: 500,
+              fontSize: 15,
+              borderRadius: 8,
+              padding: 8,
+              background: "none",
+              transition: "background .2s, color .2s",
+            }}
+            className="sidebar-link"
           >
             Logout
           </Button>

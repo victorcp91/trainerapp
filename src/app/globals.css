@@ -29,3 +29,20 @@ body {
 .draggable {
   will-change: transform;
 }
+
+/* Sidebar link custom hover for better contrast and spacing */
+.sidebar-link {
+  display: flex;
+  text-decoration: none;
+}
+.sidebar-link:hover,
+.sidebar-link:focus {
+  background: #23272f !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-link:active {
+  background: #181a1b !important;
+  color: #fff !important;
+}

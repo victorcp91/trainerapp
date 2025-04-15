@@ -32,6 +32,20 @@ import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
 import { showNotification } from "@mantine/notifications";
 
+type Client = {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  email: string;
+  phone: string;
+  tags: string[];
+  status: string;
+  type: string;
+  profilePicture: string;
+  startDate?: string;
+};
+
 const clients = [
   {
     id: "1",
@@ -211,7 +225,7 @@ const ClientsPage = () => {
     setOccupiedIntervals(intervals);
   }, [selectedDate]);
 
-  const handleOpenScheduleModal = (client: any) => {
+  const handleOpenScheduleModal = (client: Client) => {
     setSelectedClient(client);
     setIsScheduleModalOpen(true);
     setSelectedDate(null);
@@ -223,7 +237,8 @@ const ClientsPage = () => {
   };
 
   const handleSchedule = () => {
-    if (!selectedDate || !startTime || !endTime || !location) return;
+    if (!selectedDate || !startTime || !endTime || !location || !selectedClient)
+      return;
     // Função auxiliar para adicionar dias
     function addDays(date: Date, days: number) {
       const d = new Date(date);
