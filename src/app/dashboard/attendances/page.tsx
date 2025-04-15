@@ -105,7 +105,7 @@ const CalendarPage = () => {
         });
       }
     });
-  }, [inputRef.current]);
+  }, []);
 
   const calculateDonutData = () => {
     const total = totalAppointments || 1; // Evitar divisão por zero

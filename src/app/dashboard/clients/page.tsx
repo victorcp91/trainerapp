@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { withAuth } from "@/utils/withAuth";
 import {
   Button,
@@ -169,22 +175,26 @@ const ClientsPage = () => {
         setLocation(place.formatted_address || place.name || "");
       }
     });
-  }, [locationInputRef.current]);
+  }, []); // Removido locationInputRef.current do array de dependências
 
-  const attendances = [
-    {
-      clientId: "2",
-      date: "2025-04-15",
-      times: ["09:00", "10:00"],
-      location: "Academia X",
-    },
-    {
-      clientId: "2",
-      date: "2025-04-16",
-      times: ["14:00", "15:00"],
-      location: "Estúdio Y",
-    },
-  ];
+  // Memoize attendances para evitar recriação a cada render
+  const attendances = useMemo(
+    () => [
+      {
+        clientId: "2",
+        date: "2025-04-15",
+        times: ["09:00", "10:00"],
+        location: "Academia X",
+      },
+      {
+        clientId: "2",
+        date: "2025-04-16",
+        times: ["14:00", "15:00"],
+        location: "Estúdio Y",
+      },
+    ],
+    []
+  );
 
   const weekDays = [
     { value: "0", label: "Domingo" },
@@ -205,7 +215,7 @@ const ClientsPage = () => {
       return new Date(year, month - 1, day);
     });
     setOccupiedDates(dates);
-  }, []);
+  }, [attendances]); // Adicionada dependência 'attendances'
 
   useEffect(() => {
     if (!selectedDate) {
@@ -223,7 +233,7 @@ const ClientsPage = () => {
         location: a.location || undefined,
       }));
     setOccupiedIntervals(intervals);
-  }, [selectedDate]);
+  }, [selectedDate, attendances]); // Adicionada dependência 'attendances'
 
   const handleOpenScheduleModal = (client: Client) => {
     setSelectedClient(client);
@@ -346,7 +356,8 @@ const ClientsPage = () => {
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const handleLoadMore = () => {
+  // Memoize handleLoadMore para evitar recriação a cada render
+  const handleLoadMore = useCallback(() => {
     if (isLoading || loadedClients.length >= clients.length) return;
 
     setIsLoading(true);
@@ -362,7 +373,7 @@ const ClientsPage = () => {
 
       setIsLoading(false);
     }, 500);
-  };
+  }, [isLoading, loadedClients.length]);
 
   const clientTypes = [
     { value: "online", label: "Online" },
@@ -429,16 +440,17 @@ const ClientsPage = () => {
       { threshold: 1.0 }
     );
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (loadMoreRef.current) {
-        observer.unobserve(loadMoreRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
-  }, [loadMoreRef, isLoading]);
+  }, [isLoading, handleLoadMore]); // Corrigido dependências e uso da ref
 
   return (
     <DatesProvider settings={{ locale: "pt-br" }}>

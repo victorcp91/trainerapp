@@ -71,6 +71,9 @@ function NewPlanPage() {
     null
   );
 
+  // Novo estado para armazenar a seleção de treino/descanso para cada dia do plano
+  const [dayAssignments, setDayAssignments] = useState<string[]>([]);
+
   // Estado para mensagem de erro ao buscar modelo de série
   const [serieModelError, setSerieModelError] = useState<string | null>(null);
 
@@ -84,12 +87,6 @@ function NewPlanPage() {
 
   // Estado para modal de aplicação do modelo de série
   const [applySerieModalOpened, setApplySerieModalOpened] = useState(false);
-
-  // Novo estado para quantidade de dias de descanso entre treinos
-  const [daysBetweenTrainings, setDaysBetweenTrainings] = useState(1);
-
-  // Novo estado para armazenar a seleção de treino/descanso para cada dia do plano
-  const [dayAssignments, setDayAssignments] = useState<string[]>([]);
 
   // Mock de sequência de treinos do modelo selecionado
   const serieModelTrainings: {
@@ -180,11 +177,6 @@ function NewPlanPage() {
       },
     ],
   };
-
-  // Estado para armazenar as escolhas do usuário ao aplicar o modelo
-  const [serieApplication, setSerieApplication] = useState<
-    { date: Date | null; rest: number }[]
-  >([]);
 
   // Mock de séries/modelos de série
   const serieModels = [
@@ -376,7 +368,7 @@ function NewPlanPage() {
     setExerciseModalOpened(true);
   };
 
-  const handleModalSave = (tempExercises: any) => {
+  const handleModalSave = (tempExercises: Exercise[]) => {
     if (!selectedDay) return;
     setTrainingDays((prev) =>
       prev.map((day) =>
@@ -497,10 +489,6 @@ function NewPlanPage() {
   };
 
   const availableDays = ["segunda-feira", "quarta-feira", "sexta-feira"]; // Dias disponíveis
-
-  function toggleReplicationDate(day: Date): void {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <DatesProvider settings={{ locale: "pt-br" }}>
@@ -1045,7 +1033,7 @@ function NewPlanPage() {
                 locale="pt-BR" // alterado para string "pt-BR" para evitar erro
                 minDate={startDate}
                 maxDate={endDate}
-                __onDayClick={(event, day: Date) => toggleReplicationDate(day)}
+                __onDayClick={() => {}}
                 renderDay={(date) => {
                   const isSelected = selectedReplicationDates.some(
                     (d) => d.toDateString() === date.toDateString()
@@ -1108,8 +1096,8 @@ function NewPlanPage() {
               locale="pt-BR"
               minDate={startDate}
               maxDate={endDate}
-              __onDayClick={(event, day: Date) => {
-                setMoveTargetDate(day);
+              __onDayClick={() => {
+                setMoveTargetDate(null);
               }}
               renderDay={(date) => {
                 const isSelected =
@@ -1205,7 +1193,7 @@ function NewPlanPage() {
               >
                 <Group align="center" justify="space-between">
                   <div>
-                    <Text weight={500}>{model.name}</Text>
+                    <Text fw={500}>{model.name}</Text>
                     <Text size="xs" c="dimmed">
                       {model.description}
                     </Text>

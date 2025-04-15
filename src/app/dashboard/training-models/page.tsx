@@ -204,7 +204,7 @@ const TrainingModelsPage = () => {
   const [showSeriesFavoritesOnly, setShowSeriesFavoritesOnly] = useState(false);
 
   const [seriesLevelFilter, setSeriesLevelFilter] = useState<string[]>([]);
-  const [seriesNameFilter, setSeriesNameFilter] = useState("");
+  const [seriesNameFilter] = useState("");
 
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>(
     {}
