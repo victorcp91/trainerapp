@@ -1,80 +1,52 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
-  Card,
   Group,
-  Text,
   Title,
   Modal,
   TextInput,
-  Select,
-  Avatar,
-  Tooltip,
   Indicator,
-  MultiSelect,
-  Flex,
   Container,
 } from "@mantine/core";
-import { DonutChart } from "@mantine/charts";
-import { DatePicker } from "@mantine/dates";
+
 import {
-  IconCheck,
-  IconX,
-  IconAlertCircle,
-  IconCalendar,
-  IconMapPin,
-  IconEdit,
-} from "@tabler/icons-react";
+  AttendanceProvider,
+  useAttendance,
+} from "@/contexts/AttendanceContext";
 
-const CalendarPage = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [appointmentDetails, setAppointmentDetails] = useState("");
-  const [selectedClient, setSelectedClient] = useState<string | null>(null);
-  const [appointmentTime, setAppointmentTime] = useState<string | null>(null);
-  const [appointmentLocation, setAppointmentLocation] = useState<{
-    name: string;
-    formatted_address: string;
-    place_id: string;
-  } | null>(null);
-  const [totalAppointments, setTotalAppointments] = useState(0);
-  const [completedAppointments, setCompletedAppointments] = useState(0);
-  const [canceledAppointments, setCanceledAppointments] = useState(0);
-  const [missedAppointments, setMissedAppointments] = useState(0);
-  const [appointments, setAppointments] = useState<
-    {
-      id: number;
-      client: string;
-      address: string;
-      startTime: string; // Alterado para incluir horário inicial
-      endTime: string; // Adicionado para incluir horário final
-      avatar: string;
-    }[]
-  >([
-    {
-      id: 1,
-      client: "João Silva",
-      address: "Rua das Flores, 123 - São Paulo, SP",
-      startTime: new Date().toISOString(), // Horário inicial
-      endTime: new Date(new Date().getTime() + 3600000).toISOString(), // Horário final (1h depois)
-      avatar: "",
-    },
-    {
-      id: 2,
-      client: "Maria Oliveira",
-      address: "Avenida Paulista, 456 - São Paulo, SP",
-      startTime: new Date(
-        new Date().setDate(new Date().getDate() + 1)
-      ).toISOString(),
-      endTime: new Date(
-        new Date().setDate(new Date().getDate() + 1) + 3600000
-      ).toISOString(),
-      avatar: "",
-    },
-  ]);
+import SummaryCards from "@/components/attendances/SummaryCards";
+import CalendarSidebar from "@/components/attendances/CalendarSidebar";
+import DayDetails from "@/components/attendances/DayDetails";
+import ScheduleAppointmentModal, {
+  ScheduleDetails,
+} from "@/components/attendances/ScheduleAppointmentModal";
 
+import { Appointment, ClientOption } from "@/types/attendances";
+
+const AttendanceContent = () => {
+  const {
+    selectedDate,
+    appointments,
+    clientData,
+    addAppointment,
+    updateAppointment,
+    deleteAppointment,
+    markAbsence,
+    checkIn,
+  } = useAttendance();
+
+  // Keep mock stats locally in the page component for visual purposes
+  // TODO: Remove these when API provides real aggregate stats
+  const [totalAppointments, _setTotalAppointments] = useState(120);
+  const [completedAppointments, _setCompletedAppointments] = useState(60);
+  const [canceledAppointments, _setCanceledAppointments] = useState(25);
+  const [missedAppointments, _setMissedAppointments] = useState(15);
+
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] =
+    useState<Appointment | null>(null);
   const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [currentAction, setCurrentAction] = useState<{
@@ -82,80 +54,78 @@ const CalendarPage = () => {
     appointmentId: number | null;
   }>({ type: "cancel", appointmentId: null });
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.google || !inputRef.current)
-      return;
-    const autocomplete = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      {
-        types: ["establishment"],
-        componentRestrictions: { country: "br" },
-      }
-    );
-
-    autocomplete.addListener("place_changed", () => {
-      console.log("here");
-      const place = autocomplete.getPlace();
-      if (place) {
-        setAppointmentLocation({
-          name: place.name || "",
-          formatted_address: place.formatted_address || "",
-          place_id: place.place_id || "",
-        });
-      }
-    });
-  }, []);
-
-  const calculateDonutData = () => {
-    const total = totalAppointments || 1; // Evitar divisão por zero
-    const pending =
-      total -
-      (completedAppointments + canceledAppointments + missedAppointments);
-    return [
-      {
-        value: completedAppointments,
-        color: "green",
-        name: "Concluídos",
-      },
-      {
-        name: "Cancelados",
-        value: canceledAppointments,
-        color: "yellow",
-      },
-      {
-        name: "Faltas",
-        value: missedAppointments,
-        color: "red",
-      },
-      {
-        name: "Pendentes",
-        value: pending,
-        color: "gray",
-      },
-    ];
+  const handleOpenScheduleModal = (appointmentToEdit: Appointment | null) => {
+    setEditingAppointment(appointmentToEdit);
+    setIsScheduleModalOpen(true);
   };
 
-  // Exemplo de valores fictícios para os gráficos
-  useEffect(() => {
-    setTotalAppointments(120); // Total de agendamentos
-    setCompletedAppointments(60); // Total de concluídos
-    setCanceledAppointments(25); // Total de cancelados
-    setMissedAppointments(15); // Total de faltas
-    // Pendentes serão calculados automaticamente como 20
-  }, []);
-
-  const handleScheduleAppointment = () => {
-    setIsModalOpen(false);
-    setAppointmentDetails("");
-    setSelectedClient(null);
-    setAppointmentTime(null);
-    setAppointmentLocation(null);
+  const handleCloseScheduleModal = () => {
+    setIsScheduleModalOpen(false);
+    setEditingAppointment(null);
   };
 
-  const handleCheckIn = (id: number) => {
-    console.log(`Check-in realizado para o agendamento ${id}`);
+  const handleScheduleAppointment = (details: ScheduleDetails) => {
+    if (editingAppointment) {
+      const updatedClientLabel = clientData.find(
+        (c) => c.value === details.client
+      )?.label;
+      const updatedAppointment: Appointment = {
+        ...editingAppointment,
+        client: updatedClientLabel || editingAppointment.client,
+        startTime:
+          details.date && details.startTime
+            ? new Date(
+                `${details.date.toISOString().split("T")[0]}T${
+                  details.startTime
+                }:00`
+              ).toISOString()
+            : editingAppointment.startTime,
+        endTime:
+          details.date && details.endTime
+            ? new Date(
+                `${details.date.toISOString().split("T")[0]}T${
+                  details.endTime
+                }:00`
+              ).toISOString()
+            : editingAppointment.endTime,
+        location: details.location,
+        observation: details.details,
+        address:
+          details.location?.formatted_address || editingAppointment.address,
+      };
+      updateAppointment(updatedAppointment);
+    } else {
+      const newId = Math.max(0, ...appointments.map((a) => a.id)) + 1;
+      const clientLabel = clientData.find(
+        (c) => c.value === details.client
+      )?.label;
+      const newAppointment: Appointment = {
+        id: newId,
+        client: clientLabel || "Unknown Client",
+        startTime:
+          details.date && details.startTime
+            ? new Date(
+                `${details.date.toISOString().split("T")[0]}T${
+                  details.startTime
+                }:00`
+              ).toISOString()
+            : new Date().toISOString(),
+        endTime:
+          details.date && details.endTime
+            ? new Date(
+                `${details.date.toISOString().split("T")[0]}T${
+                  details.endTime
+                }:00`
+              ).toISOString()
+            : new Date().toISOString(),
+        address: details.location?.formatted_address || "",
+        avatar: "",
+        location: details.location,
+        observation: details.details,
+      };
+      addAppointment(newAppointment);
+    }
+    handleCloseScheduleModal();
   };
 
   const handleOpenReasonModal = (type: "cancel" | "absence", id: number) => {
@@ -164,56 +134,44 @@ const CalendarPage = () => {
     setIsReasonModalOpen(true);
   };
 
-  const handleConfirmReason = () => {
-    if (
-      currentAction.type === "cancel" &&
-      currentAction.appointmentId !== null
-    ) {
-      console.log(
-        `Agendamento ${currentAction.appointmentId} cancelado. Motivo: ${reason}`
-      );
-      setAppointments((prev) =>
-        prev.filter(
-          (appointment) => appointment.id !== currentAction.appointmentId
-        )
-      );
-    } else if (
-      currentAction.type === "absence" &&
-      currentAction.appointmentId !== null
-    ) {
-      console.log(
-        `Falta registrada para o agendamento ${currentAction.appointmentId}. Motivo: ${reason}`
-      );
-    }
+  const handleCloseReasonModal = () => {
     setIsReasonModalOpen(false);
   };
 
-  const handleEditAppointment = (appointment: {
-    id: number;
-    client: string;
-    address: string;
-    startTime: string;
-    endTime: string;
-    avatar: string;
-  }) => {
-    setSelectedClient(appointment.client);
-    setSelectedDate(new Date(appointment.startTime));
-    setAppointmentTime(
-      new Date(appointment.startTime).toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
-    setAppointmentDetails(appointment.address);
-    setIsModalOpen(true);
+  const handleConfirmReason = () => {
+    const { type, appointmentId } = currentAction;
+    if (appointmentId === null) return;
+
+    if (type === "cancel") {
+      deleteAppointment(appointmentId);
+      console.log(`Canceling appointment ${appointmentId}, Reason: ${reason}`);
+    } else if (type === "absence") {
+      markAbsence(appointmentId, reason);
+    }
+    handleCloseReasonModal();
+  };
+
+  const filteredAppointments = appointments.filter(
+    (appointment) =>
+      selectedDate &&
+      new Date(appointment.startTime).toDateString() ===
+        selectedDate.toDateString()
+  );
+
+  const dailyStats = {
+    total: filteredAppointments.length,
+    completed: 0,
+    canceled: 0,
+    missed: 0,
   };
 
   const renderDay = (date: Date) => {
     const isToday = date.toDateString() === new Date().toDateString();
-    const hasAppointments = appointments.some(
+    const dayAppointments = appointments.filter(
       (appointment) =>
         new Date(appointment.startTime).toDateString() === date.toDateString()
     );
+    const hasAppointments = dayAppointments.length > 0;
 
     return (
       <div
@@ -221,23 +179,52 @@ const CalendarPage = () => {
           backgroundColor:
             isToday &&
             selectedDate &&
-            date.toDateString() !== selectedDate.toDateString()
+            date.toDateString() !== selectedDate?.toDateString()
               ? "#e0f7fa"
-              : "transparent", // Fundo azul claro apenas para hoje se outra data estiver selecionada
+              : "transparent",
           borderRadius: "50%",
           padding: "5px",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
         }}
       >
-        <Indicator
-          size={8}
-          color="blue"
-          offset={-2}
-          disabled={!hasAppointments}
-        >
-          <div>{date.getDate()}</div>
-        </Indicator>
+        {date.getDate()}
+        {hasAppointments && (
+          <Indicator
+            size={6}
+            color="blue"
+            offset={-5}
+            style={{ position: "absolute", bottom: 4, right: 4 }}
+          />
+        )}
       </div>
     );
+  };
+
+  const createInitialDataForEdit = (
+    appointment: Appointment | null
+  ): ScheduleDetails | undefined => {
+    if (!appointment) return undefined;
+    const clientValue =
+      clientData.find((c) => c.label === appointment.client)?.value || null;
+    return {
+      client: clientValue,
+      date: new Date(appointment.startTime),
+      startTime: new Date(appointment.startTime).toLocaleTimeString("sv-SE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      endTime: new Date(appointment.endTime).toLocaleTimeString("sv-SE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      location: appointment.location || null,
+      details: appointment.observation || "",
+      recurrence: [],
+    };
   };
 
   return (
@@ -246,547 +233,53 @@ const CalendarPage = () => {
         Atendimentos
       </Title>
 
-      <Group mb="lg" grow style={{ alignItems: "stretch" }}>
-        {/* Card do ano */}
-        <Card withBorder shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
-          <Group style={{ flexDirection: "column" }}>
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-              }}
-            >
-              <Title order={3}>
-                {selectedDate
-                  ? selectedDate.getFullYear().toString()
-                  : "Ano não selecionado"}
-              </Title>
-            </div>
-            <DonutChart
-              style={{ marginTop: "-50px" }}
-              data={calculateDonutData()}
-              withLabels
-              withLabelsLine
-              labelsType="value"
-              paddingAngle={5}
-              size={100}
-              thickness={14}
-            />
-          </Group>
-        </Card>
+      <SummaryCards
+        totalAppointments={totalAppointments}
+        completedAppointments={completedAppointments}
+        canceledAppointments={canceledAppointments}
+        missedAppointments={missedAppointments}
+      />
 
-        {/* Card do mês */}
-        <Card withBorder shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
-          <Group style={{ flexDirection: "column" }}>
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-              }}
-            >
-              <Title order={3}>
-                {selectedDate
-                  ? selectedDate.toLocaleDateString("pt-BR", {
-                      month: "long",
-                      year:
-                        selectedDate.getFullYear() !== new Date().getFullYear()
-                          ? "numeric"
-                          : undefined,
-                    })
-                  : "Mês não selecionado"}
-              </Title>
-            </div>
-            <DonutChart
-              style={{ marginTop: "-50px" }}
-              paddingAngle={5}
-              size={100}
-              thickness={14}
-              data={calculateDonutData()}
-              withLabels
-              withLabelsLine
-              labelsType="value"
-            />
-          </Group>
-        </Card>
+      <Group align="flex-start" wrap="nowrap">
+        <CalendarSidebar renderDay={renderDay} />
 
-        {/* Card do dia */}
-        <Card withBorder shadow="sm" px="lg" py="xs" style={{ flex: 1 }}>
-          <Group style={{ flexDirection: "column" }}>
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-              }}
-            >
-              <Title order={3}>Hoje</Title>
-            </div>
-            <DonutChart
-              style={{ marginTop: "-50px" }}
-              paddingAngle={5}
-              size={100}
-              thickness={14}
-              data={calculateDonutData()}
-              withLabels
-              withLabelsLine
-              labelsType="value"
-            />
-          </Group>
-        </Card>
+        <DayDetails
+          appointments={filteredAppointments}
+          totalAppointments={dailyStats.total}
+          completedAppointments={dailyStats.completed}
+          canceledAppointments={dailyStats.canceled}
+          missedAppointments={dailyStats.missed}
+          onCheckIn={checkIn}
+          onOpenReasonModal={handleOpenReasonModal}
+          onEditAppointment={(app) => handleOpenScheduleModal(app)}
+          onOpenScheduleModal={() => handleOpenScheduleModal(null)}
+        />
       </Group>
 
-      <Group align="flex-start">
-        {/* Sidebar com o calendário */}
-        <Card withBorder shadow="sm" px="lg" py="xs" style={{ width: "300px" }}>
-          <DatePicker
-            value={selectedDate}
-            onChange={setSelectedDate}
-            renderDay={renderDay}
-          />
-        </Card>
+      <ScheduleAppointmentModal
+        isOpen={isScheduleModalOpen}
+        onClose={handleCloseScheduleModal}
+        onSchedule={handleScheduleAppointment}
+        renderDay={renderDay}
+        initialData={createInitialDataForEdit(editingAppointment)}
+      />
 
-        {/* Detalhes do dia selecionado */}
-        <Card
-          withBorder
-          shadow="sm"
-          px="lg"
-          py="xs"
-          style={{ width: "250px", flex: 1 }}
-        >
-          <Group mb="md" style={{ justifyContent: "space-between" }}>
-            <Title order={2}>
-              {selectedDate
-                ? selectedDate.toLocaleDateString("pt-BR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
-                : "Nenhuma data selecionada"}
-            </Title>
-            <Group style={{ alignItems: "center", gap: "10px" }}>
-              <Tooltip label="Total de agendamentos" withArrow>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                >
-                  <IconCalendar size={20} color="blue" />
-                  <Text size="sm">{totalAppointments}</Text>
-                </div>
-              </Tooltip>
-              <Tooltip label="Total de concluídos" withArrow>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                >
-                  <IconCheck size={20} color="green" />
-                  <Text size="sm">{completedAppointments}</Text>
-                </div>
-              </Tooltip>
-              <Tooltip label="Total de cancelados" withArrow>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                >
-                  <IconX size={20} color="red" />
-                  <Text size="sm">{canceledAppointments}</Text>
-                </div>
-              </Tooltip>
-              <Tooltip label="Total de faltas" withArrow>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                >
-                  <IconAlertCircle size={20} color="yellow" />
-                  <Text size="sm">{missedAppointments}</Text>
-                </div>
-              </Tooltip>
-            </Group>
-          </Group>
-          <Card style={{ textAlign: "center" }}>
-            {appointments
-              .filter(
-                (appointment) =>
-                  selectedDate &&
-                  new Date(appointment.startTime).toDateString() ===
-                    selectedDate.toDateString()
-              )
-              .sort(
-                (a, b) =>
-                  new Date(a.startTime).getTime() -
-                  new Date(b.startTime).getTime()
-              )
-              .map((appointment) => (
-                <Card
-                  key={appointment.id}
-                  withBorder
-                  shadow="sm"
-                  padding="md"
-                  mb="sm"
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "flex-start",
-                    gap: "10px",
-                  }}
-                >
-                  <Group
-                    style={{
-                      flexDirection: "row",
-                      gap: "5px",
-                      alignItems: "flex-start",
-                      flex: 1,
-                      marginTop: "-10px",
-                    }}
-                  >
-                    <Group
-                      style={{
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        gap: "5px",
-                        marginTop: "5px",
-                        flex: 1,
-                      }}
-                    >
-                      <Group>
-                        <Text
-                          size="sm"
-                          color="dimmed"
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          {new Date(appointment.startTime).toLocaleTimeString(
-                            "pt-BR",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                          {" - "}
-                          {new Date(appointment.endTime).toLocaleTimeString(
-                            "pt-BR",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                        </Text>
-                      </Group>
-                      <Group style={{ flex: 1 }}>
-                        <Avatar
-                          src={appointment.avatar}
-                          alt={`Avatar de ${appointment.client}`}
-                          radius="xl"
-                          size={40}
-                        />
-                        <Text>{appointment.client}</Text>
-                        <Text
-                          size="sm"
-                          color="dimmed"
-                          style={{
-                            flex: 1,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "5px",
-                          }}
-                        >
-                          <IconMapPin size={16} color="blue" />
-                          <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                              appointment.address
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              textDecoration: "none",
-                              color: "inherit",
-                            }}
-                          >
-                            {appointment.address}
-                          </a>
-                        </Text>
-                      </Group>
-                      <Group mt="xs">
-                        <Button
-                          size="xs"
-                          variant="light"
-                          color="green"
-                          onClick={() => handleCheckIn(appointment.id)}
-                        >
-                          Check-in
-                        </Button>
-                        <Button
-                          size="xs"
-                          variant="light"
-                          color="yellow"
-                          onClick={() =>
-                            handleOpenReasonModal("absence", appointment.id)
-                          }
-                        >
-                          Falta
-                        </Button>
-                        <Button
-                          size="xs"
-                          variant="light"
-                          color="red"
-                          onClick={() =>
-                            handleOpenReasonModal("cancel", appointment.id)
-                          }
-                        >
-                          Cancelar
-                        </Button>
-                      </Group>
-                    </Group>
-                  </Group>
-                  <Tooltip label="Editar atendimento" withArrow>
-                    <IconEdit
-                      size={20}
-                      color="blue"
-                      style={{
-                        cursor: "pointer",
-                        alignSelf: "flex-start",
-                      }}
-                      onClick={() => handleEditAppointment(appointment)}
-                    />
-                  </Tooltip>
-                </Card>
-              ))}
-            <Button
-              variant="outline"
-              c="blue"
-              onClick={() => setIsModalOpen(true)}
-              mt="md"
-            >
-              + Agendar atendimento
-            </Button>
-          </Card>
-        </Card>
-      </Group>
-
-      {/* Modal para agendar atendimento */}
-      <Modal
-        opened={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        size="xl"
-        title={null}
-      >
-        <Flex align="center" gap="md" mb="md">
-          <Title order={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
-            Agendar atendimento
-          </Title>
-          <Select
-            placeholder="Selecione o cliente"
-            data={[
-              { value: "1", label: "João Silva" },
-              { value: "2", label: "Maria Oliveira" },
-              { value: "3", label: "Alice Johnson" },
-            ]}
-            value={selectedClient}
-            onChange={setSelectedClient}
-            style={{ minWidth: 220 }}
-            searchable
-            required
-            nothingFoundMessage="Nenhum cliente encontrado"
-            size="sm"
-          />
-        </Flex>
-        <Flex gap="lg" direction="row" align="flex-start">
-          <Group flex={1} justify="center">
-            <Text>Selecione o cliente e o dia do atendimento</Text>
-            <DatePicker
-              value={selectedDate}
-              onChange={setSelectedDate}
-              minDate={new Date()}
-              renderDay={renderDay}
-            />
-          </Group>
-          <Group flex={1}>
-            <div
-              style={{
-                background: "#f8f9fa",
-                borderRadius: 10,
-                padding: 20,
-                minHeight: 120,
-                boxShadow: "0 1px 4px 0 rgba(0,0,0,0.03)",
-                border: "1px solid #f1f3f5",
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                height: "340px",
-              }}
-            >
-              <Text
-                fw={600}
-                mb={8}
-                size="sm"
-                style={{ flex: "none", letterSpacing: 0.2 }}
-              >
-                Intervalos ocupados:
-              </Text>
-              <div style={{ flex: 1, overflowY: "auto" }}>
-                {/* Aqui você pode exibir intervalos ocupados se desejar, usando lógica semelhante à página de clientes */}
-                <Text size="sm" c="dimmed" style={{ fontSize: 14, padding: 8 }}>
-                  Nenhum (mock)
-                </Text>
-              </div>
-            </div>
-          </Group>
-        </Flex>
-        {selectedDate && (
-          <>
-            <Group mt="md">
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Horário de início
-                </label>
-                <input
-                  type="time"
-                  value={appointmentTime || ""}
-                  onChange={(e) => setAppointmentTime(e.target.value)}
-                  disabled={!selectedDate}
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                  placeholder="HH:mm"
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Horário final
-                </label>
-                <input
-                  type="time"
-                  value={appointmentTime || ""}
-                  onChange={(e) => setAppointmentTime(e.target.value)}
-                  disabled={!selectedDate}
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                  placeholder="HH:mm"
-                />
-              </div>
-            </Group>
-            <Group my="md">
-              <MultiSelect
-                label="Recorrência (dias da semana)"
-                placeholder="Selecione os dias"
-                data={[
-                  { value: "0", label: "Domingo" },
-                  { value: "1", label: "Segunda" },
-                  { value: "2", label: "Terça" },
-                  { value: "3", label: "Quarta" },
-                  { value: "4", label: "Quinta" },
-                  { value: "5", label: "Sexta" },
-                  { value: "6", label: "Sábado" },
-                ]}
-                value={[]}
-                onChange={() => {}}
-                clearable
-              />
-            </Group>
-            <Group>
-              <div style={{ width: "100%" }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Localização
-                </label>
-                <input
-                  ref={inputRef}
-                  placeholder="Digite o local (ex: Smart Fit, Estúdio Y...)"
-                  value={appointmentLocation?.formatted_address || ""}
-                  onChange={() => {}}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                />
-              </div>
-            </Group>
-            <Group mt="md">
-              <div style={{ width: "100%" }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Observação
-                </label>
-                <textarea
-                  value={appointmentDetails}
-                  onChange={(e) => setAppointmentDetails(e.target.value)}
-                  placeholder="Digite observações relevantes para o atendimento (opcional)"
-                  style={{
-                    width: "100%",
-                    minHeight: 60,
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                />
-              </div>
-            </Group>
-            <Button
-              mt="md"
-              onClick={handleScheduleAppointment}
-              disabled={!selectedClient || !appointmentTime}
-            >
-              Agendar Atendimento
-            </Button>
-          </>
-        )}
-      </Modal>
-
-      {/* Modal para registrar motivo */}
       <Modal
         opened={isReasonModalOpen}
-        onClose={() => setIsReasonModalOpen(false)}
+        onClose={handleCloseReasonModal}
         title={
           currentAction.type === "cancel"
             ? "Motivo do Cancelamento"
             : "Motivo da Falta"
         }
+        centered
       >
         <TextInput
           label="Motivo"
           placeholder="Descreva o motivo (opcional)"
           value={reason}
           onChange={(event) => setReason(event.currentTarget.value)}
+          data-autofocus
         />
         <Button mt="md" fullWidth onClick={handleConfirmReason}>
           Confirmar
@@ -796,4 +289,55 @@ const CalendarPage = () => {
   );
 };
 
-export default CalendarPage;
+const AttendancePage = () => {
+  const initialMockAppointments: Appointment[] = [
+    {
+      id: 1,
+      client: "João Silva",
+      address: "Rua das Flores, 123 - São Paulo, SP",
+      startTime: new Date().toISOString(),
+      endTime: new Date(new Date().getTime() + 3600000).toISOString(),
+      avatar: "",
+      location: {
+        name: "Smart Fit - Flores",
+        formatted_address: "Rua das Flores, 123 - São Paulo, SP",
+        place_id: "mock_place_id_1",
+      },
+      observation: "Treino de perna",
+    },
+    {
+      id: 2,
+      client: "Maria Oliveira",
+      address: "Avenida Paulista, 456 - São Paulo, SP",
+      startTime: new Date(
+        new Date().setDate(new Date().getDate() + 1)
+      ).toISOString(),
+      endTime: new Date(
+        new Date(new Date().setDate(new Date().getDate() + 1)).getTime() +
+          3600000
+      ).toISOString(),
+      avatar: "",
+      location: {
+        name: "Bodytech - Paulista",
+        formatted_address: "Avenida Paulista, 456 - São Paulo, SP",
+        place_id: "mock_place_id_2",
+      },
+    },
+  ];
+  const initialMockClientData: ClientOption[] = [
+    { value: "1", label: "João Silva" },
+    { value: "2", label: "Maria Oliveira" },
+    { value: "3", label: "Alice Johnson" },
+  ];
+
+  return (
+    <AttendanceProvider
+      initialAppointments={initialMockAppointments}
+      initialClientData={initialMockClientData}
+    >
+      <AttendanceContent />
+    </AttendanceProvider>
+  );
+};
+
+export default AttendancePage;

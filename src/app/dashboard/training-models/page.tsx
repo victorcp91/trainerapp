@@ -6,74 +6,79 @@ import {
   Title,
   Card,
   Text,
-  MultiSelect,
   Button,
-  Modal,
-  TextInput,
-  Select,
   Container,
   Grid,
   Group,
 } from "@mantine/core";
+import { IconFolder, IconStar, IconPlus } from "@tabler/icons-react";
 import {
-  IconFolder,
-  IconStar,
-  IconChevronUp,
-  IconChevronDown,
-  IconTrash,
-  IconPlus,
-  IconGripVertical,
-  IconEdit,
-} from "@tabler/icons-react";
-import {
-  useDroppable,
-  useDraggable,
   DndContext,
   DragOverlay,
   DragStartEvent,
   DragEndEvent,
 } from "@dnd-kit/core";
-import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
-import { ExerciseModal } from "@/components/shared";
+import { ExerciseModal } from "@/components/dashboard";
 
-const trainingModels = [
+// Import types from the new location
+import type {
+  TrainingModel,
+  Serie,
+  LevelOption,
+  MuscleGroupOption,
+} from "@/types/training";
+import type { ExerciseModalSaveData } from "@/types/modal";
+
+// Import newly created components
+import TrainingModelFilters from "@/components/trainingModels/TrainingModelFilters";
+import TrainingModelList from "@/components/trainingModels/TrainingModelList";
+import SeriesFilters from "@/components/trainingModels/SeriesFilters";
+import SeriesList from "@/components/trainingModels/SeriesList";
+import CreateSeriesModal from "@/components/trainingModels/CreateSeriesModal";
+
+// Mock Data (Types are now imported)
+const trainingModelsData: TrainingModel[] = [
   {
+    id: "tm-1",
     name: "Modelo de Força",
     description: "Treino focado em ganho de força muscular.",
     createdAt: "2023-03-01",
     isFavorite: true,
+    exercises: [],
   },
   {
+    id: "tm-2",
     name: "Modelo de Resistência",
     description: "Treino para melhorar a resistência física.",
     createdAt: "2023-02-15",
     isFavorite: false,
+    exercises: [],
   },
   {
+    id: "tm-3",
     name: "Modelo de Hipertrofia",
     description: "Treino voltado para aumento de massa muscular.",
     createdAt: "2023-01-20",
     isFavorite: true,
+    exercises: [],
   },
 ];
 
-const levels = [
+const levelsData: LevelOption[] = [
   { value: "iniciante", label: "Iniciante" },
   { value: "intermediario", label: "Intermediário" },
   { value: "avancado", label: "Avançado" },
 ];
 
-const muscleGroups = [
+const muscleGroupsData: MuscleGroupOption[] = [
   { value: "peito", label: "Peito" },
   { value: "costas", label: "Costas" },
-  { value: "pernas", label: "Pernas" },
-  { value: "ombros", label: "Ombros" },
-  { value: "biceps", label: "Bíceps" },
-  { value: "triceps", label: "Tríceps" },
+  // ... other groups
 ];
 
-const series = [
+const seriesData: Serie[] = [
   {
+    id: "s-1",
     name: "Série 1",
     description: "Descrição da série 1.",
     isFavorite: true,
@@ -81,115 +86,24 @@ const series = [
     level: "iniciante",
   },
   {
+    id: "s-2",
     name: "Série 2",
     description: "Descrição da série 2.",
     isFavorite: false,
     createdAt: "2023-02-15",
     level: "intermediario",
   },
-  {
-    name: "Série 3",
-    description: "Descrição da série 3.",
-    isFavorite: true,
-    createdAt: "2023-01-20",
-    level: "avancado",
-  },
-  {
-    name: "Série 4",
-    description: "Descrição da série 4.",
-    isFavorite: false,
-    createdAt: "2023-03-01",
-    level: "iniciante",
-  },
-  {
-    name: "Série 5",
-    description: "Descrição da série 5.",
-    isFavorite: true,
-    createdAt: "2023-02-15",
-    level: "intermediario",
-  },
-  {
-    name: "Série 6",
-    description: "Descrição da série 6.",
-    isFavorite: false,
-    createdAt: "2023-01-20",
-    level: "avancado",
-  },
-  {
-    name: "Série 7",
-    description: "Descrição da série 7.",
-    isFavorite: true,
-    createdAt: "2023-03-01",
-    level: "iniciante",
-  },
-  {
-    name: "Série 8",
-    description: "Descrição da série 8.",
-    isFavorite: false,
-    createdAt: "2023-02-15",
-    level: "intermediario",
-  },
-  {
-    name: "Série 9",
-    description: "Descrição da série 9.",
-    isFavorite: true,
-    createdAt: "2023-01-20",
-    level: "avancado",
-  },
-  {
-    name: "Série 10",
-    description: "Descrição da série 10.",
-    isFavorite: false,
-    createdAt: "2023-03-01",
-    level: "iniciante",
-  },
+  // ... add other series with unique IDs
 ];
 
-// Definição dos tipos para os componentes DraggableCard e DroppableCard
-interface DraggableCardProps {
-  id: string;
-  children:
-    | React.ReactNode
-    | ((listeners: SyntheticListenerMap) => React.ReactNode);
-}
-
-interface DroppableCardProps {
-  id: string;
-  children: React.ReactNode;
-}
-
-const DraggableCard: React.FC<DraggableCardProps> = ({ id, children }) => {
-  const { attributes, listeners, setNodeRef } = useDraggable({ id });
-
-  const style: React.CSSProperties = {
-    userSelect: "none",
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      {typeof children === "function" ? children(listeners ?? {}) : children}
-    </div>
-  );
-};
-
-const DroppableCard: React.FC<DroppableCardProps> = ({ id, children }) => {
-  const { setNodeRef, isOver } = useDroppable({ id });
-  const style: React.CSSProperties = {
-    backgroundColor: isOver ? "#e0ffe0" : "#ffffff", // Muda a cor apenas do card específico
-    transition: "background-color 0.3s",
-    borderRadius: "8px",
-    padding: "1rem",
-    boxShadow: isOver ? "0 0 10px rgba(0, 128, 0, 0.5)" : "none", // Adiciona destaque visual
-  };
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      {children}
-    </div>
-  );
-};
-
 const TrainingModelsPage = () => {
+  // State uses imported types
+  const [currentTrainingModels, setCurrentTrainingModels] =
+    useState<TrainingModel[]>(trainingModelsData);
+  const [currentSeries, setCurrentSeries] = useState<Serie[]>(seriesData);
+  const [editingModel, setEditingModel] = useState<TrainingModel | null>(null);
+
+  // --- State Management ---
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>(
     []
@@ -201,52 +115,45 @@ const TrainingModelsPage = () => {
   const [selectedSeriesLevels, setSelectedSeriesLevels] = useState<string[]>(
     []
   );
+  const [seriesLevelFilter, setSeriesLevelFilter] = useState<string[]>([]);
   const [seriesSearchTerm, setSeriesSearchTerm] = useState("");
   const [seriesSortOrder, setSeriesSortOrder] = useState("recent");
   const [showSeriesFavoritesOnly, setShowSeriesFavoritesOnly] = useState(false);
 
-  const [seriesLevelFilter, setSeriesLevelFilter] = useState<string[]>([]);
-  const [seriesNameFilter] = useState("");
-
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>(
     {}
   );
-  const [activeDragItem, setActiveDragItem] = useState<
-    (typeof trainingModels)[0] | null
-  >(null);
-
+  const [activeDragItem, setActiveDragItem] = useState<TrainingModel | null>(
+    null
+  );
   const [expandedSeries, setExpandedSeries] = useState<Record<string, boolean>>(
     {}
   );
 
   const [exerciseModalOpened, setExerciseModalOpened] = useState(false);
-
   const [seriesModalOpened, setSeriesModalOpened] = useState(false);
-  const [newSeriesName, setNewSeriesName] = useState("");
-  const [newSeriesDescription, setNewSeriesDescription] = useState("");
-  const [newSeriesLevel, setNewSeriesLevel] = useState("");
 
-  const [editModalOpened, setEditModalOpened] = useState(false);
-  const [editingModel, setEditingModel] = useState<
-    (typeof trainingModels)[number] | null
-  >(null);
-
-  const handleCreateSeries = () => {
-    console.log({
-      name: newSeriesName,
-      description: newSeriesDescription,
-      level: newSeriesLevel,
-    });
-    setSeriesModalOpened(false);
-    setNewSeriesName("");
-    setNewSeriesDescription("");
-    setNewSeriesLevel("");
+  // --- Event Handlers & Logic ---
+  const handleCreateSeries = (newSeriesData: {
+    name: string;
+    description: string;
+    level: string;
+  }) => {
+    const newSerie: Serie = {
+      id: `s-${Date.now()}`,
+      name: newSeriesData.name,
+      description: newSeriesData.description,
+      level: newSeriesData.level,
+      isFavorite: false,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    setCurrentSeries((prev: Serie[]) => [...prev, newSerie]);
   };
 
-  const toggleSeriesExpansion = (id: string) => {
+  const toggleSeriesExpansion = (serieId: string) => {
     setExpandedSeries((prev) => ({
       ...prev,
-      [id]: !prev[id],
+      [serieId]: !prev[serieId],
     }));
   };
 
@@ -258,45 +165,48 @@ const TrainingModelsPage = () => {
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const draggedItem = trainingModels.find(
-      (model) => model.name === active.id
+    const draggedItemId = String(active.id);
+    const draggedItem = currentTrainingModels.find(
+      (model) => model.id === draggedItemId
     );
     if (draggedItem) {
       setActiveDragItem(draggedItem);
     }
-    // Adiciona uma classe ao body para desativar interações indesejadas
     document.body.classList.add("dragging");
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDragItem(null);
-
-    // Remove a classe ao finalizar o arraste
     document.body.classList.remove("dragging");
 
-    if (over) {
-      const sourceId: string = String(active.id);
-      const targetId: string = String(over.id);
+    if (over && active) {
+      const sourceModelId: string = String(active.id);
+      const targetSerieId: string = String(over.id);
+
+      const draggedModel = currentTrainingModels.find(
+        (model) => model.id === sourceModelId
+      );
+      if (!draggedModel) return;
 
       setDroppedItems((prev) => {
         const updated = { ...prev };
-        if (!updated[targetId]) {
-          updated[targetId] = [];
+        const targetItems = updated[targetSerieId] || [];
+        if (!targetItems.includes(draggedModel.name)) {
+          updated[targetSerieId] = [...targetItems, draggedModel.name];
         }
-        updated[targetId] = [...updated[targetId], sourceId];
         return updated;
       });
 
       setExpandedSeries((prev) => ({
         ...prev,
-        [targetId]: true,
+        [targetSerieId]: true,
       }));
     }
   };
 
-  const handleCardClick = (event: React.MouseEvent) => {
-    event.stopPropagation(); // Impede que o clique no card ative o arraste
+  const handleCardClick = () => {
+    // No action needed here
   };
 
   const handleRemoveDroppedItem = (serieId: string, position: number) => {
@@ -317,32 +227,49 @@ const TrainingModelsPage = () => {
     });
   };
 
-  const hasDroppedItems = (serieId: string) => {
-    return droppedItems[serieId] && droppedItems[serieId].length > 0;
+  const hasDroppedItems = (serieId: string): boolean => {
+    return !!droppedItems[serieId] && droppedItems[serieId].length > 0;
   };
 
-  const getDroppedItemCount = (serieId: string) => {
+  const getDroppedItemCount = (serieId: string): number => {
     return droppedItems[serieId]?.length || 0;
   };
 
-  const handleEditModel = (
-    model: (typeof trainingModels)[number],
-    event: React.MouseEvent
-  ) => {
-    event.preventDefault(); // Previne o comportamento padrão
-    event.stopPropagation(); // Impede que o evento de clique interfira no arrastar
+  const handleEditModel = (model: TrainingModel, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     setEditingModel(model);
-    setEditModalOpened(true);
+    setExerciseModalOpened(true);
   };
 
-  const toggleFavorite = (
-    model: (typeof trainingModels)[number],
+  const toggleTrainingModelFavorite = (
+    modelToToggle: TrainingModel,
     event: React.MouseEvent
   ) => {
-    event.preventDefault(); // Previne o comportamento padrão
-    event.stopPropagation(); // Impede que o evento de clique interfira no arrastar
-    model.isFavorite = !model.isFavorite;
-    console.log(`${model.name} favorito: ${model.isFavorite}`);
+    event.preventDefault();
+    event.stopPropagation();
+    setCurrentTrainingModels((prevModels) =>
+      prevModels.map((model) =>
+        model.id === modelToToggle.id
+          ? { ...model, isFavorite: !model.isFavorite }
+          : model
+      )
+    );
+  };
+
+  const toggleSerieFavorite = (
+    serieIdToToggle: string,
+    event: React.MouseEvent
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setCurrentSeries((prevSeries: Serie[]) =>
+      prevSeries.map((serie: Serie) =>
+        serie.id === serieIdToToggle
+          ? { ...serie, isFavorite: !serie.isFavorite }
+          : serie
+      )
+    );
   };
 
   useEffect(() => {
@@ -351,7 +278,8 @@ const TrainingModelsPage = () => {
     }
   }, [editingModel]);
 
-  const filteredTrainingModels = trainingModels
+  // --- Data Filtering & Sorting (Should be okay) ---
+  const filteredTrainingModels = currentTrainingModels
     .filter((model) =>
       model.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -365,16 +293,11 @@ const TrainingModelsPage = () => {
     }
   });
 
-  const filteredSeries = series
+  const filteredSeries = currentSeries
     .filter((serie) =>
       serie.name.toLowerCase().includes(seriesSearchTerm.toLowerCase())
     )
     .filter((serie) => !showSeriesFavoritesOnly || serie.isFavorite)
-    .filter(
-      (serie) =>
-        seriesNameFilter.trim() === "" ||
-        serie.name.toLowerCase().includes(seriesNameFilter.toLowerCase())
-    )
     .filter(
       (serie) =>
         seriesLevelFilter.length === 0 ||
@@ -389,22 +312,59 @@ const TrainingModelsPage = () => {
     }
   });
 
+  // Update the signature and logic for handleModalSave
+  const handleModalSave = (saveData: ExerciseModalSaveData) => {
+    console.log("Exercise modal saved:", saveData);
+    if (editingModel) {
+      console.log("Updating Training Model:", editingModel.id);
+      setCurrentTrainingModels((prev) =>
+        prev.map((m) =>
+          m.id === editingModel.id
+            ? {
+                ...m,
+                name: saveData.name,
+                description: saveData.description,
+                exercises: saveData.exercises,
+              }
+            : m
+        )
+      );
+    } else {
+      console.log("Creating new Training Model:");
+      const newModel: TrainingModel = {
+        id: `tm-${Date.now()}`,
+        name: saveData.name || "Novo Treino",
+        description: saveData.description || "",
+        createdAt: new Date().toISOString().split("T")[0],
+        isFavorite: false,
+        exercises: saveData.exercises,
+      };
+      setCurrentTrainingModels((prev) => [...prev, newModel]);
+    }
+    setExerciseModalOpened(false);
+    setEditingModel(null);
+  };
+
+  // --- Render ---
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <Container size="xl" py="xl">
         <Title order={2} mb="md">
           Modelos de Treino
         </Title>
-        <Grid gutter="md" align="stretch">
-          <Grid.Col span={8}>
+        <Grid gutter="xl" align="stretch">
+          <Grid.Col span={{ base: 12, md: 8 }}>
             <Group align="center" justify="space-between" mb="md">
-              <Group />
-              <Group gap={8}>
+              <div />
+              <Group gap="sm">
                 <Button
                   variant="filled"
                   color="green"
                   leftSection={<IconPlus size={16} />}
-                  onClick={() => setExerciseModalOpened(true)}
+                  onClick={() => {
+                    setEditingModel(null);
+                    setExerciseModalOpened(true);
+                  }}
                 >
                   Criar Treino
                 </Button>
@@ -418,387 +378,122 @@ const TrainingModelsPage = () => {
                 </Button>
               </Group>
             </Group>
-            <Flex mb="md" gap="md" align="flex-start">
-              <Flex direction="column" style={{ flex: 1 }}>
-                <Text>Nível de Treino</Text>
-                <MultiSelect
-                  data={levels}
-                  value={selectedLevels}
-                  onChange={setSelectedLevels}
-                  placeholder="Selecione níveis"
-                  clearable
-                />
-              </Flex>
-              <Flex direction="column" style={{ flex: 1 }}>
-                <Text>Grupos Musculares</Text>
-                <MultiSelect
-                  data={muscleGroups}
-                  value={selectedMuscleGroups}
-                  onChange={setSelectedMuscleGroups}
-                  placeholder="Selecione grupos"
-                  clearable
-                />
-              </Flex>
-              <Flex direction="column" style={{ flex: 1 }}>
-                <Text>Ordenar por</Text>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
-                  style={{
-                    padding: "0.5rem",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                    width: "100%",
-                  }}
-                >
-                  <option value="recent">Mais Recentes</option>
-                  <option value="oldest">Mais Antigos</option>
-                </select>
-              </Flex>
-            </Flex>
-            <Flex mb="md" gap="md" align="center">
-              <input
-                type="text"
-                placeholder="Buscar por nome do treino"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: "0.5rem",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
+
+            <TrainingModelFilters
+              selectedLevels={selectedLevels}
+              setSelectedLevels={setSelectedLevels}
+              levels={levelsData}
+              selectedMuscleGroups={selectedMuscleGroups}
+              setSelectedMuscleGroups={setSelectedMuscleGroups}
+              muscleGroups={muscleGroupsData}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              showFavoritesOnly={showFavoritesOnly}
+              setShowFavoritesOnly={setShowFavoritesOnly}
+            />
+
+            <div style={{ height: "calc(100vh - 250px)", overflowY: "auto" }}>
+              <TrainingModelList
+                models={sortedTrainingModels}
+                handleCardClick={handleCardClick}
+                handleEditModel={handleEditModel}
+                toggleFavorite={toggleTrainingModelFavorite}
               />
-              <label style={{ display: "flex", alignItems: "center" }}>
-                <input
-                  type="checkbox"
-                  checked={showFavoritesOnly}
-                  onChange={(e) => setShowFavoritesOnly(e.target.checked)}
-                  style={{ marginRight: "0.5rem" }}
-                />
-                Favoritos
-              </label>
-            </Flex>
-            <div style={{ height: "100%" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: "1rem",
-                  overflowY: "auto",
-                }}
-              >
-                {sortedTrainingModels.map((model, index) => (
-                  <DraggableCard id={model.name} key={index}>
-                    {(dragListeners) => (
-                      <Card
-                        shadow="sm"
-                        padding="lg"
-                        radius="md"
-                        withBorder
-                        style={{
-                          border: "1px solid #e0e0e0",
-                          boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                          borderRadius: "8px",
-                        }}
-                        onClick={handleCardClick}
-                      >
-                        <Flex align="center" justify="space-between">
-                          <Flex align="center">
-                            <Title order={4}>{model.name}</Title>
-                            <IconEdit
-                              size={20}
-                              color="gray"
-                              style={{
-                                cursor: "pointer",
-                                marginLeft: "0.5rem",
-                              }}
-                              onClick={(event) => handleEditModel(model, event)}
-                            />
-                          </Flex>
-                          <Flex>
-                            <IconStar
-                              size={20}
-                              color="#FFD700"
-                              style={{ cursor: "pointer" }}
-                              onClick={(event) => toggleFavorite(model, event)}
-                            />
-                            <IconGripVertical
-                              size={20}
-                              color="gray"
-                              style={{
-                                cursor: "grab",
-                                marginLeft: "0.5rem",
-                              }}
-                              {...dragListeners}
-                            />
-                          </Flex>
-                        </Flex>
-                        <Text size="sm" color="dimmed">
-                          {model.description}
-                        </Text>
-                      </Card>
-                    )}
-                  </DraggableCard>
-                ))}
-              </div>
             </div>
           </Grid.Col>
-          <Grid.Col span={4}>
+
+          <Grid.Col span={{ base: 12, md: 4 }}>
             <Card
               withBorder
               shadow="sm"
               padding="lg"
-              style={{ height: "100%" }}
+              style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
               <Title order={4} mb="sm">
                 Séries
               </Title>
-              <Flex mb="md" gap="md" align="flex-start">
-                <Flex direction="column" style={{ flex: 1 }}>
-                  <Text>Nível de Série</Text>
-                  <MultiSelect
-                    data={levels}
-                    value={selectedSeriesLevels}
-                    onChange={setSelectedSeriesLevels}
-                    placeholder="Selecione níveis"
-                    clearable
-                  />
-                </Flex>
-                <Flex direction="column" style={{ flex: 1 }}>
-                  <Text>Ordenar por</Text>
-                  <select
-                    value={seriesSortOrder}
-                    onChange={(e) => setSeriesSortOrder(e.target.value)}
-                    style={{
-                      padding: "0.5rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                      width: "100%",
-                    }}
-                  >
-                    <option value="recent">Recentes</option>
-                    <option value="oldest">Antigos</option>
-                  </select>
-                </Flex>
-              </Flex>
-              <Flex mb="md" gap="md" align="center">
-                <MultiSelect
-                  data={levels}
-                  value={seriesLevelFilter}
-                  onChange={setSeriesLevelFilter}
-                  placeholder="Filtrar por nível"
-                  clearable
-                  style={{ minWidth: 180 }}
+
+              <SeriesFilters
+                selectedSeriesLevels={selectedSeriesLevels}
+                setSelectedSeriesLevels={setSelectedSeriesLevels}
+                seriesLevelFilter={seriesLevelFilter}
+                setSeriesLevelFilter={setSeriesLevelFilter}
+                levels={levelsData}
+                seriesSortOrder={seriesSortOrder}
+                setSeriesSortOrder={setSeriesSortOrder}
+                seriesSearchTerm={seriesSearchTerm}
+                setSeriesSearchTerm={setSeriesSearchTerm}
+                showSeriesFavoritesOnly={showSeriesFavoritesOnly}
+                setShowSeriesFavoritesOnly={setShowSeriesFavoritesOnly}
+              />
+
+              <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+                <SeriesList
+                  series={sortedSeries}
+                  droppedItems={droppedItems}
+                  expandedSeries={expandedSeries}
+                  handleSeriesNameClick={handleSeriesNameClick}
+                  getDroppedItemCount={getDroppedItemCount}
+                  toggleFavorite={toggleSerieFavorite}
+                  toggleSeriesExpansion={toggleSeriesExpansion}
+                  handleRemoveDroppedItem={handleRemoveDroppedItem}
+                  hasDroppedItems={hasDroppedItems}
                 />
-                <label style={{ display: "flex", alignItems: "center" }}>
-                  <input
-                    type="checkbox"
-                    checked={showSeriesFavoritesOnly}
-                    onChange={(e) =>
-                      setShowSeriesFavoritesOnly(e.target.checked)
-                    }
-                    style={{ marginRight: "0.5rem" }}
-                  />
-                  Favoritos
-                </label>
-              </Flex>
-              <Flex>
-                <input
-                  type="text"
-                  placeholder="Buscar por nome da série"
-                  value={seriesSearchTerm}
-                  onChange={(e) => setSeriesSearchTerm(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: "0.5rem",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                  }}
-                />
-              </Flex>
-              <div style={{ overflowY: "auto", flex: 1 }}>
-                {sortedSeries.map((serie, index) => (
-                  <DroppableCard id={`serie-${index}`} key={index}>
-                    <Card
-                      shadow="sm"
-                      padding="lg"
-                      style={{
-                        cursor: "pointer",
-                        backgroundColor: "#f7f7f7",
-                        marginBottom: 16,
-                      }}
-                    >
-                      <Flex align="center" justify="space-between">
-                        <Flex align="center">
-                          <IconFolder
-                            size={24}
-                            color="teal"
-                            style={{ marginRight: "0.5rem" }}
-                          />
-                          <Title
-                            order={4}
-                            style={{ cursor: "pointer" }}
-                            onClick={() =>
-                              handleSeriesNameClick(`serie-${index}`)
-                            }
-                          >
-                            {serie.name}
-                          </Title>
-                        </Flex>
-                        <Flex align="center" gap="sm">
-                          <Text size="sm" color="dimmed">
-                            {getDroppedItemCount(`serie-${index}`)} treinos
-                          </Text>
-                          <IconStar
-                            size={20}
-                            color="#FFD700"
-                            style={{ cursor: "pointer" }}
-                          />
-                          {hasDroppedItems(`serie-${index}`) && (
-                            <button
-                              onClick={() =>
-                                toggleSeriesExpansion(`serie-${index}`)
-                              }
-                              style={{
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                              }}
-                            >
-                              {expandedSeries[`serie-${index}`] ? (
-                                <IconChevronUp size={20} color="gray" />
-                              ) : (
-                                <IconChevronDown size={20} color="gray" />
-                              )}
-                            </button>
-                          )}
-                        </Flex>
-                      </Flex>
-                      <Text size="sm" color="dimmed">
-                        {serie.description}
-                      </Text>
-                      {expandedSeries[`serie-${index}`] && (
-                        <div style={{ marginTop: "1rem" }}>
-                          {droppedItems[`serie-${index}`]?.map((item, idx) => (
-                            <Flex
-                              key={idx}
-                              id={`serie-${index}-${item}`}
-                              align="center"
-                              justify="space-between"
-                              style={{ marginBottom: "1rem" }}
-                            >
-                              <Text size="sm" color="dimmed">
-                                {idx + 1}. {item}
-                              </Text>
-                              <button
-                                onClick={() =>
-                                  handleRemoveDroppedItem(`serie-${index}`, idx)
-                                }
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <IconTrash size={20} color="red" />
-                              </button>
-                            </Flex>
-                          ))}
-                        </div>
-                      )}
-                    </Card>
-                  </DroppableCard>
-                ))}
               </div>
             </Card>
           </Grid.Col>
         </Grid>
       </Container>
+
       <DragOverlay dropAnimation={null}>
         {activeDragItem && (
           <Card
-            shadow="sm"
+            shadow="md"
             padding="lg"
             radius="md"
-            withBorder
             style={{
-              border: "1px solid #e0e0e0",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-              borderRadius: "8px",
-              backgroundColor: "#ffffff",
-              pointerEvents: "none", // Garante que o overlay não interfira nos cliques
+              backgroundColor: "white",
+              opacity: 0.9,
+              cursor: "grabbing",
             }}
           >
             <Flex align="center" justify="space-between">
-              <Flex align="center">
-                <Title order={4}>{activeDragItem.name}</Title>
-              </Flex>
-              <Flex>
-                <IconStar
-                  size={20}
-                  color="#FFD700"
-                  style={{ cursor: "pointer" }}
-                />
-              </Flex>
+              <Title order={4}>{activeDragItem.name}</Title>
+              <IconStar
+                size={20}
+                color={activeDragItem.isFavorite ? "#FFD700" : "gray"}
+                fill={activeDragItem.isFavorite ? "#FFD700" : "none"}
+              />
             </Flex>
-            <Text size="sm" color="dimmed">
+            <Text size="sm" color="dimmed" mt="xs">
               {activeDragItem.description}
             </Text>
           </Card>
         )}
       </DragOverlay>
+
       <ExerciseModal
-        handleModalClose={() => setExerciseModalOpened(false)}
-        handleModalSave={(tempExercises) => console.log(tempExercises)}
+        handleModalClose={() => {
+          setExerciseModalOpened(false);
+          setEditingModel(null);
+        }}
+        handleModalSave={handleModalSave}
         modalOpened={exerciseModalOpened}
-        editingExercises={[]} // Garante que seja um array vazio caso editingModel seja null ou undefined
-        trainingModel
+        editingModel={editingModel}
       />
-      <ExerciseModal
-        handleModalClose={() => setEditModalOpened(false)}
-        handleModalSave={(updatedModel) => console.log(updatedModel)}
-        modalOpened={editModalOpened}
-        editingExercises={editingModel ? [] : []} // Corrigido para sempre passar um array
-        trainingModel
-      />
-      <Modal
+
+      <CreateSeriesModal
         opened={seriesModalOpened}
         onClose={() => setSeriesModalOpened(false)}
-        title="Criar Série"
-      >
-        <TextInput
-          label="Nome da Série"
-          placeholder="Digite o nome da série"
-          value={newSeriesName}
-          onChange={(e) => setNewSeriesName(e.target.value)}
-          required
-        />
-        <TextInput
-          label="Descrição"
-          placeholder="Digite a descrição da série"
-          value={newSeriesDescription}
-          onChange={(e) => setNewSeriesDescription(e.target.value)}
-        />
-        <Select
-          label="Nível da Série"
-          placeholder="Selecione o nível"
-          data={levels}
-          value={newSeriesLevel}
-          onChange={(value) => setNewSeriesLevel(value || "")}
-        />
-        <Button
-          variant="filled"
-          color="green"
-          fullWidth
-          mt="md"
-          onClick={handleCreateSeries}
-        >
-          Salvar
-        </Button>
-      </Modal>
+        onCreate={handleCreateSeries}
+        levels={levelsData}
+      />
     </DndContext>
   );
 };

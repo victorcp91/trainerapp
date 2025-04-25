@@ -27,6 +27,9 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+// Import needed types
+import type { TrainingModel, Exercise } from "@/types/training";
+import type { ExerciseModalSaveData } from "@/types/modal";
 
 function SortableItem({
   id,
@@ -35,8 +38,7 @@ function SortableItem({
   id: number | string;
   children: React.ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
   };
@@ -46,38 +48,41 @@ function SortableItem({
     </div>
   );
 }
+
 interface IExerciseModal {
-  handleModalSave: (temp: Exercise[]) => void;
+  handleModalSave: (saveData: ExerciseModalSaveData) => void;
   handleModalClose: () => void;
   modalOpened: boolean;
-  editingExercises: Exercise[];
-  trainingModel?: boolean;
-}
-interface Exercise {
-  name: string;
-  series: number;
-  reps: number;
-  advancedTechnique: string;
-  notes: string;
-  restTime?: number;
+  editingModel: TrainingModel | null;
 }
 
 export function ExerciseModal({
   handleModalClose,
   handleModalSave,
   modalOpened,
-  editingExercises,
-  trainingModel,
+  editingModel,
 }: IExerciseModal) {
-  const [untilFailure, setUntilFailure] = useState(false); // Estado para "Até a falha"
+  const [untilFailure, setUntilFailure] = useState(false);
   const [fieldsError, setFieldsError] = useState<string>("");
   const [tempExercises, setTempExercises] = useState<Exercise[]>(
-    editingExercises || []
-  ); // Inicializa com um array vazio caso editingExercises seja null ou undefined
+    editingModel?.exercises || []
+  );
+  const [modelName, setModelName] = useState(editingModel?.name || "");
+  const [modelDescription, setModelDescription] = useState(
+    editingModel?.description || ""
+  );
 
   useEffect(() => {
-    setTempExercises(editingExercises || []); // Garante que tempExercises seja sempre um array
-  }, [editingExercises]);
+    if (editingModel) {
+      setModelName(editingModel.name);
+      setModelDescription(editingModel.description);
+      setTempExercises(editingModel.exercises || []);
+    } else {
+      setModelName("");
+      setModelDescription("");
+      setTempExercises([]);
+    }
+  }, [editingModel, modalOpened]);
 
   const [filters, setFilters] = useState({
     muscleGroup: "",
@@ -94,9 +99,7 @@ export function ExerciseModal({
     restTime: "",
   });
   const [favoriteExercises, setFavoriteExercises] = useState<number[]>([]);
-  const [showErrors, setShowErrors] = useState(false); // Novo estado para controle de erros
-  const [modelName, setModelName] = useState("");
-  const [modelDescription, setModelDescription] = useState("");
+  const [showErrors, setShowErrors] = useState(false);
 
   const filteredExercises = [
     {
@@ -222,17 +225,15 @@ export function ExerciseModal({
     setFieldsError("");
     const exercise = filteredExercises.find((ex) => ex.id === exerciseId);
     if (!exercise) return;
-    setTempExercises((prev) => [
-      ...prev,
-      {
-        name: exercise.name,
-        series: Number(exerciseDetails.series),
-        reps: Number(exerciseDetails.reps),
-        advancedTechnique: exerciseDetails.advancedTechnique,
-        notes: exerciseDetails.notes,
-        restTime: Number(exerciseDetails.restTime),
-      },
-    ]);
+    const newExercise: Exercise = {
+      name: exercise.name,
+      series: Number(exerciseDetails.series),
+      reps: Number(exerciseDetails.reps),
+      advancedTechnique: exerciseDetails.advancedTechnique,
+      notes: exerciseDetails.notes,
+      restTime: Number(exerciseDetails.restTime),
+    };
+    setTempExercises((prev: Exercise[]) => [...prev, newExercise]);
   };
   const toggleFavorite = (exerciseId: number) => {
     setFavoriteExercises((prev) =>
@@ -242,48 +243,169 @@ export function ExerciseModal({
     );
   };
 
+  const onSaveChanges = () => {
+    if (!modelName) {
+      setFieldsError("Nome do modelo é obrigatório.");
+      setShowErrors(true);
+      return;
+    }
+    setFieldsError("");
+    setShowErrors(false);
+    handleModalSave({
+      name: modelName,
+      description: modelDescription,
+      exercises: tempExercises,
+    });
+  };
+
   return (
     <Modal
       opened={modalOpened}
       onClose={handleModalClose}
-      title={trainingModel ? "Criar Modelo de Treino" : "Adicionar Exercício"}
-      closeOnClickOutside
-      size="100%"
+      title={
+        editingModel ? "Editar Modelo de Treino" : "Criar Modelo de Treino"
+      }
+      size="xl"
     >
-      <Group>
-        {trainingModel && (
-          <Stack
-            style={{
-              flex: 1,
-              marginBottom: "1rem",
-              display: "flex",
-              flexDirection: "row",
-            }}
-          >
-            <TextInput
-              label="Nome do Modelo"
-              placeholder="Digite o nome do modelo"
-              value={modelName}
-              onChange={(e) => setModelName(e.currentTarget.value)}
-              required
-              flex={0.5}
+      <Stack>
+        <TextInput
+          label="Nome do Modelo"
+          placeholder="Ex: Treino de Peito e Tríceps"
+          value={modelName}
+          onChange={(e) => setModelName(e.target.value)}
+          required
+          error={showErrors && !modelName ? "Nome obrigatório" : undefined}
+        />
+        <Textarea
+          label="Descrição do Modelo (Opcional)"
+          placeholder="Ex: Foco em hipertrofia, 3x por semana"
+          value={modelDescription}
+          onChange={(e) => setModelDescription(e.target.value)}
+        />
+        <Group grow>
+          <Select
+            placeholder="Grupo Muscular"
+            data={["Peito", "Costas", "Pernas"]}
+            value={filters.muscleGroup || ""}
+            onChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                muscleGroup: value || "",
+              }))
+            }
+            clearable
+          />
+          <Select
+            placeholder="Subgrupo Muscular"
+            data={["Peitoral superior", "Halteres", "Cabo", "Peso corporal"]}
+            value={filters.subMuscleGroup || ""}
+            onChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                subMuscleGroup: value || "",
+              }))
+            }
+            clearable
+          />
+          <Select
+            placeholder="Equipamento"
+            data={["Barra", "Halteres", "Cabo", "Peso corporal"]}
+            value={filters.equipment || ""}
+            onChange={(value) =>
+              setFilters((prev) => ({ ...prev, equipment: value || "" }))
+            }
+            clearable
+          />
+        </Group>
+        <Group>
+          <TextInput
+            placeholder="Buscar exercício"
+            value={filters.search || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                search: e.currentTarget.value,
+              }))
+            }
+            style={{ flex: 1 }}
+          />
+          <label style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <input
+              type="checkbox"
+              checked={filters.favorite || false}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  favorite: e.target.checked,
+                }))
+              }
             />
-            <TextInput
-              label="Descrição do Modelo"
-              placeholder="Digite a descrição do modelo"
-              value={modelDescription}
-              onChange={(e) => setModelDescription(e.currentTarget.value)}
-              required
-              flex={1}
-            />
-          </Stack>
-        )}
-      </Group>
-      <Group
-        align="center"
-        grow
-        style={{ height: trainingModel ? "70vh" : "80vh" }}
-      >
+            <Text size="sm">Favoritos</Text>
+          </label>
+        </Group>
+        <div
+          style={{
+            overflowY: "auto",
+            height: "calc(100% - 150px)",
+            paddingRight: "10px",
+          }}
+        >
+          <SimpleGrid cols={2} spacing="md" mb="md">
+            {filteredExercises.map((exercise) => (
+              <Card
+                key={exercise.id}
+                shadow="sm"
+                padding="lg"
+                style={{
+                  border: "1px solid #ccc",
+                  cursor: "pointer",
+                  position: "relative",
+                }}
+              >
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(exercise.id);
+                  }}
+                  c="yellow"
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "0px",
+                  }}
+                >
+                  {favoriteExercises.includes(exercise.id) ? (
+                    <IconStarFilled size={20} />
+                  ) : (
+                    <IconStar size={20} />
+                  )}
+                </Button>
+                <Text size="sm">{exercise.name}</Text>
+                <Text size="xs" c="dimmed">
+                  {exercise.group} - {exercise.subGroup}
+                </Text>
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  c="green"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDirectAddExercise(exercise.id);
+                  }}
+                  style={{
+                    position: "absolute",
+                    bottom: "5px",
+                    right: "0px",
+                  }}
+                >
+                  <IconPlus size={20} />
+                </Button>
+              </Card>
+            ))}
+          </SimpleGrid>
+        </div>
         <Stack
           style={{
             flex: 1,
@@ -317,15 +439,14 @@ export function ExerciseModal({
                           border: "1px solid #ccc",
                           position: "relative",
                           minHeight: "90px",
-                          cursor: "grab", // indica que é arrastável
+                          cursor: "grab",
                         }}
                       >
-                        {/* Botão de exclusão */}
                         <Button
                           variant="subtle"
                           c="red"
                           size="xs"
-                          onPointerDown={(e) => e.stopPropagation()} // evita o início do arraste
+                          onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveExercise(index);
@@ -340,7 +461,6 @@ export function ExerciseModal({
                         >
                           <IconTrash size={16} />
                         </Button>
-                        {/* Ícone de arrastar */}
                         <IconGripVertical
                           size={16}
                           style={{
@@ -382,144 +502,10 @@ export function ExerciseModal({
             </Text>
           )}
         </Stack>
-        <Stack
-          mt="xs"
-          style={{ maxWidth: "50%", height: "100%", overflow: "hidden" }}
-        >
-          <Group grow>
-            <Select
-              placeholder="Grupo Muscular"
-              data={["Peito", "Costas", "Pernas"]}
-              value={filters.muscleGroup || ""}
-              onChange={(value) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  muscleGroup: value || "",
-                }))
-              }
-              clearable
-            />
-            <Select
-              placeholder="Subgrupo Muscular"
-              data={["Peitoral superior", "Halteres", "Cabo", "Peso corporal"]}
-              value={filters.subMuscleGroup || ""}
-              onChange={(value) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  subMuscleGroup: value || "",
-                }))
-              }
-              clearable
-            />
-            <Select
-              placeholder="Equipamento"
-              data={["Barra", "Halteres", "Cabo", "Peso corporal"]}
-              value={filters.equipment || ""}
-              onChange={(value) =>
-                setFilters((prev) => ({ ...prev, equipment: value || "" }))
-              }
-              clearable
-            />
-          </Group>
-          <Group>
-            <TextInput
-              placeholder="Buscar exercício"
-              value={filters.search || ""}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  search: e.currentTarget.value,
-                }))
-              }
-              style={{ flex: 1 }}
-            />
-            <label
-              style={{ display: "flex", alignItems: "center", gap: "5px" }}
-            >
-              <input
-                type="checkbox"
-                checked={filters.favorite || false}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    favorite: e.target.checked,
-                  }))
-                }
-              />
-              <Text size="sm">Favoritos</Text>
-            </label>
-          </Group>
-          <div
-            style={{
-              overflowY: "auto",
-              height: trainingModel
-                ? "calc(100% - 130px)"
-                : "calc(100% - 150px)",
-              paddingRight: "10px",
-            }}
-          >
-            <SimpleGrid cols={2} spacing="md" mb="md">
-              {filteredExercises.map((exercise) => (
-                <Card
-                  key={exercise.id}
-                  shadow="sm"
-                  padding="lg"
-                  style={{
-                    border: "1px solid #ccc",
-                    cursor: "pointer",
-                    position: "relative",
-                  }}
-                >
-                  <Button
-                    variant="subtle"
-                    size="xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(exercise.id);
-                    }}
-                    c="yellow"
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      right: "0px",
-                    }}
-                  >
-                    {favoriteExercises.includes(exercise.id) ? (
-                      <IconStarFilled size={20} />
-                    ) : (
-                      <IconStar size={20} />
-                    )}
-                  </Button>
-                  <Text size="sm">{exercise.name}</Text>
-                  <Text size="xs" c="dimmed">
-                    {exercise.group} - {exercise.subGroup}
-                  </Text>
-                  {/* Botão de adição do exercício */}
-                  <Button
-                    variant="subtle"
-                    size="xs"
-                    c="green" // cor ajustada para ação de adicionar
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDirectAddExercise(exercise.id);
-                    }}
-                    style={{
-                      position: "absolute",
-                      bottom: "5px",
-                      right: "0px",
-                    }}
-                  >
-                    <IconPlus size={20} />
-                  </Button>
-                </Card>
-              ))}
-            </SimpleGrid>
-          </div>
-        </Stack>
         <Stack style={{ flex: 1 }}>
           <Group grow>
             <NumberInput
-              label="Séries*" // campo obrigatório
+              label="Séries*"
               placeholder=""
               value={exerciseDetails.series}
               onChange={(value) =>
@@ -633,30 +619,17 @@ export function ExerciseModal({
             <Button variant="outline" onClick={handleModalClose}>
               Cancelar
             </Button>
-            <Button
-              onClick={() => {
-                if (trainingModel && (!modelName || !modelDescription)) {
-                  setFieldsError("Preencha o nome e a descrição do modelo.");
-                  return;
-                }
-                handleModalSave(tempExercises);
-              }}
-              disabled={
-                exerciseDetails.series === "" ||
-                (!untilFailure && exerciseDetails.reps === "") ||
-                exerciseDetails.restTime === ""
-              }
-            >
-              Salvar Alterações
+            <Button onClick={onSaveChanges} mt="md">
+              {editingModel ? "Salvar Alterações" : "Criar Modelo"}
             </Button>
           </Group>
           {fieldsError && (
-            <Text size="xs" color="red">
+            <Text color="red" size="sm" mt="xs">
               {fieldsError}
             </Text>
           )}
         </Stack>
-      </Group>
+      </Stack>
     </Modal>
   );
 }

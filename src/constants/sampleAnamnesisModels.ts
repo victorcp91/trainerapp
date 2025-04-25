@@ -1,15 +1,19 @@
-import { IQuestion } from "@/types/QuestionTypes";
+// import { IQuestion } from "@/types/QuestionTypes"; // Remove unused import
+import { ISavedAnamnesisModel } from "@/types/anamnesis";
 
 // Define a type for the model structure including an ID and name
+/* // Removing the local definition
 export interface ISavedAnamnesisModel {
   id: string;
   name: string;
-  description: string;
-  questions: IQuestion[];
+  questions: IQuestion[]; // Assuming IQuestion is appropriate here
+  createdAt: Date;
+  updatedAt: Date;
 }
+*/
 
 // Sample data for created anamnesis models
-const sampleAnamnesisModels: ISavedAnamnesisModel[] = [
+export const sampleAnamnesisModelsData: ISavedAnamnesisModel[] = [
   {
     id: "model-1-abc",
     name: "Basic Intake Model",
@@ -87,4 +91,4 @@ const sampleAnamnesisModels: ISavedAnamnesisModel[] = [
   },
 ];
 
-export default sampleAnamnesisModels;
+export default sampleAnamnesisModelsData;

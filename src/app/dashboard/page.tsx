@@ -20,17 +20,41 @@ import {
   IconClock,
   IconBell,
 } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 
 const DashboardPage = () => {
   const router = useRouter();
+  const t = useTranslations("DashboardPage");
+
+  const userName = "John Doe";
+  const currentDate = new Date();
+  const activeClientsCount = 3;
+  const nearDueWorkouts = 2;
+  const overdueWorkouts = 1;
+  const todaySessionsCompleted = 2;
+  const todaySessionsTotal = 3;
+  const todayAttendancePercentage =
+    todaySessionsTotal > 0
+      ? (todaySessionsCompleted / todaySessionsTotal) * 100
+      : 0;
+  const notificationExample1Name = "Maria";
+  const notificationExample1Days = 2;
+  const notificationExample2Name = "Carlos";
+
+  const formattedDate = new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(currentDate);
 
   return (
     <Container size="xl" py="xl">
       <Title order={2} mb="md">
-        Bem-vindo de volta, John Doe
+        {t("welcomeBack", { name: userName })}
       </Title>
       <Text c="dimmed" mb="xl">
-        Quinta-feira, 10 de abril de 2025
+        {t("currentDate", { date: formattedDate })}
       </Text>
 
       <Grid gutter="md" align="stretch">
@@ -44,19 +68,19 @@ const DashboardPage = () => {
               <Title
                 order={4}
                 style={{ cursor: "pointer" }}
-                onClick={() => router.push("/dashboard/clientes")}
+                onClick={() => router.push("/dashboard/clients")}
               >
-                Clientes Ativos
+                {t("activeClients")}
               </Title>
             </Group>
             <Group>
-              <Text size="xl">3</Text>
+              <Text size="xl">{activeClientsCount}</Text>
               <Badge color="blue" variant="light">
-                Total
+                {t("totalBadge")}
               </Badge>
             </Group>
             <Text c="dimmed" size="sm">
-              Total de clientes registrados
+              {t("totalClientsRegistered")}
             </Text>
           </Card>
         </Grid.Col>
@@ -68,10 +92,10 @@ const DashboardPage = () => {
           <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconGymnastics size={24} color="orange" />
-              <Title order={4}>Treinos Pendentes</Title>
+              <Title order={4}>{t("pendingWorkouts")}</Title>
             </Group>
             <Group>
-              <Text size="xl">2</Text>
+              <Text size="xl">{nearDueWorkouts}</Text>
               <Badge
                 color="orange"
                 variant="light"
@@ -80,14 +104,14 @@ const DashboardPage = () => {
                   router.push("/dashboard/clients?seriesStatus=near_due")
                 }
               >
-                Em breve
+                {t("nearDueBadge")}
               </Badge>
             </Group>
             <Text c="dimmed" size="sm">
-              Treinos a serem preparados em breve
+              {t("nearDueDescription")}
             </Text>
             <Group mt="sm">
-              <Text size="lg">1</Text>
+              <Text size="lg">{overdueWorkouts}</Text>
               <Badge
                 color="red"
                 variant="light"
@@ -96,11 +120,11 @@ const DashboardPage = () => {
                   router.push("/dashboard/clients?seriesStatus=overdue")
                 }
               >
-                Atrasados
+                {t("overdueBadge")}
               </Badge>
             </Group>
             <Text c="dimmed" size="sm">
-              Treinos atrasados
+              {t("overdueDescription")}
             </Text>
           </Card>
         </Grid.Col>
@@ -112,18 +136,18 @@ const DashboardPage = () => {
           <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconCalendar size={24} color="green" />
-              <Title order={4}>Atendimentos hoje</Title>
+              <Title order={4}>{t("attendancesToday")}</Title>
             </Group>
             <RingProgress
-              sections={[{ value: 90, color: "green" }]}
+              sections={[{ value: todayAttendancePercentage, color: "green" }]}
               label={
                 <Text size="xl" style={{ textAlign: "center" }}>
-                  90%
+                  {Math.round(todayAttendancePercentage)}%
                 </Text>
               }
             />
             <Text c="dimmed" size="sm" mt="sm">
-              De 3 sessões totais
+              {t("ofTotalSessions", { count: todaySessionsTotal })}
             </Text>
           </Card>
         </Grid.Col>
@@ -135,25 +159,25 @@ const DashboardPage = () => {
           <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconClock size={24} color="gray" />
-              <Title order={4}>Próxima Sessão</Title>
+              <Title order={4}>{t("nextSession")}</Title>
             </Group>
             <Text size="xl">--:--</Text>
             <Text c="dimmed" size="sm">
-              Sem mais sessões hoje
+              {t("noMoreSessionsToday")}
             </Text>
           </Card>
         </Grid.Col>
       </Grid>
 
-      <Grid gutter="md" align="stretch">
+      <Grid gutter="md" align="stretch" mt="md">
         <Grid.Col style={{ flexBasis: "50%", maxWidth: "50%" }}>
           <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconBell size={24} color="blue" />
-              <Title order={4}>Agenda de Hoje</Title>
+              <Title order={4}>{t("todaySchedule")}</Title>
             </Group>
             <Center>
-              <Text c="dimmed">Nenhuma sessão agendada para hoje</Text>
+              <Text c="dimmed">{t("noSessionsScheduled")}</Text>
             </Center>
           </Card>
         </Grid.Col>
@@ -162,27 +186,30 @@ const DashboardPage = () => {
           <Card withBorder shadow="sm" padding="lg" style={{ height: "100%" }}>
             <Group align="center" gap={5} mb="sm">
               <IconBell size={24} color="orange" />
-              <Title order={4}>Notificações</Title>
+              <Title order={4}>{t("notifications")}</Title>
             </Group>
             <Text c="dimmed" size="sm">
-              Maria: Novo treino em 2 dias
+              {t("notificationExample1", {
+                name: notificationExample1Name,
+                days: notificationExample1Days,
+              })}
             </Text>
             <Text c="dimmed" size="sm">
-              Carlos: Falta na última sessão
+              {t("notificationExample2", { name: notificationExample2Name })}
             </Text>
           </Card>
         </Grid.Col>
       </Grid>
 
-      <Grid gutter="md">
+      <Grid gutter="md" mt="md">
         <Grid.Col>
           <Card withBorder shadow="sm" padding="lg">
             <Title order={4} mb="sm">
-              Agenda Semanal
+              {t("weeklySchedule")}
             </Title>
             <Grid gutter="xs">
               <Grid.Col span={6}>
-                <Text>Segunda-feira</Text>
+                <Text>{t("monday")}</Text>
                 <Text c="dimmed" size="sm">
                   10:00 - 11:00
                 </Text>
@@ -191,7 +218,7 @@ const DashboardPage = () => {
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Terça-feira</Text>
+                <Text>{t("tuesday")}</Text>
                 <Text c="dimmed" size="sm">
                   14:00 - 15:00
                 </Text>
@@ -200,7 +227,7 @@ const DashboardPage = () => {
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Quarta-feira</Text>
+                <Text>{t("wednesday")}</Text>
                 <Text c="dimmed" size="sm">
                   09:00 - 10:00
                 </Text>
@@ -209,13 +236,13 @@ const DashboardPage = () => {
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Quinta-feira</Text>
+                <Text>{t("thursday")}</Text>
                 <Text c="dimmed" size="sm">
                   16:00 - 17:00
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Sexta-feira</Text>
+                <Text>{t("friday")}</Text>
                 <Text c="dimmed" size="sm">
                   13:00 - 14:00
                 </Text>
@@ -224,15 +251,15 @@ const DashboardPage = () => {
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Sábado</Text>
+                <Text>{t("saturday")}</Text>
                 <Text c="dimmed" size="sm">
                   10:00 - 11:00
                 </Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text>Domingo</Text>
+                <Text>{t("sunday")}</Text>
                 <Text c="dimmed" size="sm">
-                  Sem sessões
+                  {t("noSessions")}
                 </Text>
               </Grid.Col>
             </Grid>
