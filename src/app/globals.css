@@ -46,3 +46,27 @@ body {
   background: #181a1b !important;
   color: #fff !important;
 }
+
+/* Increase visibility of disabled Mantine input fields */
+.mantine-InputWrapper-root input:disabled,
+.mantine-Select-input:disabled,
+.mantine-DateInput-input:disabled,
+.mantine-MultiSelect-input:disabled,
+.mantine-Textarea-input:disabled {
+  opacity: 1 !important; /* Force full opacity */
+  color: var(
+    --mantine-color-gray-8
+  ) !important; /* Use a dark gray from Mantine theme */
+  background-color: var(
+    --mantine-color-gray-1
+  ) !important; /* Use a light gray background */
+  -webkit-text-fill-color: var(
+    --mantine-color-gray-8
+  ) !important; /* Override text fill for WebKit */
+  cursor: not-allowed; /* Keep the cursor style */
+}
+
+/* Ensure the Select dropdown arrow also looks disabled */
+.mantine-Select-input:disabled + .mantine-Select-rightSection svg {
+  opacity: 0.6;
+}

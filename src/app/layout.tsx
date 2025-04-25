@@ -44,7 +44,7 @@ export default async function RootLayout({
       <body className="antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <MantineProvider>
-            <Notifications />
+            <Notifications position="top-right" />
             {children}
           </MantineProvider>
         </NextIntlClientProvider>

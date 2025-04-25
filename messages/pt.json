@@ -486,8 +486,9 @@
       "whatsappButton": "WhatsApp"
     },
     "newClientModal": {
-      "title": "Novo Aluno",
-      "editTitle": "Editar Aluno",
+      "title": "Novo Cliente",
+      "editTitle": "Editar Cliente",
+      "searchTitle": "Buscar Cliente por E-mail",
       "nameLabel": "Nome",
       "namePlaceholder": "Nome completo do aluno",
       "emailLabel": "Email",
@@ -506,7 +507,27 @@
       "saveButton": "Salvar Aluno",
       "cancelButton": "Cancelar",
       "successNotification": "Aluno salvo com sucesso!",
-      "errorNotification": "Erro ao salvar aluno. Tente novamente."
+      "errorNotification": "Erro ao salvar aluno. Tente novamente.",
+      "searchEmailLabel": "Buscar cliente por e-mail",
+      "searchEmailPlaceholder": "Digite o e-mail para buscar...",
+      "searchButtonLabel": "Buscar",
+      "userFoundMessage": "Usuário encontrado: {name}. Os dados foram pré-preenchidos.",
+      "userNotFoundMessage": "Usuário não encontrado. Preencha os dados para cadastrar um novo cliente.",
+      "saveChangesButton": "Salvar Alterações",
+      "createClientButton": "Criar Cliente",
+      "validation": {
+        "nameTooShort": "Nome deve ter pelo menos 2 caracteres",
+        "invalidEmail": "E-mail inválido",
+        "invalidPhone": "Telefone inválido",
+        "birthDateRequired": "Data de nascimento é obrigatória",
+        "genderRequired": "Gênero é obrigatório",
+        "typeRequired": "Tipo de cliente é obrigatório",
+        "anamnesisModelRequired": "Seleção do modelo de anamnese é obrigatória"
+      },
+      "anamnesisModelLabel": "Modelo de Anamnese",
+      "anamnesisModelPlaceholder": "Selecione um modelo",
+      "successNotificationTitle": "Sucesso",
+      "successNotificationAddMessage": "Novo cliente adicionado com sucesso!"
     },
     "scheduleModal": {
       "title": "Agendar Atendimento",

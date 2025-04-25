@@ -24,6 +24,6 @@ export interface ClientFormValues {
   birthDate: Date | null; // Note: API/DB might store as string
   gender: string | null;
   type: string | null;
-  tags: string[];
   observations: string;
+  anamnesisModelId: string | null; // Add field for selected model ID
 }
