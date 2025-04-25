@@ -151,8 +151,9 @@
   },
   "standardAnamnesis": {
     "welcome": {
-      "title": "Welcome Questions",
-      "description": "Basic introductory questions."
+      "title": "Welcome",
+      "description": "Let's start by getting to know you a little better.",
+      "buttonText": "Continue"
     },
     "trainer": {
       "name": "Default Trainer",

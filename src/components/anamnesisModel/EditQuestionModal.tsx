@@ -241,7 +241,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
         return (
           <>
             <TextInput
-              label={t("anamnesisModelEditor.editQuestionModal.title")}
+              label={t("anamnesisModelEditor.editQuestionModal.questionTitle")}
               name="title"
               value={welcomeFormData.title || ""}
               onChange={handleInputChange}
@@ -298,7 +298,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
                     placeholder={t(
                       "anamnesisModelEditor.editQuestionModal.optionLabelPlaceholder"
                     )}
-                    value={t(option.label)}
+                    value={option.label}
                     onChange={(e) => {
                       handleOptionChange(index, "label", e.target.value);
                     }}
