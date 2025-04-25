@@ -19,6 +19,7 @@ import {
   IconSettings,
   IconLogout,
   IconClipboardText,
+  IconMessageCircle,
 } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
@@ -37,7 +38,6 @@ export default function DashboardLayout({
         breakpoint: "sm",
         collapsed: { mobile: !opened },
       }}
-      padding="md"
     >
       <AppShell.Navbar
         p={24}
@@ -186,6 +186,22 @@ export default function DashboardLayout({
               href="/dashboard/anamnesis-models"
               label={t("anamnesisModels")}
               leftSection={<IconClipboardText size={20} />}
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: 16,
+                borderRadius: 8,
+                padding: 10,
+                marginBottom: 2,
+                transition: "background .2s, color .2s",
+              }}
+              active={false}
+              className="sidebar-link"
+            />
+            <NavLink
+              href="/dashboard/chats"
+              label={t("chats")}
+              leftSection={<IconMessageCircle size={20} />}
               style={{
                 color: "#fff",
                 fontWeight: 500,

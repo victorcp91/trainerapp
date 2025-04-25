@@ -20,10 +20,13 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconPencil } from "@tabler/icons-react"; // adicionado icone de edição
+import { useTranslations } from "next-intl";
 
 const AccountPage = () => {
+  const t = useTranslations("AccountPage");
+
   // Estados da seção "Informações pessoais"
-  const [nome, setNome] = useState("Seu Nome");
+  const [nome, setNome] = useState(t("yourNamePlaceholder"));
   const [telefone, setTelefone] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
@@ -53,8 +56,8 @@ const AccountPage = () => {
   const handleAtualizarSenha = () => {
     // Lógica de atualização de senha
     showNotification({
-      title: "Sucesso",
-      message: "Senha atualizada com sucesso",
+      title: t("notificationSuccessTitle"),
+      message: t("notificationPasswordSuccessMessage"),
       color: "green",
     });
     setSenhaAtual("");
@@ -65,19 +68,19 @@ const AccountPage = () => {
   // Adicionar função para contratar plano
   const handleContratarPlano = () => {
     showNotification({
-      title: "Plano Contratado",
-      message: "Você contratou um novo plano.",
+      title: t("notificationPlanHiredTitle"),
+      message: t("notificationPlanHiredMessage"),
       color: "green",
     });
     setPlano("Premium");
   };
 
   const handleExcluirConta = () => {
-    if (confirmacaoExclusao === "Quero excluir") {
+    if (confirmacaoExclusao === t("deleteConfirmationText")) {
       // Lógica de exclusão de conta
       showNotification({
-        title: "Conta excluída",
-        message: "Sua conta foi deletada",
+        title: t("notificationAccountDeletedTitle"),
+        message: t("notificationAccountDeletedMessage"),
         color: "red",
       });
       setModalExclusaoAberto(false);
@@ -87,8 +90,8 @@ const AccountPage = () => {
   const handleSalvarInfoPessoais = () => {
     // Lógica para salvar informações pessoais
     showNotification({
-      title: "Atualizado",
-      message: "Informações pessoais atualizadas",
+      title: t("notificationUpdatedTitle"),
+      message: t("notificationUpdatedMessage"),
       color: "green",
     });
   };
@@ -96,7 +99,7 @@ const AccountPage = () => {
   return (
     <Container size="xl" py="xl">
       <Title order={2} mb="md">
-        Minha Conta
+        {t("title")}
       </Title>
       <SimpleGrid cols={2} spacing="lg">
         {/* Seção 1: Informações pessoais */}
@@ -143,23 +146,27 @@ const AccountPage = () => {
               )}
             </FileButton>
             <TextInput
-              label="Nome completo"
+              label={t("fullNameLabel")}
               value={nome}
               onChange={(e) => setNome(e.currentTarget.value)}
               style={{ flex: 1 }}
             />
           </Group>
           <Stack mt="md" style={{ flexGrow: 1 }}>
-            <TextInput label="E-mail" value="seuemail@dominio.com" disabled />
             <TextInput
-              label="Telefone"
-              placeholder="(00) 00000-0000"
+              label={t("emailLabel")}
+              value="seuemail@dominio.com"
+              disabled
+            />
+            <TextInput
+              label={t("phoneLabel")}
+              placeholder={t("phonePlaceholder")}
               value={telefone}
               onChange={(e) => setTelefone(e.currentTarget.value)}
             />
           </Stack>
           <Button mt="xl" onClick={handleSalvarInfoPessoais}>
-            Salvar Informações
+            {t("saveInfoButton")}
           </Button>
         </Card>
 
@@ -169,26 +176,26 @@ const AccountPage = () => {
           p="lg"
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          <Title order={3}>Segurança</Title>
+          <Title order={3}>{t("securityTitle")}</Title>
           <Stack mt="md" style={{ flexGrow: 1 }}>
             <PasswordInput
-              label="Senha atual"
+              label={t("currentPasswordLabel")}
               value={senhaAtual}
               onChange={(e) => setSenhaAtual(e.currentTarget.value)}
             />
             <PasswordInput
-              label="Nova senha"
+              label={t("newPasswordLabel")}
               value={novaSenha}
               onChange={(e) => setNovaSenha(e.currentTarget.value)}
             />
             <PasswordInput
-              label="Confirmar nova senha"
+              label={t("confirmNewPasswordLabel")}
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.currentTarget.value)}
             />
           </Stack>
           <Button mt="xl" onClick={handleAtualizarSenha}>
-            Atualizar senha
+            {t("updatePasswordButton")}
           </Button>
         </Card>
 
@@ -198,16 +205,20 @@ const AccountPage = () => {
           p="lg"
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          <Title order={3}>Informações de Plano</Title>
+          <Title order={3}>{t("planInfoTitle")}</Title>
           <Stack style={{ flexGrow: 1 }}>
-            <Text>Tipo de plano: {plano}</Text>
+            <Text>
+              {t("planTypeLabel", {
+                plan: t(plano === "Gratuito" ? "planFree" : "planPremium"),
+              })}
+            </Text>
             {plano === "Premium" && (
               <>
                 <Select
-                  label="Renovação"
+                  label={t("renewalLabel")}
                   data={[
-                    { value: "automática", label: "Automática" },
-                    { value: "manual", label: "Manual" },
+                    { value: "automática", label: t("renewalAuto") },
+                    { value: "manual", label: t("renewalManual") },
                   ]}
                   value={renovacao}
                   onChange={(value: string | null) =>
@@ -216,11 +227,11 @@ const AccountPage = () => {
                 />
                 {renovacao === "manual" ? (
                   <Text color="dimmed" size="sm">
-                    Data de expiração: {expirationDate}
+                    {t("expirationDateLabel", { date: expirationDate })}
                   </Text>
                 ) : (
                   <Text color="dimmed" size="sm">
-                    Data de renovação: {renewalDate}
+                    {t("renewalDateLabel", { date: renewalDate })}
                   </Text>
                 )}
               </>
@@ -229,10 +240,10 @@ const AccountPage = () => {
           {plano === "Gratuito" && (
             <>
               <Text color="dimmed" size="sm">
-                Data final do período de teste: {trialEndDate}
+                {t("trialEndDateLabel", { date: trialEndDate })}
               </Text>
               <Button mt="xl" onClick={handleContratarPlano}>
-                Contratar Plano
+                {t("hirePlanButton")}
               </Button>
             </>
           )}
@@ -249,13 +260,13 @@ const AccountPage = () => {
             height: "100%",
           }}
         >
-          <Title order={3}>Ações Críticas</Title>
+          <Title order={3}>{t("criticalActionsTitle")}</Title>
           <Button
             mt="xl"
             color="red"
             onClick={() => setModalExclusaoAberto(true)}
           >
-            Excluir minha conta
+            {t("deleteAccountButton")}
           </Button>
         </Card>
       </SimpleGrid>
@@ -264,14 +275,12 @@ const AccountPage = () => {
       <Modal
         opened={modalExclusaoAberto}
         onClose={() => setModalExclusaoAberto(false)}
-        title="Confirmação"
+        title={t("modalConfirmTitle")}
         centered
       >
-        <Text mb="sm">
-          Digite “Quero excluir” para confirmar a exclusão da conta.
-        </Text>
+        <Text mb="sm">{t("modalConfirmPrompt")}</Text>
         <TextInput
-          placeholder="Confirmação"
+          placeholder={t("modalConfirmInputPlaceholder")}
           value={confirmacaoExclusao}
           onChange={(e) => setConfirmacaoExclusao(e.currentTarget.value)}
         />
@@ -281,10 +290,10 @@ const AccountPage = () => {
             variant="outline"
             onClick={() => setModalExclusaoAberto(false)}
           >
-            Cancelar
+            {t("modalCancelButton")}
           </Button>
           <Button mt="xl" color="red" onClick={handleExcluirConta}>
-            Confirmar
+            {t("modalConfirmButton")}
           </Button>
         </Group>
       </Modal>
