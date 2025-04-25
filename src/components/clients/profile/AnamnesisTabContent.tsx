@@ -1,5 +1,6 @@
 import React from "react";
 import { Stack, Card, Text, Divider, Group, Avatar } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 // Re-use or define ProgressPhotos type
 interface ProgressPhotos {
@@ -19,11 +20,13 @@ const AnamnesisTabContent: React.FC<AnamnesisTabContentProps> = ({
   progressPhotos,
   onPhotoClick,
 }) => {
+  const t = useTranslations();
   return (
     <Stack>
       {/* Progress Photos (Placeholder for actual Anamnesis content?) */}
       <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Text size="md">Progresso</Text> {/* Title might change */}
+        <Text size="md">{t("clientProfile.progress")}</Text>{" "}
+        {/* Title might change - using Progress for now */}
         <Divider my="sm" />
         <Group>
           {photoDates.map((date) => (

@@ -7,6 +7,7 @@ import {
   TextInput,
   Checkbox,
 } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 interface Option {
   value: string;
@@ -42,42 +43,43 @@ export const TrainingModelFilters: React.FC<TrainingModelFiltersProps> = ({
   showFavoritesOnly,
   setShowFavoritesOnly,
 }) => {
+  const t = useTranslations();
   return (
     <>
       <Flex mb="md" gap="md" align="flex-start">
         <Flex direction="column" style={{ flex: 1 }}>
           <Text size="sm" mb={4}>
-            Nível de Treino
+            {t("trainingModels.filters.levelLabel")}
           </Text>
           <MultiSelect
             data={levels}
             value={selectedLevels}
             onChange={setSelectedLevels}
-            placeholder="Selecione níveis"
+            placeholder={t("trainingModels.filters.selectLevelsPlaceholder")}
             clearable
           />
         </Flex>
         <Flex direction="column" style={{ flex: 1 }}>
           <Text size="sm" mb={4}>
-            Grupos Musculares
+            {t("trainingModels.filters.muscleGroupsLabel")}
           </Text>
           <MultiSelect
             data={muscleGroups}
             value={selectedMuscleGroups}
             onChange={setSelectedMuscleGroups}
-            placeholder="Selecione grupos"
+            placeholder={t("trainingModels.filters.selectGroupsPlaceholder")}
             clearable
           />
         </Flex>
         <Flex direction="column" style={{ flex: 1 }}>
           <Text size="sm" mb={4}>
-            Ordenar por
+            {t("common.sortBy")}
           </Text>
           {/* Using Mantine Select for consistency */}
           <Select
             data={[
-              { value: "recent", label: "Mais Recentes" },
-              { value: "oldest", label: "Mais Antigos" },
+              { value: "recent", label: t("common.sort.recent") },
+              { value: "oldest", label: t("common.sort.oldest") },
             ]}
             value={sortOrder}
             onChange={(value) => setSortOrder(value || "recent")} // Handle null case
@@ -86,13 +88,13 @@ export const TrainingModelFilters: React.FC<TrainingModelFiltersProps> = ({
       </Flex>
       <Flex mb="md" gap="md" align="center">
         <TextInput
-          placeholder="Buscar por nome do treino"
+          placeholder={t("trainingModels.filters.searchByNamePlaceholder")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ flex: 1 }}
         />
         <Checkbox
-          label="Favoritos"
+          label={t("common.favorites")}
           checked={showFavoritesOnly}
           onChange={(event) =>
             setShowFavoritesOnly(event.currentTarget.checked)

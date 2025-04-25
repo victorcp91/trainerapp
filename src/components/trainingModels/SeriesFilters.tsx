@@ -7,6 +7,7 @@ import {
   TextInput,
   Checkbox,
 } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 interface Option {
   value: string;
@@ -40,6 +41,7 @@ export const SeriesFilters: React.FC<SeriesFiltersProps> = ({
   showSeriesFavoritesOnly,
   setShowSeriesFavoritesOnly,
 }) => {
+  const t = useTranslations();
   return (
     <>
       {/* Top row of filters (Level Selection and Sorting) */}
@@ -48,24 +50,26 @@ export const SeriesFilters: React.FC<SeriesFiltersProps> = ({
         {/* Keeping it based on original code structure, but clarify its purpose if needed */}
         <Flex direction="column" style={{ flex: 1 }}>
           <Text size="sm" mb={4}>
-            Nível de Série
+            {t("trainingModels.seriesFilters.levelLabel")}
           </Text>
           <MultiSelect
             data={levels}
             value={selectedSeriesLevels} // Connected to state
             onChange={setSelectedSeriesLevels} // Connected to state handler
-            placeholder="Selecione níveis"
+            placeholder={t(
+              "trainingModels.seriesFilters.selectLevelsPlaceholder"
+            )}
             clearable
           />
         </Flex>
         <Flex direction="column" style={{ flex: 1 }}>
           <Text size="sm" mb={4}>
-            Ordenar por
+            {t("common.sortBy")}
           </Text>
           <Select
             data={[
-              { value: "recent", label: "Recentes" },
-              { value: "oldest", label: "Antigos" },
+              { value: "recent", label: t("common.sort.recent") },
+              { value: "oldest", label: t("common.sort.oldest") },
             ]}
             value={seriesSortOrder}
             onChange={(value) => setSeriesSortOrder(value || "recent")} // Handle null case
@@ -79,12 +83,14 @@ export const SeriesFilters: React.FC<SeriesFiltersProps> = ({
           data={levels}
           value={seriesLevelFilter}
           onChange={setSeriesLevelFilter}
-          placeholder="Filtrar por nível"
+          placeholder={t(
+            "trainingModels.seriesFilters.filterByLevelPlaceholder"
+          )}
           clearable
           style={{ flex: 1, minWidth: 150 }} // Adjusted styling slightly
         />
         <Checkbox
-          label="Favoritos"
+          label={t("common.favorites")}
           checked={showSeriesFavoritesOnly}
           onChange={(event) =>
             setShowSeriesFavoritesOnly(event.currentTarget.checked)
@@ -97,7 +103,9 @@ export const SeriesFilters: React.FC<SeriesFiltersProps> = ({
         {" "}
         {/* Ensure search is below other filters */}
         <TextInput
-          placeholder="Buscar por nome da série"
+          placeholder={t(
+            "trainingModels.seriesFilters.searchByNamePlaceholder"
+          )}
           value={seriesSearchTerm}
           onChange={(e) => setSeriesSearchTerm(e.target.value)}
           style={{

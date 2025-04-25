@@ -17,6 +17,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Exercise } from "../../types/exercise"; // Use relative path
+import { useTranslations } from "next-intl";
 
 // Assuming these types/constants are defined elsewhere and imported or passed as props
 interface SerieModel {
@@ -102,6 +103,7 @@ export function SeriesInfoForm({
   // Setters
   setTriedSerieModelSearch,
 }: SeriesInfoFormProps) {
+  const t = useTranslations();
   const [seriesSearchTerm, setSeriesSearchTerm] = useState("");
   const [seriesLevelFilter, setSeriesLevelFilter] = useState<string[]>([]);
 
@@ -118,8 +120,8 @@ export function SeriesInfoForm({
       <Divider my="sm" />
       <Stack>
         <Select
-          label="Tipo de Treino"
-          placeholder="Selecione o tipo"
+          label={t("newPlan.seriesInfo.trainingTypeLabel")}
+          placeholder={t("newPlan.seriesInfo.selectTypePlaceholder")}
           data={[
             "Hipertrofia",
             "Emagrecimento",
@@ -223,7 +225,7 @@ export function SeriesInfoForm({
           size="lg"
         >
           <TextInput
-            placeholder="Buscar por nome"
+            placeholder={t("newPlan.seriesInfo.searchByNamePlaceholder")}
             value={seriesSearchTerm}
             onChange={(event) => setSeriesSearchTerm(event.currentTarget.value)}
           />

@@ -5,6 +5,7 @@ import {
   InputBase,
   useCombobox,
 } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 interface ISelectClearable {
   options: { value: string; label: string }[];
@@ -17,6 +18,7 @@ export function SelectClearable({
   value,
   setValue,
 }: ISelectClearable) {
+  const t = useTranslations();
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
@@ -50,7 +52,7 @@ export function SelectClearable({
                 size="sm"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => setValue(null)}
-                aria-label="Todos"
+                aria-label={t("common.all")}
               />
             ) : (
               <Combobox.Chevron />
@@ -62,7 +64,7 @@ export function SelectClearable({
           {selectedOption ? (
             selectedOption.label
           ) : (
-            <Input.Placeholder>Todos</Input.Placeholder>
+            <Input.Placeholder>{t("common.all")}</Input.Placeholder>
           )}
         </InputBase>
       </Combobox.Target>

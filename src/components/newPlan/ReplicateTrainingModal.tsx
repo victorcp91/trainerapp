@@ -1,6 +1,7 @@
 import { Modal, Group, Stack, Button, Text, Divider } from "@mantine/core";
 import { Calendar } from "@mantine/dates";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface ReplicateTrainingModalProps {
   opened: boolean;
@@ -20,6 +21,7 @@ export function ReplicateTrainingModal({
   selectedDay,
   onConfirm,
 }: ReplicateTrainingModalProps) {
+  const t = useTranslations();
   const [internalOption, setInternalOption] = useState<string | null>(null);
   const [internalDates, setInternalDates] = useState<Date[]>([]);
 
@@ -35,19 +37,19 @@ export function ReplicateTrainingModal({
   };
 
   const predefinedOptions = [
-    "A cada 2 dias",
-    "A cada 3 dias",
-    "A cada 4 dias",
-    "A cada 5 dias",
-    "A cada 6 dias",
-    "Toda semana",
+    t("newPlan.replicateTrainingModal.every2Days"),
+    t("newPlan.replicateTrainingModal.every3Days"),
+    t("newPlan.replicateTrainingModal.every4Days"),
+    t("newPlan.replicateTrainingModal.every5Days"),
+    t("newPlan.replicateTrainingModal.every6Days"),
+    t("newPlan.replicateTrainingModal.everyWeek"),
   ];
 
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title="Replicar Treino"
+      title={t("newPlan.replicateTrainingModal.title")}
       closeOnClickOutside
     >
       <Group>
@@ -66,7 +68,7 @@ export function ReplicateTrainingModal({
             ))}
           </Group>
           <Text size="sm" c="dimmed">
-            Selecione uma opção pré-definida ou use o calendário ao lado.
+            {t("newPlan.replicateTrainingModal.description")}
           </Text>
         </Stack>
         {startDate && endDate ? (
@@ -75,8 +77,7 @@ export function ReplicateTrainingModal({
             minDate={startDate}
             maxDate={endDate}
             value={internalDates}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={setInternalDates as any}
+            onChange={setInternalDates}
             multiple
             renderDay={(date) => {
               const day = date.getDate();
@@ -129,7 +130,7 @@ export function ReplicateTrainingModal({
           !selectedDay || (!internalOption && internalDates.length === 0)
         }
       >
-        Confirmar Replicação
+        {t("newPlan.replicateTrainingModal.confirmButton")}
       </Button>
     </Modal>
   );

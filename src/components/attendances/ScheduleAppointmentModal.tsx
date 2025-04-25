@@ -12,6 +12,7 @@ import {
 import { DatePicker, DatePickerProps } from "@mantine/dates";
 import { useAttendance } from "@/contexts/AttendanceContext"; // Import context hook
 import { AppointmentLocation, ScheduleDetails } from "@/types/attendances"; // Remove unused ClientOption
+import { useTranslations } from "next-intl";
 
 interface ScheduleAppointmentModalProps {
   isOpen: boolean;
@@ -51,6 +52,7 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
   renderDay,
   initialData,
 }) => {
+  const t = useTranslations();
   // Get context data
   const { selectedDate, setSelectedDate, clientData } = useAttendance();
 
@@ -190,24 +192,26 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
       opened={isOpen}
       onClose={onClose}
       size="xl"
-      title={null} // Remove default title, using custom below
-      closeOnClickOutside={false} // Prevent closing by clicking outside
+      title={null} // Keep null, custom title below
+      closeOnClickOutside={false}
     >
       <Flex align="center" gap="md" mb="md">
         <Title order={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
-          {isEditing ? "Editar Atendimento" : "Agendar Atendimento"}
+          {isEditing
+            ? t("attendances.scheduleModal.editTitle")
+            : t("attendances.scheduleModal.addTitle")}
         </Title>
         <Select
-          placeholder="Selecione o cliente"
-          data={clientData} // Use clientData from context
+          placeholder={t("attendances.scheduleModal.selectClientPlaceholder")}
+          data={clientData}
           value={selectedClient}
           onChange={setSelectedClient}
           style={{ minWidth: 220 }}
           searchable
           required
-          nothingFoundMessage="Nenhum cliente encontrado"
+          nothingFoundMessage={t("common.noClientFound")}
           size="sm"
-          disabled={isEditing} // Disable client change when editing? Or allow? Discuss.
+          disabled={isEditing}
         />
       </Flex>
       <Flex
@@ -252,12 +256,12 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
               size="sm"
               style={{ flex: "none", letterSpacing: 0.2 }}
             >
-              Intervalos ocupados:
+              {t("attendances.scheduleModal.busySlotsLabel")}
             </Text>
             <div style={{ flex: 1, overflowY: "auto" }}>
               {/* TODO: Implement logic to display busy intervals */}
               <Text size="sm" c="dimmed" style={{ fontSize: 14, padding: 8 }}>
-                Nenhum (mock)
+                {t("attendances.scheduleModal.noBusySlots")}
               </Text>
             </div>
           </div>
@@ -277,7 +281,7 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
                   display: "block",
                 }}
               >
-                Horário de início
+                {t("attendances.scheduleModal.startTimeLabel")}
               </label>
               <input
                 type="time"
@@ -305,7 +309,7 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
                   display: "block",
                 }}
               >
-                Horário final
+                {t("attendances.scheduleModal.endTimeLabel")}
               </label>
               <input
                 type="time"
@@ -327,16 +331,16 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
           </Group>
           <Group my="md" grow>
             <MultiSelect
-              label="Recorrência (dias da semana)"
-              placeholder="Selecione os dias (opcional)"
+              label={t("attendances.scheduleModal.recurrenceLabel")}
+              placeholder={t("attendances.scheduleModal.recurrencePlaceholder")}
               data={[
-                { value: "0", label: "Domingo" },
-                { value: "1", label: "Segunda" },
-                { value: "2", label: "Terça" },
-                { value: "3", label: "Quarta" },
-                { value: "4", label: "Quinta" },
-                { value: "5", label: "Sexta" },
-                { value: "6", label: "Sábado" },
+                { value: "0", label: t("common.weekdays.sunday") },
+                { value: "1", label: t("common.weekdays.monday") },
+                { value: "2", label: t("common.weekdays.tuesday") },
+                { value: "3", label: t("common.weekdays.wednesday") },
+                { value: "4", label: t("common.weekdays.thursday") },
+                { value: "5", label: t("common.weekdays.friday") },
+                { value: "6", label: t("common.weekdays.saturday") },
               ]}
               value={recurrence}
               onChange={setRecurrence}
@@ -353,13 +357,13 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
                   display: "block",
                 }}
               >
-                Localização
+                {t("attendances.scheduleModal.locationLabel")}
               </label>
               <input
                 ref={inputRef}
-                placeholder="Digite o local (ex: Smart Fit, Endereço...)"
-                value={locationInputValue} // Bind to input value state
-                onChange={handleLocationInputChange} // Handle manual changes
+                placeholder={t("attendances.scheduleModal.locationPlaceholder")}
+                value={locationInputValue}
+                onChange={handleLocationInputChange}
                 required
                 style={{
                   width: "100%",
@@ -375,7 +379,9 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
                 locationInputValue ===
                   appointmentLocation.formatted_address && (
                   <Text size="xs" c="dimmed" mt={4}>
-                    Selecionado: {appointmentLocation.formatted_address}
+                    {t("attendances.scheduleModal.locationSelected", {
+                      address: appointmentLocation.formatted_address,
+                    })}
                   </Text>
                 )}
             </div>
@@ -390,12 +396,14 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
                   display: "block",
                 }}
               >
-                Observação
+                {t("attendances.scheduleModal.observationLabel")}
               </label>
               <textarea
                 value={appointmentDetails}
                 onChange={(e) => setAppointmentDetails(e.target.value)}
-                placeholder="Digite observações relevantes para o atendimento (opcional)"
+                placeholder={t(
+                  "attendances.scheduleModal.observationPlaceholder"
+                )}
                 style={{
                   width: "100%",
                   minHeight: 60,
@@ -420,7 +428,9 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
             }
             fullWidth // Make button full width
           >
-            {isEditing ? "Salvar Alterações" : "Agendar Atendimento"}
+            {isEditing
+              ? t("common.saveChanges")
+              : t("attendances.scheduleModal.scheduleButton")}
           </Button>
         </>
       )}

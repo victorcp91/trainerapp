@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, TextInput, Card, Group, Text, Button } from "@mantine/core";
 import { IconStar } from "@tabler/icons-react";
 import { TrainingModel } from "@/types/training";
+import { useTranslations } from "next-intl";
 
 // Assuming Level type is defined or imported - Remove if levels prop is removed
 // interface Level {
@@ -33,6 +34,7 @@ export function AddModelModal({
   trainingModels,
   onConfirm,
 }: AddModelModalProps) {
+  const t = useTranslations();
   // Internal state for the modal
   const [searchTerm, setSearchTerm] = useState("");
   // const [levelFilter, setLevelFilter] = useState<string[]>([]); // Remove level filter state
@@ -69,10 +71,10 @@ export function AddModelModal({
     <Modal
       opened={opened}
       onClose={handleClose} // Use the combined handler
-      title="Adicionar Modelo de Treino ao Dia"
+      title={t("newPlan.addModelModal.title")}
     >
       <TextInput
-        placeholder="Buscar por nome do modelo"
+        placeholder={t("newPlan.addModelModal.searchByNamePlaceholder")}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         mb="md"
@@ -90,7 +92,7 @@ export function AddModelModal({
       <div style={{ maxHeight: 250, overflowY: "auto", marginBottom: 16 }}>
         {filteredModels.length === 0 && (
           <Text size="sm" c="dimmed">
-            Nenhum modelo encontrado.
+            {t("common.noModelFound")}
           </Text>
         )}
         {filteredModels.map((model, idx) => (
@@ -130,7 +132,7 @@ export function AddModelModal({
         disabled={!selectedModel} // Disable based on internal state
         onClick={handleConfirm} // Use internal confirm handler
       >
-        Adicionar ao Dia Atual
+        {t("newPlan.addModelModal.addButton")}
       </Button>
     </Modal>
   );

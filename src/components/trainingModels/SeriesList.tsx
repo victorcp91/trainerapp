@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react";
 import { useDroppable } from "@dnd-kit/core";
 import type { Serie } from "@/types/training";
+import { useTranslations } from "next-intl";
 
 // Uncomment the DroppableCard definition
 interface DroppableCardProps {
@@ -54,6 +55,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
   handleRemoveDroppedItem,
   hasDroppedItems,
 }) => {
+  const t = useTranslations();
   return (
     <div style={{ overflowY: "auto", height: "100%" }}>
       {" "}
@@ -91,7 +93,9 @@ export const SeriesList: React.FC<SeriesListProps> = ({
                 </Flex>
                 <Flex align="center" gap="sm">
                   <Text size="xs" color="dimmed">
-                    {getDroppedItemCount(serieId)} treinos
+                    {t("trainingModels.seriesList.trainingCount", {
+                      count: getDroppedItemCount(serieId),
+                    })}
                   </Text>
                   <IconStar
                     size={18}

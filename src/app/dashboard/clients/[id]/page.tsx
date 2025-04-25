@@ -11,8 +11,10 @@ import EvolutionTabContent from "@/components/clients/profile/EvolutionTabConten
 import AnamnesisTabContent from "@/components/clients/profile/AnamnesisTabContent";
 import ProgressComparisonModal from "@/components/clients/profile/ProgressComparisonModal";
 import ReplicateTrainingModal from "@/components/clients/profile/ReplicateTrainingModal";
+import { useTranslations } from "next-intl";
 
 function ClientProfilePage() {
+  const t = useTranslations();
   const [notes, setNotes] = useState<string[]>([]);
   const [newNote, setNewNote] = useState<string>("");
   const [newNoteDate, setNewNoteDate] = useState<Date | null>(new Date());
@@ -82,10 +84,18 @@ function ClientProfilePage() {
 
         <Tabs value={currentTab} onChange={handleTabChange}>
           <Tabs.List>
-            <Tabs.Tab value="profile">Perfil</Tabs.Tab>
-            <Tabs.Tab value="training">Treinos</Tabs.Tab>
-            <Tabs.Tab value="evolution">Evolução</Tabs.Tab>
-            <Tabs.Tab value="anamnesis">Anamnese</Tabs.Tab>
+            <Tabs.Tab value="profile">
+              {t("clientProfile.tabs.profile")}
+            </Tabs.Tab>
+            <Tabs.Tab value="training">
+              {t("clientProfile.tabs.training")}
+            </Tabs.Tab>
+            <Tabs.Tab value="evolution">
+              {t("clientProfile.tabs.evolution")}
+            </Tabs.Tab>
+            <Tabs.Tab value="anamnesis">
+              {t("clientProfile.tabs.anamnesis")}
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="profile" pt="md">

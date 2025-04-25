@@ -291,7 +291,38 @@
     "success": "Success",
     "required": "Required",
     "createModel": "Create Model",
-    "saveModel": "Save Model"
+    "saveModel": "Save Model",
+    "all": "All",
+    "favorites": "Favorites",
+    "description": "Description",
+    "requiredField": "{field} is required.",
+    "series": "Series",
+    "reps": "Reps",
+    "untilFailure": "Until Failure",
+    "advancedTechnique": "Advanced Technique",
+    "restTimeSeconds": "Rest (s)",
+    "addNotesPlaceholder": "Add observations about the exercise...",
+    "noClientFound": "No client found",
+    "noDateSelected": "No date selected",
+    "describeReasonPlaceholder": "Describe the reason (optional)",
+    "saveChanges": "Save Changes",
+    "noModelFound": "No model found",
+    "weekdays": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    },
+    "sortBy": "Sort by",
+    "sort": {
+      "recent": "Recent",
+      "oldest": "Oldest"
+    },
+    "failure": "failure",
+    "rest": "Rest"
   },
   "anamnesisModelsPage": {
     "title": "Anamnesis Models",
@@ -558,6 +589,176 @@
       "thursday": "Thursday",
       "friday": "Friday",
       "saturday": "Saturday"
+    }
+  },
+  "clientProfile": {
+    "tabs": {
+      "profile": "Profile",
+      "training": "Training",
+      "anamnesis": "Anamnesis",
+      "evolution": "Evolution"
+    },
+    "progress": "Progress",
+    "training": {
+      "drafts": "Drafts"
+    },
+    "profile": {
+      "goals": "Goals",
+      "training": "Training",
+      "selectDatePlaceholder": "Select date",
+      "addNoteAriaLabel": "Add note"
+    },
+    "progressModal": {
+      "dateBeforeLabel": "Date Before",
+      "selectDatePlaceholder": "Select a date",
+      "dateAfterLabel": "Date After",
+      "title": "Progress Photo Comparison"
+    }
+  },
+  "attendances": {
+    "pageTitle": "Attendances",
+    "dayDetails": {
+      "totalScheduledTooltip": "Total scheduled",
+      "totalCancelledTooltip": "Total cancelled",
+      "totalNoShowTooltip": "Total no-shows",
+      "totalCompletedTooltip": "Total completed",
+      "noAppointments": "No appointments scheduled for this date.",
+      "addAppointmentButton": "+ Schedule Appointment"
+    },
+    "listItem": {
+      "editTooltip": "Edit attendance",
+      "checkInButton": "Check-in",
+      "absenceButton": "Absence"
+    },
+    "scheduleModal": {
+      "selectClientPlaceholder": "Select client",
+      "editTitle": "Edit Attendance",
+      "addTitle": "Schedule Attendance",
+      "busySlotsLabel": "Busy intervals:",
+      "noBusySlots": "None (mock)",
+      "startTimeLabel": "Start time",
+      "endTimeLabel": "End time",
+      "recurrenceLabel": "Recurrence (days of week)",
+      "recurrencePlaceholder": "Select days (optional)",
+      "locationLabel": "Location",
+      "locationPlaceholder": "Enter location (e.g., Smart Fit, Address...)",
+      "locationSelected": "Selected: {address}",
+      "observationLabel": "Observation",
+      "observationPlaceholder": "Enter relevant observations (optional)",
+      "scheduleButton": "Schedule Attendance"
+    },
+    "cancelModal": {
+      "reasonLabel": "Reason",
+      "title": "Reason for Cancellation"
+    },
+    "absenceModal": {
+      "title": "Reason for Absence"
+    }
+  },
+  "trainingModels": {
+    "pageTitle": "Training Models",
+    "createTrainingButton": "Create Training",
+    "createSeriesButton": "Create Series",
+    "seriesTitle": "Series",
+    "filters": {
+      "selectGroupsPlaceholder": "Select groups",
+      "searchByNamePlaceholder": "Search by training name",
+      "levelLabel": "Training Level",
+      "selectLevelsPlaceholder": "Select levels",
+      "muscleGroupsLabel": "Muscle Groups"
+    },
+    "seriesFilters": {
+      "levelLabel": "Series Level",
+      "selectLevelsPlaceholder": "Select levels",
+      "filterByLevelPlaceholder": "Filter by level",
+      "searchByNamePlaceholder": "Search by series name"
+    },
+    "seriesList": {
+      "trainingCount": "{count, plural, =0 {No trainings} =1 {# training} other {# trainings}}"
+    },
+    "createSeriesModal": {
+      "title": "Create Series",
+      "nameLabel": "Series Name",
+      "namePlaceholder": "Enter series name",
+      "descriptionPlaceholder": "Enter series description",
+      "levelLabel": "Series Level",
+      "levelPlaceholder": "Select level"
+    }
+  },
+  "newPlan": {
+    "addModelModal": {
+      "searchByNamePlaceholder": "Search by model name",
+      "title": "Add Training Model to Day",
+      "addButton": "Add to Current Day"
+    },
+    "seriesInfo": {
+      "trainingTypeLabel": "Training Type",
+      "selectTypePlaceholder": "Select type",
+      "searchByNamePlaceholder": "Search by name",
+      "moveTrainingModal": {
+        "title": "Move Training",
+        "description": "Select the date you want to move the training to. The training will be removed from the current date and added to the chosen date.",
+        "confirmButton": "Confirm Move"
+      },
+      "replicateTrainingModal": {
+        "title": "Replicate Training",
+        "every2Days": "Every 2 days",
+        "every3Days": "Every 3 days",
+        "every4Days": "Every 4 days",
+        "every5Days": "Every 5 days",
+        "every6Days": "Every 6 days",
+        "everyWeek": "Every week",
+        "description": "Select a predefined option or use the calendar.",
+        "confirmButton": "Confirm Replication"
+      }
+    },
+    "dayCard": {
+      "replicateButton": "Replicate Training",
+      "moveButton": "Move Training",
+      "clearButton": "Clear Training",
+      "addModelButton": "Add Training Model",
+      "editTrainingButton": "Edit Training",
+      "createTrainingButton": "Create Training",
+      "weekOptionsTitle": "Options for Week {weekNum}",
+      "replicateNextWeekButton": "Replicate to Next Week",
+      "replicateAllWeeksButton": "Replicate to All Weeks"
+    },
+    "trainingInfo": {
+      "title": "Training Information",
+      "availableDays": "Available days:",
+      "timePerSession": "Time per session:",
+      "timeValue": "1 hour",
+      "equipment": "Equipment:",
+      "equipmentValue": "Free weights",
+      "focus": "Focus:",
+      "focusValue": "Chest and Back",
+      "cardio": "Cardio:",
+      "cardioValue": "Treadmill, Bike",
+      "restrictions": "Restrictions:",
+      "restrictionsValue": "None"
+    }
+  },
+  "anamnesisModel": {
+    "questionItem": {
+      "editAriaLabel": "Edit question",
+      "removeAriaLabel": "Remove question"
+    }
+  },
+  "dashboard": {
+    "exerciseModal": {
+      "modelNameLabel": "Model Name",
+      "muscleGroupPlaceholder": "Muscle Group",
+      "subgroupPlaceholder": "Subgroup",
+      "equipmentPlaceholder": "Equipment",
+      "selectPlaceholder": "Select",
+      "notesLabel": "Notes",
+      "addExercisesTitle": "Add Exercises",
+      "muscleGroupLabel": "Muscle Group",
+      "subgroupLabel": "Subgroup",
+      "equipmentLabel": "Equipment",
+      "searchPlaceholder": "Search exercise",
+      "editTitle": "Edit Model",
+      "createTitle": "Create Model"
     }
   }
 }

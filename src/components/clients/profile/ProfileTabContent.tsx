@@ -13,6 +13,7 @@ import { DateInput } from "@mantine/dates";
 import { IconTrash, IconCheck, IconBrandWhatsapp } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications"; // For email copy notification
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime"; // Type for router
+import { useTranslations } from "next-intl";
 
 // Props required by this tab content
 interface ProfileTabContentProps {
@@ -39,6 +40,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
   setIsAddingNote,
   router,
 }) => {
+  const t = useTranslations();
   const addNote = () => {
     if (newNote.trim() && newNoteDate) {
       const formattedDate = newNoteDate.toLocaleDateString("pt-BR");
@@ -136,7 +138,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
             flexDirection: "column",
           }}
         >
-          <Text size="md">Objetivos</Text>
+          <Text size="md">{t("clientProfile.profile.goals")}</Text>
           <Divider my="sm" />
           <Text>1. Correr uma maratona sem parar para caminhar</Text>
           <Text>2. 10km City2Surf Fun Run em menos de 50 minutos</Text>
@@ -194,7 +196,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
                 <DateInput
                   value={newNoteDate}
                   onChange={setNewNoteDate}
-                  placeholder="Selecione a data"
+                  placeholder={t("clientProfile.profile.selectDatePlaceholder")}
                   maw={150} // Max width for date
                   required
                 />
@@ -209,7 +211,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
                   variant="light"
                   onClick={addNote}
                   px={6}
-                  aria-label="Adicionar nota"
+                  aria-label={t("clientProfile.profile.addNoteAriaLabel")}
                 >
                   <IconCheck size={16} />
                 </Button>
@@ -249,9 +251,10 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
             flex: 1,
             display: "flex",
             flexDirection: "column",
+            justifyContent: "space-between", // Ensure content spacing
           }}
         >
-          <Text size="md">Treino</Text>
+          <Text size="md">{t("clientProfile.profile.training")}</Text>
           <Divider my="sm" />
           <Stack style={{ flexGrow: 1 }}>
             {" "}

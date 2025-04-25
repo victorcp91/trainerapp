@@ -1,5 +1,6 @@
 import React from "react";
 import { Stack, Card, Text, Divider, Group, Avatar } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 interface ProgressPhotos {
   front: string;
@@ -18,11 +19,12 @@ const EvolutionTabContent: React.FC<EvolutionTabContentProps> = ({
   progressPhotos,
   onPhotoClick,
 }) => {
+  const t = useTranslations();
   return (
     <Stack>
       {/* Progress Photos */}
       <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Text size="md">Progresso</Text>
+        <Text size="md">{t("clientProfile.progress")}</Text>
         <Divider my="sm" />
         <Group>
           {photoDates.map((date) => (

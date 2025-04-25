@@ -3,6 +3,7 @@ import { Card, Text, Group, Stack, Divider, Button } from "@mantine/core";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Exercise } from "../../types/exercise"; // Use relative path
+import { useTranslations } from "next-intl";
 
 interface TrainingDay {
   date: Date;
@@ -37,6 +38,7 @@ export function TrainingDayCard({
   const { date, exercises } = dayData;
   const isWeekEnd = (index + 1) % 7 === 0;
   const isLastDay = index === trainingDays.length - 1;
+  const t = useTranslations();
 
   const canReplicateWeek = !trainingDays
     .slice(index - 6, index + 1)
@@ -70,7 +72,7 @@ export function TrainingDayCard({
                     : {}
                 }
               >
-                Replicar Treino
+                {t("newPlan.dayCard.replicateButton")}
               </Button>
               <Button
                 variant="subtle"
@@ -84,7 +86,7 @@ export function TrainingDayCard({
                     : {}
                 }
               >
-                Mover Treino
+                {t("newPlan.dayCard.moveButton")}
               </Button>
               <Button
                 variant="subtle"
@@ -98,7 +100,7 @@ export function TrainingDayCard({
                     : {}
                 }
               >
-                Limpar Treino
+                {t("newPlan.dayCard.clearButton")}
               </Button>
               <Text size="sm" c="dimmed">
                 {format(date, "dd/MM/yyyy")}
@@ -112,7 +114,7 @@ export function TrainingDayCard({
             color="blue"
             onClick={() => onAddModelClick(date)}
           >
-            Adicionar Modelo de Treino
+            {t("newPlan.dayCard.addModelButton")}
           </Button>
           {/* Exercise List */}
           <Stack style={{ maxHeight: "200px", overflowY: "auto" }}>
@@ -130,12 +132,12 @@ export function TrainingDayCard({
                 <Text size="sm">{exercise.name}</Text>
                 <Text size="xs" c="dimmed">
                   {exercise.series} x{" "}
-                  {exercise.reps === 0 ? "falha" : exercise.reps}
+                  {exercise.reps === 0 ? t("common.failure") : exercise.reps}
                   {!!exercise.advancedTechnique && (
                     <> - {exercise.advancedTechnique}</>
                   )}
                   {exercise.restTime
-                    ? ` | Descanso: ${exercise.restTime}s`
+                    ? ` | ${t("common.rest")}: ${exercise.restTime}s`
                     : ""}
                 </Text>
               </Card>
@@ -147,7 +149,9 @@ export function TrainingDayCard({
             c="green"
             onClick={() => onEditCreateClick(date)}
           >
-            {exercises.length > 0 ? "Editar treino" : "Criar treino"}
+            {exercises.length > 0
+              ? t("newPlan.dayCard.editTrainingButton")
+              : t("newPlan.dayCard.createTrainingButton")}
           </Button>
         </Stack>
       </Card>
@@ -164,7 +168,9 @@ export function TrainingDayCard({
         >
           <Stack>
             <Text size="md">
-              Opções para a Semana {Math.floor(index / 7) + 1}
+              {t("newPlan.dayCard.weekOptionsTitle", {
+                weekNum: Math.floor(index / 7) + 1,
+              })}
             </Text>
             <Group grow>
               <Button
@@ -180,7 +186,7 @@ export function TrainingDayCard({
                     : {}
                 }
               >
-                Replicar para a Próxima Semana
+                {t("newPlan.dayCard.replicateNextWeekButton")}
               </Button>
               <Button
                 variant="filled"
@@ -194,7 +200,7 @@ export function TrainingDayCard({
                     : {}
                 }
               >
-                Replicar para Todas as Semanas
+                {t("newPlan.dayCard.replicateAllWeeksButton")}
               </Button>
             </Group>
           </Stack>

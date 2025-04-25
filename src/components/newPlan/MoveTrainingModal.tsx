@@ -1,6 +1,7 @@
 import { Modal, Text, Divider, Button } from "@mantine/core";
 import { Calendar } from "@mantine/dates";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface MoveTrainingModalProps {
   opened: boolean;
@@ -19,6 +20,7 @@ export function MoveTrainingModal({
   selectedDay,
   onConfirm,
 }: MoveTrainingModalProps) {
+  const t = useTranslations();
   const [internalMoveTargetDate, setInternalMoveTargetDate] =
     useState<Date | null>(null);
 
@@ -43,12 +45,11 @@ export function MoveTrainingModal({
     <Modal
       opened={opened}
       onClose={handleInternalClose}
-      title="Mover Treino"
+      title={t("newPlan.moveTrainingModal.title")}
       closeOnClickOutside
     >
       <Text size="sm" mb="sm">
-        Selecione a data para onde deseja mover o treino. O treino será removido
-        da data atual e adicionado à data escolhida.
+        {t("newPlan.moveTrainingModal.description")}
       </Text>
       {startDate && endDate ? (
         <Calendar
@@ -56,8 +57,7 @@ export function MoveTrainingModal({
           minDate={startDate}
           maxDate={endDate}
           value={internalMoveTargetDate}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={setInternalMoveTargetDate as any}
+          onChange={setInternalMoveTargetDate}
           renderDay={(date: Date) => {
             const day = date.getDate();
             const isSelected =
@@ -112,7 +112,7 @@ export function MoveTrainingModal({
               internalMoveTargetDate.toDateString())
         }
       >
-        Confirmar Movimentação
+        {t("newPlan.moveTrainingModal.confirmButton")}
       </Button>
     </Modal>
   );

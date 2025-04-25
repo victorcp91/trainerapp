@@ -68,7 +68,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
               color="blue"
               size="xs"
               onClick={() => onEdit(index)}
-              aria-label="Editar pergunta"
+              aria-label={t("anamnesisModel.questionItem.editAriaLabel")}
             >
               <IconEdit size={16} />
             </Button>
@@ -77,7 +77,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
               color="red"
               size="xs"
               onClick={() => onRemove(index)}
-              aria-label="Remover pergunta"
+              aria-label={t("anamnesisModel.questionItem.removeAriaLabel")}
             >
               <IconTrash size={16} />
             </Button>

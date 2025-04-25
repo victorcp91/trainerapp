@@ -9,6 +9,7 @@ import {
 import AppointmentListItem from "./AppointmentListItem";
 import { Appointment } from "@/types/attendances";
 import { useAttendance } from "@/contexts/AttendanceContext";
+import { useTranslations } from "next-intl";
 
 interface DayDetailsProps {
   appointments: Appointment[];
@@ -33,6 +34,7 @@ const DayDetails: React.FC<DayDetailsProps> = ({
   onCheckIn,
   onOpenScheduleModal,
 }) => {
+  const t = useTranslations();
   const { selectedDate } = useAttendance();
 
   return (
@@ -49,28 +51,40 @@ const DayDetails: React.FC<DayDetailsProps> = ({
                 month: "long",
                 year: "numeric",
               })
-            : "Nenhuma data selecionada"}
+            : t("common.noDateSelected")}
         </Title>
         <Group style={{ alignItems: "center", gap: "15px", flexWrap: "wrap" }}>
-          <Tooltip label="Total de agendamentos" withArrow>
+          <Tooltip
+            label={t("attendances.dayDetails.totalScheduledTooltip")}
+            withArrow
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <IconCalendar size={20} color="blue" />
               <Text size="sm">{totalAppointments}</Text>
             </div>
           </Tooltip>
-          <Tooltip label="Total de concluídos" withArrow>
+          <Tooltip
+            label={t("attendances.dayDetails.totalCompletedTooltip")}
+            withArrow
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <IconCheck size={20} color="green" />
               <Text size="sm">{completedAppointments}</Text>
             </div>
           </Tooltip>
-          <Tooltip label="Total de cancelados" withArrow>
+          <Tooltip
+            label={t("attendances.dayDetails.totalCancelledTooltip")}
+            withArrow
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <IconX size={20} color="red" />
               <Text size="sm">{canceledAppointments}</Text>
             </div>
           </Tooltip>
-          <Tooltip label="Total de faltas" withArrow>
+          <Tooltip
+            label={t("attendances.dayDetails.totalNoShowTooltip")}
+            withArrow
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <IconAlertCircle size={20} color="yellow" />
               <Text size="sm">{missedAppointments}</Text>
@@ -92,7 +106,7 @@ const DayDetails: React.FC<DayDetailsProps> = ({
           ))
         ) : (
           <Text color="dimmed" mt="md" mb="md">
-            Nenhum atendimento agendado para esta data.
+            {t("attendances.dayDetails.noAppointments")}
           </Text>
         )}
         <Button
@@ -102,7 +116,7 @@ const DayDetails: React.FC<DayDetailsProps> = ({
           mt="md"
           fullWidth
         >
-          + Agendar atendimento
+          {t("attendances.dayDetails.addAppointmentButton")}
         </Button>
       </Card>
     </Card>

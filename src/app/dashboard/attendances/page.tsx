@@ -10,6 +10,7 @@ import {
   Indicator,
   Container,
 } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 import {
   AttendanceProvider,
@@ -19,13 +20,16 @@ import {
 import SummaryCards from "@/components/attendances/SummaryCards";
 import CalendarSidebar from "@/components/attendances/CalendarSidebar";
 import DayDetails from "@/components/attendances/DayDetails";
-import ScheduleAppointmentModal, {
-  ScheduleDetails,
-} from "@/components/attendances/ScheduleAppointmentModal";
+import ScheduleAppointmentModal from "@/components/attendances/ScheduleAppointmentModal";
 
-import { Appointment, ClientOption } from "@/types/attendances";
+import {
+  Appointment,
+  ClientOption,
+  ScheduleDetails,
+} from "@/types/attendances";
 
 const AttendanceContent = () => {
+  const t = useTranslations();
   const {
     selectedDate,
     appointments,
@@ -39,10 +43,10 @@ const AttendanceContent = () => {
 
   // Keep mock stats locally in the page component for visual purposes
   // TODO: Remove these when API provides real aggregate stats
-  const [totalAppointments, _setTotalAppointments] = useState(120);
-  const [completedAppointments, _setCompletedAppointments] = useState(60);
-  const [canceledAppointments, _setCanceledAppointments] = useState(25);
-  const [missedAppointments, _setMissedAppointments] = useState(15);
+  const [totalAppointments] = useState(120);
+  const [completedAppointments] = useState(60);
+  const [canceledAppointments] = useState(25);
+  const [missedAppointments] = useState(15);
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] =
@@ -230,7 +234,7 @@ const AttendanceContent = () => {
   return (
     <Container size="xl" py="xl">
       <Title order={2} mb="md">
-        Atendimentos
+        {t("attendances.pageTitle")}
       </Title>
 
       <SummaryCards
@@ -269,20 +273,20 @@ const AttendanceContent = () => {
         onClose={handleCloseReasonModal}
         title={
           currentAction.type === "cancel"
-            ? "Motivo do Cancelamento"
-            : "Motivo da Falta"
+            ? t("attendances.cancelModal.title")
+            : t("attendances.absenceModal.title")
         }
         centered
       >
         <TextInput
-          label="Motivo"
-          placeholder="Descreva o motivo (opcional)"
+          label={t("attendances.cancelModal.reasonLabel")}
+          placeholder={t("common.describeReasonPlaceholder")}
           value={reason}
           onChange={(event) => setReason(event.currentTarget.value)}
           data-autofocus
         />
         <Button mt="md" fullWidth onClick={handleConfirmReason}>
-          Confirmar
+          {t("common.confirm")}
         </Button>
       </Modal>
     </Container>

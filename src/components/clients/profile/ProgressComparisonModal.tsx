@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { IconShare } from "@tabler/icons-react";
 import html2canvas from "html2canvas";
+import { useTranslations } from "next-intl";
 
 interface ProgressPhotos {
   front: string;
@@ -45,6 +46,7 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
   progressPhotos,
   initialBeforeDate,
 }) => {
+  const t = useTranslations();
   const [beforeDate, setBeforeDate] = useState<string | null>(null);
   const [afterDate, setAfterDate] = useState<string | null>(null);
   const [selectedAngles, setSelectedAngles] = useState<string[]>([
@@ -93,21 +95,21 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title="Comparação de Fotos de Progresso"
+      title={t("clientProfile.progressModal.title")}
       size="lg"
     >
       <Group grow>
         <Select
-          label="Data Antes"
-          placeholder="Selecione uma data"
+          label={t("clientProfile.progressModal.dateBeforeLabel")}
+          placeholder={t("clientProfile.progressModal.selectDatePlaceholder")}
           data={photoDates}
           value={beforeDate}
           onChange={setBeforeDate}
           clearable
         />
         <Select
-          label="Data Depois"
-          placeholder="Selecione uma data"
+          label={t("clientProfile.progressModal.dateAfterLabel")}
+          placeholder={t("clientProfile.progressModal.selectDatePlaceholder")}
           data={photoDates.filter((d) => d !== beforeDate)} // Prevent selecting same date
           value={afterDate}
           onChange={setAfterDate}

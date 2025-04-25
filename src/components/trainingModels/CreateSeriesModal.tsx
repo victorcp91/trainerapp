@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, TextInput, Select, Button } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 interface Level {
   value: string;
@@ -23,6 +24,7 @@ export const CreateSeriesModal: React.FC<CreateSeriesModalProps> = ({
   onCreate,
   levels,
 }) => {
+  const t = useTranslations();
   const [newSeriesName, setNewSeriesName] = useState("");
   const [newSeriesDescription, setNewSeriesDescription] = useState("");
   const [newSeriesLevel, setNewSeriesLevel] = useState<string | null>(null); // Use null for Select
@@ -47,25 +49,31 @@ export const CreateSeriesModal: React.FC<CreateSeriesModalProps> = ({
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} title="Criar Série">
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={t("trainingModels.createSeriesModal.title")}
+    >
       <TextInput
-        label="Nome da Série"
-        placeholder="Digite o nome da série"
+        label={t("trainingModels.createSeriesModal.nameLabel")}
+        placeholder={t("trainingModels.createSeriesModal.namePlaceholder")}
         value={newSeriesName}
         onChange={(e) => setNewSeriesName(e.target.value)}
         required
         mb="md"
       />
       <TextInput
-        label="Descrição"
-        placeholder="Digite a descrição da série"
+        label={t("common.description")}
+        placeholder={t(
+          "trainingModels.createSeriesModal.descriptionPlaceholder"
+        )}
         value={newSeriesDescription}
         onChange={(e) => setNewSeriesDescription(e.target.value)}
         mb="md"
       />
       <Select
-        label="Nível da Série"
-        placeholder="Selecione o nível"
+        label={t("trainingModels.createSeriesModal.levelLabel")}
+        placeholder={t("trainingModels.createSeriesModal.levelPlaceholder")}
         data={levels}
         value={newSeriesLevel}
         onChange={setNewSeriesLevel} // Directly set the value or null
@@ -81,7 +89,7 @@ export const CreateSeriesModal: React.FC<CreateSeriesModalProps> = ({
         onClick={handleCreateSeries}
         disabled={!newSeriesName || !newSeriesLevel} // Disable if required fields are empty
       >
-        Salvar
+        {t("common.save")}
       </Button>
     </Modal>
   );

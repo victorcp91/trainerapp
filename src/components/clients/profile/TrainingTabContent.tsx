@@ -9,6 +9,7 @@ import {
   IconCheck,
 } from "@tabler/icons-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useTranslations } from "next-intl";
 
 // Mock data structure for training history item
 interface TrainingHistoryItem {
@@ -40,6 +41,7 @@ const TrainingTabContent: React.FC<TrainingTabContentProps> = ({
   setReplicateModalOpened,
   // Destructure dynamic data props here when added
 }) => {
+  const t = useTranslations();
   // Replace with dynamic data passed via props
   const mockHistory: TrainingHistoryItem[] = [
     {
@@ -236,7 +238,7 @@ const TrainingTabContent: React.FC<TrainingTabContentProps> = ({
           withBorder
           style={{ flex: 1 }}
         >
-          <Text size="md">Rascunhos</Text>
+          <Text size="md">{t("clientProfile.training.drafts")}</Text>
           <Divider my="sm" />
           <Stack>
             {mockDrafts.map((draft) => (

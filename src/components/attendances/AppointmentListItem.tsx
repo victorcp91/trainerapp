@@ -2,6 +2,7 @@ import React from "react";
 import { Card, Group, Text, Avatar, Tooltip, Button } from "@mantine/core";
 import { IconMapPin, IconEdit } from "@tabler/icons-react";
 import { Appointment } from "@/types/attendances"; // Assuming you have a type definition
+import { useTranslations } from "next-intl";
 
 interface AppointmentListItemProps {
   appointment: Appointment;
@@ -18,6 +19,7 @@ const AppointmentListItem: React.FC<AppointmentListItemProps> = ({
   onMarkAbsence,
   onCancel,
 }) => {
+  const t = useTranslations();
   return (
     <Card
       key={appointment.id}
@@ -113,7 +115,7 @@ const AppointmentListItem: React.FC<AppointmentListItemProps> = ({
               color="green"
               onClick={() => onCheckIn(appointment.id)}
             >
-              Check-in
+              {t("attendances.listItem.checkInButton")}
             </Button>
             <Button
               size="xs"
@@ -121,7 +123,7 @@ const AppointmentListItem: React.FC<AppointmentListItemProps> = ({
               color="yellow"
               onClick={() => onMarkAbsence(appointment.id)}
             >
-              Falta
+              {t("attendances.listItem.absenceButton")}
             </Button>
             <Button
               size="xs"
@@ -129,12 +131,12 @@ const AppointmentListItem: React.FC<AppointmentListItemProps> = ({
               color="red"
               onClick={() => onCancel(appointment.id)}
             >
-              Cancelar
+              {t("common.cancel")}
             </Button>
           </Group>
         </Group>
       </Group>
-      <Tooltip label="Editar atendimento" withArrow>
+      <Tooltip label={t("attendances.listItem.editTooltip")} withArrow>
         <IconEdit
           size={20}
           color="blue"

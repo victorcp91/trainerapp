@@ -19,6 +19,7 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import { ExerciseModal } from "@/components/dashboard";
+import { useTranslations } from "next-intl";
 
 // Import types from the new location
 import type {
@@ -97,6 +98,7 @@ const seriesData: Serie[] = [
 ];
 
 const TrainingModelsPage = () => {
+  const t = useTranslations();
   // State uses imported types
   const [currentTrainingModels, setCurrentTrainingModels] =
     useState<TrainingModel[]>(trainingModelsData);
@@ -350,7 +352,7 @@ const TrainingModelsPage = () => {
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <Container size="xl" py="xl">
         <Title order={2} mb="md">
-          Modelos de Treino
+          {t("trainingModels.pageTitle")}
         </Title>
         <Grid gutter="xl" align="stretch">
           <Grid.Col span={{ base: 12, md: 8 }}>
@@ -366,7 +368,7 @@ const TrainingModelsPage = () => {
                     setExerciseModalOpened(true);
                   }}
                 >
-                  Criar Treino
+                  {t("trainingModels.createTrainingButton")}
                 </Button>
                 <Button
                   variant="filled"
@@ -374,7 +376,7 @@ const TrainingModelsPage = () => {
                   leftSection={<IconFolder size={16} />}
                   onClick={() => setSeriesModalOpened(true)}
                 >
-                  Criar Série
+                  {t("trainingModels.createSeriesButton")}
                 </Button>
               </Group>
             </Group>
@@ -416,7 +418,7 @@ const TrainingModelsPage = () => {
               }}
             >
               <Title order={4} mb="sm">
-                Séries
+                {t("trainingModels.seriesTitle")}
               </Title>
 
               <SeriesFilters

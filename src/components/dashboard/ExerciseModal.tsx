@@ -18,6 +18,7 @@ import {
   Text,
   Textarea,
   TextInput,
+  Title,
 } from "@mantine/core";
 import {
   IconGripVertical,
@@ -30,6 +31,7 @@ import { useEffect, useState } from "react";
 // Import needed types
 import type { TrainingModel, Exercise } from "@/types/training";
 import type { ExerciseModalSaveData } from "@/types/modal";
+import { useTranslations } from "next-intl";
 
 function SortableItem({
   id,
@@ -62,6 +64,7 @@ export function ExerciseModal({
   modalOpened,
   editingModel,
 }: IExerciseModal) {
+  const t = useTranslations();
   const [untilFailure, setUntilFailure] = useState(false);
   const [fieldsError, setFieldsError] = useState<string>("");
   const [tempExercises, setTempExercises] = useState<Exercise[]>(
@@ -245,17 +248,24 @@ export function ExerciseModal({
 
   const onSaveChanges = () => {
     if (!modelName) {
-      setFieldsError("Nome do modelo é obrigatório.");
+      setFieldsError(
+        t("common.requiredField", {
+          field: t("dashboard.exerciseModal.modelNameLabel"),
+        })
+      );
       setShowErrors(true);
       return;
     }
     setFieldsError("");
     setShowErrors(false);
-    handleModalSave({
+    const saveData = {
+      id: editingModel?.id || Date.now(),
       name: modelName,
       description: modelDescription,
       exercises: tempExercises,
-    });
+      isFavorite: editingModel?.isFavorite || false,
+    };
+    handleModalSave(saveData);
   };
 
   return (
@@ -263,372 +273,279 @@ export function ExerciseModal({
       opened={modalOpened}
       onClose={handleModalClose}
       title={
-        editingModel ? "Editar Modelo de Treino" : "Criar Modelo de Treino"
+        editingModel
+          ? t("dashboard.exerciseModal.editTitle")
+          : t("dashboard.exerciseModal.createTitle")
       }
-      size="xl"
+      size="90%"
+      styles={{
+        body: {
+          display: "flex",
+          flexDirection: "column",
+          height: "calc(100% - 60px)",
+        },
+      }}
     >
-      <Stack>
+      <Stack style={{ flex: 1, overflowY: "auto" }}>
         <TextInput
-          label="Nome do Modelo"
-          placeholder="Ex: Treino de Peito e Tríceps"
+          label={t("dashboard.exerciseModal.modelNameLabel")}
           value={modelName}
-          onChange={(e) => setModelName(e.target.value)}
+          onChange={(event) => setModelName(event.currentTarget.value)}
+          error={
+            showErrors && !modelName
+              ? t("common.requiredField", {
+                  field: t("dashboard.exerciseModal.modelNameLabel"),
+                })
+              : undefined
+          }
           required
-          error={showErrors && !modelName ? "Nome obrigatório" : undefined}
         />
         <Textarea
-          label="Descrição do Modelo (Opcional)"
-          placeholder="Ex: Foco em hipertrofia, 3x por semana"
+          label={t("common.description")}
           value={modelDescription}
-          onChange={(e) => setModelDescription(e.target.value)}
+          onChange={(event) => setModelDescription(event.currentTarget.value)}
+          minRows={2}
         />
-        <Group grow>
-          <Select
-            placeholder="Grupo Muscular"
-            data={["Peito", "Costas", "Pernas"]}
-            value={filters.muscleGroup || ""}
-            onChange={(value) =>
-              setFilters((prev) => ({
-                ...prev,
-                muscleGroup: value || "",
-              }))
-            }
-            clearable
-          />
-          <Select
-            placeholder="Subgrupo Muscular"
-            data={["Peitoral superior", "Halteres", "Cabo", "Peso corporal"]}
-            value={filters.subMuscleGroup || ""}
-            onChange={(value) =>
-              setFilters((prev) => ({
-                ...prev,
-                subMuscleGroup: value || "",
-              }))
-            }
-            clearable
-          />
-          <Select
-            placeholder="Equipamento"
-            data={["Barra", "Halteres", "Cabo", "Peso corporal"]}
-            value={filters.equipment || ""}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, equipment: value || "" }))
-            }
-            clearable
-          />
-        </Group>
-        <Group>
-          <TextInput
-            placeholder="Buscar exercício"
-            value={filters.search || ""}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                search: e.currentTarget.value,
-              }))
-            }
-            style={{ flex: 1 }}
-          />
-          <label style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <input
-              type="checkbox"
-              checked={filters.favorite || false}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  favorite: e.target.checked,
-                }))
-              }
-            />
-            <Text size="sm">Favoritos</Text>
-          </label>
-        </Group>
-        <div
-          style={{
-            overflowY: "auto",
-            height: "calc(100% - 150px)",
-            paddingRight: "10px",
-          }}
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <SimpleGrid cols={2} spacing="md" mb="md">
-            {filteredExercises.map((exercise) => (
-              <Card
-                key={exercise.id}
-                shadow="sm"
-                padding="lg"
-                style={{
-                  border: "1px solid #ccc",
-                  cursor: "pointer",
-                  position: "relative",
-                }}
-              >
-                <Button
-                  variant="subtle"
-                  size="xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(exercise.id);
-                  }}
-                  c="yellow"
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "0px",
-                  }}
-                >
-                  {favoriteExercises.includes(exercise.id) ? (
-                    <IconStarFilled size={20} />
-                  ) : (
-                    <IconStar size={20} />
-                  )}
-                </Button>
-                <Text size="sm">{exercise.name}</Text>
-                <Text size="xs" c="dimmed">
-                  {exercise.group} - {exercise.subGroup}
-                </Text>
-                <Button
-                  variant="subtle"
-                  size="xs"
-                  c="green"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDirectAddExercise(exercise.id);
-                  }}
-                  style={{
-                    position: "absolute",
-                    bottom: "5px",
-                    right: "0px",
-                  }}
-                >
-                  <IconPlus size={20} />
-                </Button>
-              </Card>
-            ))}
-          </SimpleGrid>
-        </div>
-        <Stack
-          style={{
-            flex: 1,
-            borderRight: "1px solid #ccc",
-            padding: "10px",
-            overflowY: "auto",
-            height: "100%",
-            backgroundColor: "#f7f7f7",
-          }}
-        >
-          {tempExercises.length ? (
-            <DndContext
-              onDragEnd={handleDragEnd}
-              collisionDetection={closestCenter}
-            >
-              <SortableContext
-                items={tempExercises.map((_, index) => index)}
-                strategy={verticalListSortingStrategy}
-              >
-                {tempExercises.map((ex, index) => {
-                  const matchedExercise = filteredExercises.find(
-                    (e) => e.name === ex.name
-                  );
-                  return (
-                    <SortableItem key={index} id={index}>
-                      <Card
-                        key={index}
-                        shadow="sm"
-                        padding="lg"
-                        style={{
-                          border: "1px solid #ccc",
-                          position: "relative",
-                          minHeight: "90px",
-                          cursor: "grab",
-                        }}
-                      >
-                        <Button
-                          variant="subtle"
-                          c="red"
-                          size="xs"
-                          onPointerDown={(e) => e.stopPropagation()}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveExercise(index);
-                          }}
-                          style={{
-                            position: "absolute",
-                            right: "0px",
-                            bottom: "10px",
-                            zIndex: 1,
-                            pointerEvents: "auto",
-                          }}
-                        >
-                          <IconTrash size={16} />
-                        </Button>
-                        <IconGripVertical
-                          size={16}
-                          style={{
-                            position: "absolute",
-                            right: "15px",
-                            top: "15px",
-                          }}
-                        />
-                        <Text
-                          size="sm"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          {ex.name}
+          <SortableContext
+            items={tempExercises.map((_, index) => index)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Stack gap="xs" mt="md">
+              {tempExercises.map((exercise, index) => (
+                <SortableItem key={index} id={index}>
+                  <Card withBorder p="xs">
+                    <Group justify="space-between">
+                      <Group>
+                        <IconGripVertical size={16} />
+                        <Text>{exercise.name}</Text>
+                        <Text size="sm" c="dimmed">
+                          {exercise.series}x
+                          {exercise.reps > 0 ? exercise.reps : "F"} •{" "}
+                          {exercise.restTime}s
                         </Text>
-                        <Text size="xs" c="dimmed">
-                          {ex.series} x {ex.reps === 0 ? "falha" : ex.reps}
-                          {!!ex.advancedTechnique && (
-                            <> - {ex.advancedTechnique}</>
-                          )}
-                          {ex.restTime ? ` | Descanso: ${ex.restTime}s` : ""}
-                        </Text>
-                        {matchedExercise && (
-                          <Text size="xs" c="dimmed">
-                            {matchedExercise.group} - {matchedExercise.subGroup}
+                        {exercise.advancedTechnique && (
+                          <Text size="xs" c="blue">
+                            ({exercise.advancedTechnique})
                           </Text>
                         )}
-                      </Card>
-                    </SortableItem>
-                  );
-                })}
-              </SortableContext>
-            </DndContext>
-          ) : (
-            <Text size="sm" c="dimmed">
-              Nenhum exercício adicionado.
-            </Text>
-          )}
-        </Stack>
-        <Stack style={{ flex: 1 }}>
-          <Group grow>
-            <NumberInput
-              label="Séries*"
-              placeholder=""
-              value={exerciseDetails.series}
-              onChange={(value) =>
-                setExerciseDetails((prev) => ({
-                  ...prev,
-                  series: value === null ? "" : String(value),
-                }))
-              }
-              error={
-                showErrors && exerciseDetails.series === ""
-                  ? "Campo obrigatório"
-                  : null
-              }
-            />
-            <NumberInput
-              label="Repetições*"
-              placeholder=""
-              value={exerciseDetails.reps}
-              onChange={(value) =>
-                setExerciseDetails((prev) => ({
-                  ...prev,
-                  reps: value === null ? "" : String(value),
-                }))
-              }
-              disabled={untilFailure}
-              error={
-                !untilFailure && showErrors && exerciseDetails.reps === ""
-                  ? "Campo obrigatório"
-                  : null
-              }
-            />
-          </Group>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: "5px",
-            }}
+                      </Group>
+                      <IconTrash
+                        size={16}
+                        color="red"
+                        onClick={() => handleRemoveExercise(index)}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </Group>
+                    {exercise.notes && (
+                      <Text size="xs" mt="xs">
+                        {exercise.notes}
+                      </Text>
+                    )}
+                  </Card>
+                </SortableItem>
+              ))}
+              {tempExercises.length === 0 && (
+                <Text c="dimmed" ta="center">
+                  Nenhum exercício adicionado ainda.
+                </Text>
+              )}
+            </Stack>
+          </SortableContext>
+        </DndContext>
+      </Stack>
+
+      {/* Exercise Selection Part */}
+      <Stack mt="xl">
+        <Title order={5}>
+          {t("dashboard.exerciseModal.addExercisesTitle")}
+        </Title>
+        <SimpleGrid cols={3} spacing="sm">
+          <Select
+            label={t("dashboard.exerciseModal.muscleGroupLabel")}
+            placeholder={t("dashboard.exerciseModal.muscleGroupPlaceholder")}
+            data={["Costas", "Pernas", "Braços", "Ombros", "Core"]}
+            value={filters.muscleGroup}
+            onChange={(value) =>
+              setFilters({ ...filters, muscleGroup: value || "" })
+            }
+            clearable
+          />
+          <Select
+            label={t("dashboard.exerciseModal.subgroupLabel")}
+            placeholder={t("dashboard.exerciseModal.subgroupPlaceholder")}
+            data={["Cabo", "Peso corporal", "Barra", "Máquina", "Halteres"]}
+            value={filters.subMuscleGroup}
+            onChange={(value) =>
+              setFilters({ ...filters, subMuscleGroup: value || "" })
+            }
+            clearable
+          />
+          <Select
+            label={t("dashboard.exerciseModal.equipmentLabel")}
+            placeholder={t("dashboard.exerciseModal.equipmentPlaceholder")}
+            data={["Cabo", "Peso corporal", "Barra", "Máquina", "Halteres"]}
+            value={filters.equipment}
+            onChange={(value) =>
+              setFilters({ ...filters, equipment: value || "" })
+            }
+            clearable
+          />
+        </SimpleGrid>
+        <TextInput
+          placeholder={t("dashboard.exerciseModal.searchPlaceholder")}
+          value={filters.search}
+          onChange={(event) =>
+            setFilters({ ...filters, search: event.currentTarget.value })
+          }
+        />
+        <Group>
+          <Button
+            variant={filters.favorite ? "filled" : "light"}
+            onClick={() =>
+              setFilters({ ...filters, favorite: !filters.favorite })
+            }
           >
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={untilFailure}
-                onChange={(e) => {
-                  setUntilFailure(e.target.checked);
-                  if (e.target.checked) {
-                    setExerciseDetails((prev) => ({ ...prev, reps: "" }));
-                  }
-                }}
-              />
-              <Text size="sm" mr="xl">
-                Até a falha
-              </Text>
-            </label>
-          </div>
-          <Group grow>
-            <NumberInput
-              label="Descanso (segundos)*"
-              placeholder="0"
-              value={
-                exerciseDetails.restTime === ""
-                  ? 0
-                  : Number(exerciseDetails.restTime)
-              }
-              onChange={(value) =>
-                setExerciseDetails((prev) => ({
-                  ...prev,
-                  restTime: value === null ? "" : String(value),
-                }))
-              }
-              min={0}
-              error={
-                showErrors && exerciseDetails.restTime === ""
-                  ? "Campo obrigatório"
-                  : null
-              }
-            />
-          </Group>
-          <Group grow>
-            <Select
-              label="Técnica Avançada"
-              placeholder="Selecione"
-              data={["Drop set", "Rest-pause", "Super set"]}
-              value={exerciseDetails.advancedTechnique || ""}
-              onChange={(value) =>
-                setExerciseDetails((prev) => ({
-                  ...prev,
-                  advancedTechnique: value || "",
-                }))
-              }
-            />
-          </Group>
-          <Textarea
-            label="Notas"
-            placeholder="Adicione notas (opcional)"
-            value={exerciseDetails.notes ?? ""}
-            onChange={(e) =>
-              setExerciseDetails((prev) => ({
-                ...prev,
-                notes: e.target.value,
-              }))
+            <Text size="sm">{t("common.favorites")}</Text>
+          </Button>
+        </Group>
+        <Card
+          withBorder
+          padding="sm"
+          style={{ maxHeight: "300px", overflowY: "auto" }}
+        >
+          <Stack gap="xs">
+            {filteredExercises.map((exercise) => (
+              <Card key={exercise.id} withBorder padding="xs">
+                <Group justify="space-between">
+                  <Text size="sm">{exercise.name}</Text>
+                  <Group gap="xs">
+                    {favoriteExercises.includes(exercise.id) ? (
+                      <IconStarFilled
+                        size={16}
+                        onClick={() => toggleFavorite(exercise.id)}
+                        style={{ cursor: "pointer", color: "gold" }}
+                      />
+                    ) : (
+                      <IconStar
+                        size={16}
+                        onClick={() => toggleFavorite(exercise.id)}
+                        style={{ cursor: "pointer" }}
+                      />
+                    )}
+                    <IconPlus
+                      size={16}
+                      onClick={() => handleDirectAddExercise(exercise.id)}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </Group>
+                </Group>
+              </Card>
+            ))}
+          </Stack>
+        </Card>
+        <SimpleGrid cols={3} spacing="sm">
+          <NumberInput
+            label={t("common.series")}
+            placeholder="Ex: 3"
+            value={exerciseDetails.series}
+            onChange={(value) =>
+              setExerciseDetails({ ...exerciseDetails, series: String(value) })
+            }
+            min={1}
+            allowDecimal={false}
+            required
+            error={
+              showErrors && !exerciseDetails.series
+                ? t("common.required")
+                : undefined
             }
           />
-          <Group mt="md">
-            <Button variant="outline" onClick={handleModalClose}>
-              Cancelar
-            </Button>
-            <Button onClick={onSaveChanges} mt="md">
-              {editingModel ? "Salvar Alterações" : "Criar Modelo"}
-            </Button>
-          </Group>
-          {fieldsError && (
-            <Text color="red" size="sm" mt="xs">
-              {fieldsError}
-            </Text>
-          )}
-        </Stack>
+          <NumberInput
+            label={t("common.reps")}
+            placeholder="Ex: 12"
+            value={exerciseDetails.reps}
+            onChange={(value) =>
+              setExerciseDetails({ ...exerciseDetails, reps: String(value) })
+            }
+            min={1}
+            allowDecimal={false}
+            disabled={untilFailure}
+            required={!untilFailure}
+            error={
+              showErrors && !untilFailure && !exerciseDetails.reps
+                ? t("common.required")
+                : undefined
+            }
+          />
+          <Button
+            variant={untilFailure ? "filled" : "outline"}
+            onClick={() => setUntilFailure(!untilFailure)}
+            mt="25px"
+          >
+            {t("common.untilFailure")}
+          </Button>
+        </SimpleGrid>
+        <SimpleGrid cols={2} spacing="sm">
+          <Select
+            label={t("common.advancedTechnique")}
+            placeholder={t("dashboard.exerciseModal.selectPlaceholder")}
+            data={["Drop-set", "Bi-set", "Rest-pause"]}
+            value={exerciseDetails.advancedTechnique}
+            onChange={(value) =>
+              setExerciseDetails({
+                ...exerciseDetails,
+                advancedTechnique: value || "",
+              })
+            }
+            clearable
+          />
+          <NumberInput
+            label={t("common.restTimeSeconds")}
+            placeholder="Ex: 60"
+            value={exerciseDetails.restTime}
+            onChange={(value) =>
+              setExerciseDetails({
+                ...exerciseDetails,
+                restTime: String(value),
+              })
+            }
+            min={0}
+            allowDecimal={false}
+            required
+            error={
+              showErrors && !exerciseDetails.restTime
+                ? t("common.required")
+                : undefined
+            }
+          />
+        </SimpleGrid>
+        <Textarea
+          label={t("dashboard.exerciseModal.notesLabel")}
+          placeholder={t("common.addNotesPlaceholder")}
+          value={exerciseDetails.notes}
+          onChange={(event) =>
+            setExerciseDetails({
+              ...exerciseDetails,
+              notes: event.currentTarget.value,
+            })
+          }
+          minRows={2}
+        />
+        {showErrors && fieldsError && (
+          <Text color="red" size="sm">
+            {fieldsError}
+          </Text>
+        )}
+        <Group justify="flex-end" mt="md">
+          <Button variant="default" onClick={handleModalClose}>
+            {t("common.cancel")}
+          </Button>
+          <Button onClick={onSaveChanges}>{t("common.saveModel")}</Button>
+        </Group>
       </Stack>
     </Modal>
   );
