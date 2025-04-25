@@ -46,7 +46,8 @@ interface AnamnesisModelEditorProps {
   initialQuestions?: IQuestion[];
   onSave: (questions: IQuestion[]) => void;
   onLoadStandard: () => void;
-  mode: "new" | "create_from_standard";
+  mode: "new" | "create_from_standard" | "edit";
+  onDelete?: () => void;
 }
 
 const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
@@ -54,6 +55,7 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
   onSave,
   onLoadStandard,
   mode,
+  onDelete,
 }) => {
   const t = useTranslations("anamnesisModelEditor");
   const tRoot = useTranslations();
@@ -67,6 +69,10 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<
     number | null
   >(null);
+
+  // Determine if the 'Load Standard Model' button should be shown
+  // Only show it when creating a completely new model from scratch
+  const showLoadStandardButton = mode === "new";
 
   useEffect(() => {
     setInternalQuestions(JSON.parse(JSON.stringify(initialQuestions)));
@@ -305,33 +311,38 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
     handleCloseEditModal();
   };
 
-  const saveButtonText =
-    mode === "create_from_standard"
-      ? tRoot("common.createModel")
-      : tRoot("common.saveModel");
-
-  const showSaveButton =
-    mode === "new" || (mode === "create_from_standard" && isDirty);
-
   return (
     <Container size="xl" py="xl">
       <Flex justify="space-between" align="center" mb="md">
         <Title order={2} mb="lg">
-          {t("titleNew")}
+          {mode === "edit"
+            ? t("pageTitleEdit")
+            : mode === "create_from_standard"
+            ? t("pageTitleCreateFromStandard")
+            : t("standardModelTitle")}
         </Title>
         <Group>
-          <Button
-            variant="outline"
-            leftSection={<IconTemplate size={16} />}
-            onClick={onLoadStandard}
-          >
-            {t("loadStandardTemplate")}
-          </Button>
-          {showSaveButton && (
-            <Button onClick={() => onSave(internalQuestions)} color="green">
-              {saveButtonText}
+          {showLoadStandardButton && (
+            <Button
+              variant="outline"
+              leftSection={<IconTemplate size={16} />}
+              onClick={onLoadStandard}
+            >
+              {t("loadStandardTemplate")}
             </Button>
           )}
+          {mode === "edit" && onDelete && (
+            <Button variant="outline" color="red" onClick={onDelete} mr="auto">
+              {tRoot("common.delete")}
+            </Button>
+          )}
+          <Button
+            onClick={() => onSave(internalQuestions)}
+            color="green"
+            disabled={!isDirty}
+          >
+            {t("saveButton")}
+          </Button>
         </Group>
       </Flex>
       <Grid gutter="md">

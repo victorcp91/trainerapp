@@ -89,6 +89,7 @@ interface IWelcome {
   trainerImage: string;
   buttonText: string;
   order: number;
+  required: boolean;
 }
 
 type IQuestion =

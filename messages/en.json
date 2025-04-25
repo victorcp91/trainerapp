@@ -110,7 +110,6 @@
       }
     },
     "editModelTitle": "Edit Anamnesis Model ({modelId})",
-    "newModelTitle": "New Anamnesis Model",
     "titleNew": "New Anamnesis Model",
     "modelQuestionsTitle": "Model Questions",
     "emptyStateText": "Add questions using the sidebar.",
@@ -284,12 +283,13 @@
   },
   "anamnesisModelsPage": {
     "title": "Anamnesis Models",
-    "createButton": "Create Model",
+    "createButton": "Create New Model",
     "standardModel": {
-      "title": "Standard Anamnesis Model",
-      "description": "Start with a pre-defined standard set of questions.",
-      "action": "Use Template"
-    }
+      "title": "Create from Standard Model",
+      "description": "Start with a pre-defined set of common questions.",
+      "action": "Load Standard Model"
+    },
+    "editButton": "Edit"
   },
   "SortableQuestionItem": {
     "required": "Required",
@@ -312,5 +312,79 @@
     "welcomeButtonText": "Button Text",
     "welcomeTrainerName": "Trainer Name",
     "welcomeTrainerImage": "Trainer Image URL"
+  },
+  "loginPage": {
+    "title": "Login",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "loginButton": "Login",
+    "forgotPasswordLink": "Forgot your password?",
+    "registerPrompt": "Don't have an account?",
+    "registerLink": "Register"
+  },
+  "registerPage": {
+    "title": "Register",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "registerButton": "Register",
+    "loginPrompt": "Already have an account?",
+    "loginLink": "Login"
+  },
+  "forgotPasswordPage": {
+    "title": "Forgot Password",
+    "emailLabel": "Enter your email address",
+    "resetButton": "Send Reset Link",
+    "backToLogin": "Back to Login"
+  },
+  "anamnesisModelEditor": {
+    "titleNew": "Create New Anamnesis Model",
+    "standardModelTitle": "Create Anamnesis Model from Standard",
+    "pageTitleEdit": "Edit Anamnesis Model",
+    "pageTitleCreateFromStandard": "Create Model from Standard",
+    "pageTitleNew": "Create New Model",
+    "addQuestionTitle": "Add Question",
+    "loadStandardButton": "Load Standard Model",
+    "saveButton": "Save Model",
+    "questionTypes": {
+      "welcome": "Welcome Screen",
+      "text": "Text Input",
+      "date": "Date Picker",
+      "singleOption": "Single Choice",
+      "multipleOption": "Multiple Choice",
+      "metric": "Metric Input",
+      "bodyParts": "Body Part Selector",
+      "injury": "Injury Description"
+    },
+    "newQuestionPrefix": "New Question",
+    "questionDefaults": {
+      "welcome": {
+        "buttonText": "Continue"
+      }
+    },
+    "noQuestionsPrompt": "Drag questions from the right panel to build your model.",
+    "loadStandardTemplate": "Load Standard Template"
+  },
+  "sortableQuestionItem": {
+    "requiredLabel": "Required",
+    "editButton": "Edit",
+    "removeButton": "Remove"
+  },
+  "editQuestionModal": {
+    "title": "Edit Question",
+    "questionTitleLabel": "Question Title",
+    "descriptionLabel": "Description (Optional)",
+    "requiredLabel": "Required Field",
+    "optionsLabel": "Options (for Choice types)",
+    "addOptionButton": "Add Option",
+    "optionLabelPlaceholder": "Option Label",
+    "optionValuePlaceholder": "Option Value",
+    "removeOptionButton": "Remove Option",
+    "metricTypeLabel": "Metric Type",
+    "welcomeButtonTextLabel": "Button Text (for Welcome type)",
+    "welcomeTrainerNameLabel": "Trainer Name (for Welcome type)",
+    "welcomeTrainerImageLabel": "Trainer Image URL (for Welcome type)",
+    "saveChangesButton": "Save Changes",
+    "cancelButton": "Cancel"
   }
 }
