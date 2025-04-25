@@ -7,7 +7,6 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { withAuth } from "@/utils/withAuth";
 import {
   Button,
   Flex,
@@ -24,6 +23,7 @@ import {
   Loader,
   Text,
   MultiSelect,
+  Container,
 } from "@mantine/core";
 import { DateInput, Calendar, DatesProvider } from "@mantine/dates";
 import "dayjs/locale/pt-br";
@@ -454,663 +454,667 @@ const ClientsPage = () => {
 
   return (
     <DatesProvider settings={{ locale: "pt-br" }}>
-      <Flex justify="space-between" align="center" mb="lg">
-        <Title order={2}>Clientes</Title>
-        <Button onClick={() => setIsModalOpen(true)}>
-          + Adicionar Cliente
-        </Button>
-      </Flex>
-      <Flex mb="lg" gap="md">
-        <div style={{ flex: 1 }}>
-          <label style={{ display: "block", marginBottom: "4px" }}>
-            Tipo de Cliente
-          </label>
-          <SelectClearable
-            options={clientTypes}
-            value={showClientType}
-            setValue={setShowClientType}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ display: "block", marginBottom: "4px" }}>
-            Status da Série
-          </label>
-          <SelectClearable
-            options={seriesStatuses}
-            value={showSeriesStatus}
-            setValue={setShowSeriesStatus}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ display: "block", marginBottom: "4px" }}>
-            Status do Cliente
-          </label>
-          <SelectClearable
-            options={clientStatuses}
-            value={showClientStatus}
-            setValue={setShowClientStatus}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ display: "block", marginBottom: "4px" }}>
-            Gênero
-          </label>
-          <SelectClearable
-            options={[
-              { value: "Feminino", label: "Feminino" },
-              { value: "Masculino", label: "Masculino" },
-              { value: "Outro", label: "Outro" },
-            ]}
-            value={showGender}
-            setValue={setShowGender}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ display: "block", marginBottom: "4px" }}>
-            Pagamento
-          </label>
-          <SelectClearable
-            options={paymentStatuses}
-            value={showFollowUpStatus}
-            setValue={setShowFollowUpStatus}
-          />
-        </div>
-      </Flex>
-      <Flex gap="md">
-        <div style={{ flex: 1 }}>
-          <label style={{ display: "block", marginBottom: "4px" }}>
-            Buscar Clientes
-          </label>
-          <TextInput
-            placeholder="Buscar clientes por nome ou e-mail..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.currentTarget.value)}
-          />
-        </div>
-        <div style={{ flex: 1, marginBottom: "16px" }}>
-          <label style={{ display: "block", marginBottom: "4px" }}>
-            Ordenar por
-          </label>
-          <Select
-            placeholder="Selecione uma opção"
-            data={sortOptions}
-            value={sortOption}
-            onChange={setSortOption}
-          />
-        </div>
-      </Flex>
-      <Grid gutter="lg">
-        {loadedClients
-          .filter((client) => {
-            if (showClientType && client.type !== showClientType) return false;
-            if (showSeriesStatus && client.status !== showSeriesStatus)
-              return false;
-            if (showClientStatus && client.status !== showClientStatus)
-              return false;
-            if (showFollowUpStatus && client.status !== showFollowUpStatus)
-              return false;
-            if (showGender && client.gender !== showGender) return false;
-            return true;
-          })
-          .sort((a, b) => {
-            if (!sortOption) return 0;
-            switch (sortOption) {
-              case "name-asc":
-                return a.name.localeCompare(b.name);
-              case "name-desc":
-                return b.name.localeCompare(a.name);
-              case "age-asc":
-                return a.age - b.age;
-              case "age-desc":
-                return b.age - a.age;
-              case "priority":
-                const priorityOrder = ["overdue", "near_due", "on_track"];
-                return (
-                  priorityOrder.indexOf(a.status) -
-                  priorityOrder.indexOf(b.status)
-                );
-              case "createdAt":
-                return (
-                  new Date(a.startDate || 0).getTime() -
-                  new Date(b.startDate || 0).getTime()
-                );
-              default:
-                return 0;
-            }
-          })
-          .map((client, index) => (
-            <Grid.Col
-              key={index}
-              span={{ xs: 6, lg: 3 }}
-              style={{ display: "flex" }}
-            >
-              <Card
-                shadow="sm"
-                padding="lg"
-                radius="md"
-                withBorder
-                style={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  minHeight: 340,
-                  background: "#fff",
-                  boxShadow: "0 2px 8px 0 rgba(0,0,0,0.03)",
-                }}
-              >
-                <Flex
-                  align="center"
-                  gap="sm"
-                  mb="xs"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => r.push(`/dashboard/clients/${client.id}`)}
-                >
-                  <Avatar
-                    src={client.profilePicture || ""}
-                    radius="xl"
-                    size="md"
-                  />
-                  <div style={{ flex: 1 }}>
-                    <Title order={4} size="h6" style={{ marginBottom: 0 }}>
-                      {client.name}
-                    </Title>
-                    <Text size="sm" c="dimmed">
-                      {client.age} anos • {client.gender}
-                    </Text>
-                  </div>
-                </Flex>
-                <Flex
-                  gap="xs"
-                  wrap="wrap"
-                  mb="xs"
-                  style={{ minHeight: 40, alignItems: "center" }}
-                >
-                  {client.tags.map((tag, idx) => (
-                    <Badge key={idx} c="blue" variant="light" size="sm">
-                      {tag}
-                    </Badge>
-                  ))}
-                </Flex>
-                <Badge c="gray" variant="outline" mb="xs" size="sm">
-                  {client.type === "online"
-                    ? "Online"
-                    : client.type === "in_person"
-                    ? "Presencial"
-                    : "Híbrido"}
-                </Badge>
-                <Flex align="center" gap="xs" mb="xs">
-                  {client.status === "on_track" && (
-                    <>
-                      <IconCheck size={16} />
-                      <Text size="sm" c="green">
-                        Série: <strong>Em Dia</strong>
-                      </Text>
-                    </>
-                  )}
-                  {client.status === "near_due" && (
-                    <>
-                      <IconAlertTriangle size={16} />
-                      <Text size="sm" c="orange">
-                        Série: <strong>Próx. do Vencimento</strong>
-                      </Text>
-                    </>
-                  )}
-                  {client.status === "overdue" && (
-                    <>
-                      <IconAlertCircle size={16} />
-                      <Text size="sm" c="red">
-                        Série: <strong>Vencida</strong>
-                      </Text>
-                    </>
-                  )}
-                </Flex>
-                <Text
-                  size="sm"
-                  style={{
-                    cursor: "pointer",
-                    color: "orange",
-                    textDecoration: "underline",
-                    marginBottom: 4,
-                    fontWeight: 500,
-                  }}
-                  onClick={() => {
-                    navigator.clipboard.writeText(client.email);
-                    showNotification({
-                      title: "E-mail copiado!",
-                      message:
-                        "O e-mail foi copiado para a área de transferência.",
-                      color: "orange",
-                      position: "top-right",
-                    });
-                  }}
-                >
-                  {client.email}
-                </Text>
-                <a
-                  href={`https://wa.me/${client.phone.replace(/[^0-9]/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: "green",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    fontWeight: 600,
-                    fontSize: 15,
-                    marginBottom: 8,
-                  }}
-                >
-                  <IconBrandWhatsapp size={18} /> {client.phone}
-                </a>
-                <Flex mt="auto" gap="sm">
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    fullWidth
-                    onClick={() => handleOpenScheduleModal(client)}
-                  >
-                    Agendar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    fullWidth
-                    onClick={() =>
-                      r.push(`/dashboard/clients/clientId?tab=training`)
-                    }
-                  >
-                    Treino
-                  </Button>
-                </Flex>
-              </Card>
-            </Grid.Col>
-          ))}
-      </Grid>
-      {isLoading && <Loader size="lg" mt="lg" />}
-      <div ref={loadMoreRef} style={{ height: "1px" }} />
-      <Modal
-        opened={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Cadastrar Cliente"
-        size="xl"
-      >
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Flex gap="lg" align="flex-start">
-            <div style={{ flex: 1 }}>
-              <Title order={4} mb="sm">
-                Dados Pessoais
-              </Title>
-              <TextInput
-                label="Nome completo"
-                placeholder="Digite o nome completo"
-                {...form.getInputProps("fullName")}
-                required
-              />
-              <TextInput
-                label="E-mail"
-                placeholder="Digite o e-mail"
-                {...form.getInputProps("email")}
-                required
-              />
-              <TextInput
-                label="Telefone"
-                placeholder="Digite o telefone"
-                {...form.getInputProps("phone")}
-              />
-              <DateInput
-                label="Data de nascimento"
-                placeholder="Selecione a data"
-                {...form.getInputProps("birthDate")}
-              />
-              <Select
-                label="Gênero"
-                placeholder="Selecione"
-                data={[
-                  "Masculino",
-                  "Feminino",
-                  "Outro",
-                  "Prefere não informar",
-                ]}
-                {...form.getInputProps("gender")}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <Title order={4} mb="sm">
-                Informações Adicionais
-              </Title>
-              <Textarea
-                label="Observações"
-                placeholder="Ex: alérgico a látex"
-                {...form.getInputProps("notes")}
-              />
-              <Select
-                label="Modalidade de atendimento"
-                placeholder="Selecione"
-                data={["Presencial", "Remoto", "Híbrido"]}
-                {...form.getInputProps("clientType")}
-                required
-              />
-            </div>
-          </Flex>
-          <Group mt="md">
-            <Button type="submit">Cadastrar</Button>
-          </Group>
-        </form>
-      </Modal>
-      <Modal
-        opened={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
-        size="xl"
-        title={null}
-      >
-        <Flex align="center" gap="md" mb="md">
-          <Title order={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
-            Agendar atendimento
-          </Title>
-          <Select
-            placeholder="Selecione o cliente"
-            data={clients.map((c) => ({ value: c.id, label: c.name }))}
-            value={selectedClient?.id || ""}
-            onChange={(id) => {
-              const client = clients.find((c) => c.id === id) || null;
-              setSelectedClient(client);
-            }}
-            style={{ minWidth: 220 }}
-            searchable
-            required
-            nothingFoundMessage="Nenhum cliente encontrado"
-            size="sm"
-          />
+      <Container size="xl" py="xl">
+        <Title order={2} mb="md">
+          Clientes
+        </Title>
+        <Flex mb="lg" gap="md">
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", marginBottom: "4px" }}>
+              Tipo de Cliente
+            </label>
+            <SelectClearable
+              options={clientTypes}
+              value={showClientType}
+              setValue={setShowClientType}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", marginBottom: "4px" }}>
+              Status da Série
+            </label>
+            <SelectClearable
+              options={seriesStatuses}
+              value={showSeriesStatus}
+              setValue={setShowSeriesStatus}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", marginBottom: "4px" }}>
+              Status do Cliente
+            </label>
+            <SelectClearable
+              options={clientStatuses}
+              value={showClientStatus}
+              setValue={setShowClientStatus}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", marginBottom: "4px" }}>
+              Gênero
+            </label>
+            <SelectClearable
+              options={[
+                { value: "Feminino", label: "Feminino" },
+                { value: "Masculino", label: "Masculino" },
+                { value: "Outro", label: "Outro" },
+              ]}
+              value={showGender}
+              setValue={setShowGender}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", marginBottom: "4px" }}>
+              Pagamento
+            </label>
+            <SelectClearable
+              options={paymentStatuses}
+              value={showFollowUpStatus}
+              setValue={setShowFollowUpStatus}
+            />
+          </div>
         </Flex>
-        <Flex gap="lg" direction="row" align="flex-start">
-          <Group flex={1} justify="center">
-            <Text>Selecione o dia do atendimento</Text>
-            <Calendar
-              locale="pt-br"
-              __onDayClick={(event, day) => setSelectedDate(day)}
-              minDate={new Date()}
-              renderDay={(date) => {
-                const isToday =
-                  date.toDateString() === new Date().toDateString();
-                const isOccupied = occupiedDates.some(
-                  (d) => d.toDateString() === date.toDateString()
-                );
-                const isSelected =
-                  selectedDate &&
-                  date.toDateString() === selectedDate.toDateString();
-                return (
-                  <div
+        <Flex gap="md">
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", marginBottom: "4px" }}>
+              Buscar Clientes
+            </label>
+            <TextInput
+              placeholder="Buscar clientes por nome ou e-mail..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.currentTarget.value)}
+            />
+          </div>
+          <div style={{ flex: 1, marginBottom: "16px" }}>
+            <label style={{ display: "block", marginBottom: "4px" }}>
+              Ordenar por
+            </label>
+            <Select
+              placeholder="Selecione uma opção"
+              data={sortOptions}
+              value={sortOption}
+              onChange={setSortOption}
+            />
+          </div>
+        </Flex>
+        <Grid gutter="lg">
+          {loadedClients
+            .filter((client) => {
+              if (showClientType && client.type !== showClientType)
+                return false;
+              if (showSeriesStatus && client.status !== showSeriesStatus)
+                return false;
+              if (showClientStatus && client.status !== showClientStatus)
+                return false;
+              if (showFollowUpStatus && client.status !== showFollowUpStatus)
+                return false;
+              if (showGender && client.gender !== showGender) return false;
+              return true;
+            })
+            .sort((a, b) => {
+              if (!sortOption) return 0;
+              switch (sortOption) {
+                case "name-asc":
+                  return a.name.localeCompare(b.name);
+                case "name-desc":
+                  return b.name.localeCompare(a.name);
+                case "age-asc":
+                  return a.age - b.age;
+                case "age-desc":
+                  return b.age - a.age;
+                case "priority":
+                  const priorityOrder = ["overdue", "near_due", "on_track"];
+                  return (
+                    priorityOrder.indexOf(a.status) -
+                    priorityOrder.indexOf(b.status)
+                  );
+                case "createdAt":
+                  return (
+                    new Date(a.startDate || 0).getTime() -
+                    new Date(b.startDate || 0).getTime()
+                  );
+                default:
+                  return 0;
+              }
+            })
+            .map((client, index) => (
+              <Grid.Col
+                key={index}
+                span={{ xs: 6, lg: 3 }}
+                style={{ display: "flex" }}
+              >
+                <Card
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  style={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "100%",
+                    justifyContent: "space-between",
+                    minHeight: 340,
+                    background: "#fff",
+                    boxShadow: "0 2px 8px 0 rgba(0,0,0,0.03)",
+                  }}
+                >
+                  <Flex
+                    align="center"
+                    gap="sm"
+                    mb="xs"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => r.push(`/dashboard/clients/${client.id}`)}
+                  >
+                    <Avatar
+                      src={client.profilePicture || ""}
+                      radius="xl"
+                      size="md"
+                    />
+                    <div style={{ flex: 1 }}>
+                      <Title order={4} size="h6" style={{ marginBottom: 0 }}>
+                        {client.name}
+                      </Title>
+                      <Text size="sm" c="dimmed">
+                        {client.age} anos • {client.gender}
+                      </Text>
+                    </div>
+                  </Flex>
+                  <Flex
+                    gap="xs"
+                    wrap="wrap"
+                    mb="xs"
+                    style={{ minHeight: 40, alignItems: "center" }}
+                  >
+                    {client.tags.map((tag, idx) => (
+                      <Badge key={idx} c="blue" variant="light" size="sm">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </Flex>
+                  <Badge c="gray" variant="outline" mb="xs" size="sm">
+                    {client.type === "online"
+                      ? "Online"
+                      : client.type === "in_person"
+                      ? "Presencial"
+                      : "Híbrido"}
+                  </Badge>
+                  <Flex align="center" gap="xs" mb="xs">
+                    {client.status === "on_track" && (
+                      <>
+                        <IconCheck size={16} />
+                        <Text size="sm" c="green">
+                          Série: <strong>Em Dia</strong>
+                        </Text>
+                      </>
+                    )}
+                    {client.status === "near_due" && (
+                      <>
+                        <IconAlertTriangle size={16} />
+                        <Text size="sm" c="orange">
+                          Série: <strong>Próx. do Vencimento</strong>
+                        </Text>
+                      </>
+                    )}
+                    {client.status === "overdue" && (
+                      <>
+                        <IconAlertCircle size={16} />
+                        <Text size="sm" c="red">
+                          Série: <strong>Vencida</strong>
+                        </Text>
+                      </>
+                    )}
+                  </Flex>
+                  <Text
+                    size="sm"
                     style={{
-                      background: isSelected
-                        ? "#228be6"
-                        : isOccupied
-                        ? "#ffe0e0"
-                        : undefined,
-                      border: isToday ? "2px solid #228be6" : undefined,
-                      borderRadius: 6,
-                      width: 32,
-                      height: 32,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: isToday ? "bold" : "normal",
-                      color: isSelected
-                        ? "white"
-                        : isOccupied
-                        ? "#c92a2a"
-                        : undefined,
+                      cursor: "pointer",
+                      color: "orange",
+                      textDecoration: "underline",
+                      marginBottom: 4,
+                      fontWeight: 500,
+                    }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(client.email);
+                      showNotification({
+                        title: "E-mail copiado!",
+                        message:
+                          "O e-mail foi copiado para a área de transferência.",
+                        color: "orange",
+                        position: "top-right",
+                      });
                     }}
                   >
-                    {date.getDate()}
-                  </div>
-                );
+                    {client.email}
+                  </Text>
+                  <a
+                    href={`https://wa.me/${client.phone.replace(
+                      /[^0-9]/g,
+                      ""
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "green",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      fontWeight: 600,
+                      fontSize: 15,
+                      marginBottom: 8,
+                    }}
+                  >
+                    <IconBrandWhatsapp size={18} /> {client.phone}
+                  </a>
+                  <Flex mt="auto" gap="sm">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      fullWidth
+                      onClick={() => handleOpenScheduleModal(client)}
+                    >
+                      Agendar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      fullWidth
+                      onClick={() =>
+                        r.push(`/dashboard/clients/clientId?tab=training`)
+                      }
+                    >
+                      Treino
+                    </Button>
+                  </Flex>
+                </Card>
+              </Grid.Col>
+            ))}
+        </Grid>
+        {isLoading && <Loader size="lg" mt="lg" />}
+        <div ref={loadMoreRef} style={{ height: "1px" }} />
+        <Modal
+          opened={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Cadastrar Cliente"
+          size="xl"
+        >
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Flex gap="lg" align="flex-start">
+              <div style={{ flex: 1 }}>
+                <Title order={4} mb="sm">
+                  Dados Pessoais
+                </Title>
+                <TextInput
+                  label="Nome completo"
+                  placeholder="Digite o nome completo"
+                  {...form.getInputProps("fullName")}
+                  required
+                />
+                <TextInput
+                  label="E-mail"
+                  placeholder="Digite o e-mail"
+                  {...form.getInputProps("email")}
+                  required
+                />
+                <TextInput
+                  label="Telefone"
+                  placeholder="Digite o telefone"
+                  {...form.getInputProps("phone")}
+                />
+                <DateInput
+                  label="Data de nascimento"
+                  placeholder="Selecione a data"
+                  {...form.getInputProps("birthDate")}
+                />
+                <Select
+                  label="Gênero"
+                  placeholder="Selecione"
+                  data={[
+                    "Masculino",
+                    "Feminino",
+                    "Outro",
+                    "Prefere não informar",
+                  ]}
+                  {...form.getInputProps("gender")}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <Title order={4} mb="sm">
+                  Informações Adicionais
+                </Title>
+                <Textarea
+                  label="Observações"
+                  placeholder="Ex: alérgico a látex"
+                  {...form.getInputProps("notes")}
+                />
+                <Select
+                  label="Modalidade de atendimento"
+                  placeholder="Selecione"
+                  data={["Presencial", "Remoto", "Híbrido"]}
+                  {...form.getInputProps("clientType")}
+                  required
+                />
+              </div>
+            </Flex>
+            <Group mt="md">
+              <Button type="submit">Cadastrar</Button>
+            </Group>
+          </form>
+        </Modal>
+        <Modal
+          opened={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
+          size="xl"
+          title={null}
+        >
+          <Flex align="center" gap="md" mb="md">
+            <Title order={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
+              Agendar atendimento
+            </Title>
+            <Select
+              placeholder="Selecione o cliente"
+              data={clients.map((c) => ({ value: c.id, label: c.name }))}
+              value={selectedClient?.id || ""}
+              onChange={(id) => {
+                const client = clients.find((c) => c.id === id) || null;
+                setSelectedClient(client);
               }}
+              style={{ minWidth: 220 }}
+              searchable
+              required
+              nothingFoundMessage="Nenhum cliente encontrado"
+              size="sm"
             />
-          </Group>
-          <Group flex={1}>
-            <div
-              style={{
-                background: "#f8f9fa",
-                borderRadius: 10,
-                padding: 20,
-                minHeight: 120,
-                boxShadow: "0 1px 4px 0 rgba(0,0,0,0.03)",
-                border: "1px solid #f1f3f5",
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                height: "340px",
-              }}
-            >
-              <Text
-                fw={600}
-                mb={8}
-                size="sm"
-                style={{ flex: "none", letterSpacing: 0.2 }}
+          </Flex>
+          <Flex gap="lg" direction="row" align="flex-start">
+            <Group flex={1} justify="center">
+              <Text>Selecione o dia do atendimento</Text>
+              <Calendar
+                locale="pt-br"
+                __onDayClick={(event, day) => setSelectedDate(day)}
+                minDate={new Date()}
+                renderDay={(date) => {
+                  const isToday =
+                    date.toDateString() === new Date().toDateString();
+                  const isOccupied = occupiedDates.some(
+                    (d) => d.toDateString() === date.toDateString()
+                  );
+                  const isSelected =
+                    selectedDate &&
+                    date.toDateString() === selectedDate.toDateString();
+                  return (
+                    <div
+                      style={{
+                        background: isSelected
+                          ? "#228be6"
+                          : isOccupied
+                          ? "#ffe0e0"
+                          : undefined,
+                        border: isToday ? "2px solid #228be6" : undefined,
+                        borderRadius: 6,
+                        width: 32,
+                        height: 32,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: isToday ? "bold" : "normal",
+                        color: isSelected
+                          ? "white"
+                          : isOccupied
+                          ? "#c92a2a"
+                          : undefined,
+                      }}
+                    >
+                      {date.getDate()}
+                    </div>
+                  );
+                }}
+              />
+            </Group>
+            <Group flex={1}>
+              <div
+                style={{
+                  background: "#f8f9fa",
+                  borderRadius: 10,
+                  padding: 20,
+                  minHeight: 120,
+                  boxShadow: "0 1px 4px 0 rgba(0,0,0,0.03)",
+                  border: "1px solid #f1f3f5",
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "340px",
+                }}
               >
-                Intervalos ocupados:
-              </Text>
-              <div style={{ flex: 1, overflowY: "auto" }}>
-                {selectedDate ? (
-                  occupiedIntervals.length === 0 ? (
+                <Text
+                  fw={600}
+                  mb={8}
+                  size="sm"
+                  style={{ flex: "none", letterSpacing: 0.2 }}
+                >
+                  Intervalos ocupados:
+                </Text>
+                <div style={{ flex: 1, overflowY: "auto" }}>
+                  {selectedDate ? (
+                    occupiedIntervals.length === 0 ? (
+                      <Text
+                        size="sm"
+                        c="dimmed"
+                        style={{ fontSize: 14, padding: 8 }}
+                      >
+                        Nenhum
+                      </Text>
+                    ) : (
+                      <ul style={{ margin: 0, paddingLeft: 16 }}>
+                        {occupiedIntervals.map((i, idx) => (
+                          <li
+                            key={idx}
+                            style={{
+                              fontSize: 14,
+                              marginBottom: 8,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: 8,
+                            }}
+                          >
+                            <span style={{ fontWeight: 500 }}>
+                              {i.start} - {i.end}: <b>{i.clientName}</b>
+                              {i.location ? ` (${i.location})` : ""}
+                            </span>
+                            <Button
+                              size="xs"
+                              color="red"
+                              variant="subtle"
+                              style={{
+                                minWidth: 80,
+                                fontSize: 13,
+                                padding: "2px 8px",
+                              }}
+                              onClick={() =>
+                                setConfirmCancel({ idx, interval: i })
+                              }
+                            >
+                              Desmarcar
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )
+                  ) : (
                     <Text
                       size="sm"
                       c="dimmed"
                       style={{ fontSize: 14, padding: 8 }}
                     >
-                      Nenhum
+                      Selecione um dia
                     </Text>
-                  ) : (
-                    <ul style={{ margin: 0, paddingLeft: 16 }}>
-                      {occupiedIntervals.map((i, idx) => (
-                        <li
-                          key={idx}
-                          style={{
-                            fontSize: 14,
-                            marginBottom: 8,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 8,
-                          }}
-                        >
-                          <span style={{ fontWeight: 500 }}>
-                            {i.start} - {i.end}: <b>{i.clientName}</b>
-                            {i.location ? ` (${i.location})` : ""}
-                          </span>
-                          <Button
-                            size="xs"
-                            color="red"
-                            variant="subtle"
-                            style={{
-                              minWidth: 80,
-                              fontSize: 13,
-                              padding: "2px 8px",
-                            }}
-                            onClick={() =>
-                              setConfirmCancel({ idx, interval: i })
-                            }
-                          >
-                            Desmarcar
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                  )
-                ) : (
-                  <Text
-                    size="sm"
-                    c="dimmed"
-                    style={{ fontSize: 14, padding: 8 }}
+                  )}
+                </div>
+              </div>
+            </Group>
+          </Flex>
+          {selectedDate && (
+            <>
+              <Group mt="md">
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 14,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
                   >
-                    Selecione um dia
-                  </Text>
-                )}
-              </div>
-            </div>
-          </Group>
-        </Flex>
-        {selectedDate && (
-          <>
-            <Group mt="md">
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Horário de início
-                </label>
-                <input
-                  type="time"
-                  value={startTime || ""}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  disabled={!selectedDate}
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                  placeholder="HH:mm"
+                    Horário de início
+                  </label>
+                  <input
+                    type="time"
+                    value={startTime || ""}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    disabled={!selectedDate}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      border: "1px solid #ced4da",
+                      fontSize: 15,
+                    }}
+                    placeholder="HH:mm"
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 14,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    Horário final
+                  </label>
+                  <input
+                    type="time"
+                    value={endTime || ""}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    disabled={!selectedDate}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      border: "1px solid #ced4da",
+                      fontSize: 15,
+                    }}
+                    placeholder="HH:mm"
+                  />
+                </div>
+              </Group>
+              <Group my="md">
+                <MultiSelect
+                  label="Recorrência (dias da semana)"
+                  placeholder="Selecione os dias"
+                  data={weekDays}
+                  value={recurrenceDays}
+                  onChange={setRecurrenceDays}
+                  clearable
                 />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Horário final
-                </label>
-                <input
-                  type="time"
-                  value={endTime || ""}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  disabled={!selectedDate}
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                  placeholder="HH:mm"
-                />
-              </div>
-            </Group>
-            <Group my="md">
-              <MultiSelect
-                label="Recorrência (dias da semana)"
-                placeholder="Selecione os dias"
-                data={weekDays}
-                value={recurrenceDays}
-                onChange={setRecurrenceDays}
-                clearable
-              />
-            </Group>
-            <Group>
-              <div style={{ width: "100%" }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Localização
-                </label>
-                <input
-                  ref={locationInputRef}
-                  placeholder="Digite o local (ex: Smart Fit, Estúdio Y...)"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                />
-              </div>
-            </Group>
-            <Group mt="md">
-              <div style={{ width: "100%" }}>
-                <label
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  Observação
-                </label>
-                <textarea
-                  value={observation || ""}
-                  onChange={(e) => setObservation(e.target.value)}
-                  placeholder="Digite observações relevantes para o atendimento (opcional)"
-                  style={{
-                    width: "100%",
-                    minHeight: 60,
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #ced4da",
-                    fontSize: 15,
-                  }}
-                />
-              </div>
-            </Group>
-            <Button
-              mt="md"
-              onClick={handleSchedule}
-              disabled={!startTime || !endTime || !location}
-            >
-              Agendar Atendimento
+              </Group>
+              <Group>
+                <div style={{ width: "100%" }}>
+                  <label
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 14,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    Localização
+                  </label>
+                  <input
+                    ref={locationInputRef}
+                    placeholder="Digite o local (ex: Smart Fit, Estúdio Y...)"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      border: "1px solid #ced4da",
+                      fontSize: 15,
+                    }}
+                  />
+                </div>
+              </Group>
+              <Group mt="md">
+                <div style={{ width: "100%" }}>
+                  <label
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 14,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    Observação
+                  </label>
+                  <textarea
+                    value={observation || ""}
+                    onChange={(e) => setObservation(e.target.value)}
+                    placeholder="Digite observações relevantes para o atendimento (opcional)"
+                    style={{
+                      width: "100%",
+                      minHeight: 60,
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      border: "1px solid #ced4da",
+                      fontSize: 15,
+                    }}
+                  />
+                </div>
+              </Group>
+              <Button
+                mt="md"
+                onClick={handleSchedule}
+                disabled={!startTime || !endTime || !location}
+              >
+                Agendar Atendimento
+              </Button>
+            </>
+          )}
+        </Modal>
+        <Modal
+          opened={!!confirmCancel}
+          onClose={() => setConfirmCancel(null)}
+          title="Confirmar desmarcação"
+          centered
+        >
+          <Text>
+            Tem certeza que deseja desmarcar o atendimento de{" "}
+            <b>{confirmCancel?.interval.clientName}</b>
+            {confirmCancel?.interval.location
+              ? ` (${confirmCancel.interval.location})`
+              : ""}{" "}
+            das {confirmCancel?.interval.start} às {confirmCancel?.interval.end}
+            ?
+          </Text>
+          <Group mt="md">
+            <Button onClick={() => setConfirmCancel(null)} variant="default">
+              Cancelar
             </Button>
-          </>
-        )}
-      </Modal>
-      <Modal
-        opened={!!confirmCancel}
-        onClose={() => setConfirmCancel(null)}
-        title="Confirmar desmarcação"
-        centered
-      >
-        <Text>
-          Tem certeza que deseja desmarcar o atendimento de{" "}
-          <b>{confirmCancel?.interval.clientName}</b>
-          {confirmCancel?.interval.location
-            ? ` (${confirmCancel.interval.location})`
-            : ""}{" "}
-          das {confirmCancel?.interval.start} às {confirmCancel?.interval.end}?
-        </Text>
-        <Group mt="md">
-          <Button onClick={() => setConfirmCancel(null)} variant="default">
-            Cancelar
-          </Button>
-          <Button
-            color="red"
-            onClick={() => handleCancelAttendance(confirmCancel!.idx)}
-          >
-            Desmarcar
-          </Button>
-        </Group>
-      </Modal>
+            <Button
+              color="red"
+              onClick={() => handleCancelAttendance(confirmCancel!.idx)}
+            >
+              Desmarcar
+            </Button>
+          </Group>
+        </Modal>
+      </Container>
     </DatesProvider>
   );
 };
 
-export default withAuth(ClientsPage, true);
+export default ClientsPage;

@@ -14,6 +14,8 @@ import {
   SimpleGrid,
   MultiSelect,
   TextInput,
+  Container,
+  Title,
 } from "@mantine/core";
 import { DateInput, Calendar, DatesProvider } from "@mantine/dates"; // adicionado Calendar
 import { useState } from "react";
@@ -28,7 +30,6 @@ import {
   IconHeart,
   IconAlertCircle,
 } from "@tabler/icons-react"; // Importar ícones
-import { withAuth } from "@/utils/withAuth";
 
 import { ExerciseModal } from "@/components/shared/ExerciseModal";
 
@@ -188,7 +189,7 @@ function NewPlanPage() {
   const levels = [
     { value: "iniciante", label: "Iniciante" },
     { value: "intermediario", label: "Intermediário" },
-    { value: "avançado", label: "Avançado" },
+    { value: "avancado", label: "Avançado" },
   ];
 
   // Mock de modelos de treino
@@ -491,557 +492,640 @@ function NewPlanPage() {
   const availableDays = ["segunda-feira", "quarta-feira", "sexta-feira"]; // Dias disponíveis
 
   return (
-    <DatesProvider settings={{ locale: "pt-br" }}>
-      <Stack>
-        <Text size="xl">Nova Série</Text>
-        <Divider my="sm" />
-        <Card shadow="sm" padding="lg">
-          <Text size="md">Informações de Treino</Text>
+    <Container size="xl" py="xl">
+      <Title order={2} mb="md">
+        Nova Série
+      </Title>
+      <DatesProvider settings={{ locale: "pt-br" }}>
+        <Stack>
           <Divider my="sm" />
-          <Group align="flex-start" style={{ alignItems: "stretch" }}>
-            <Stack style={{ flex: 1 }}>
-              <Group>
-                <IconCalendar size={20} />
-                <Text size="sm">
-                  <strong>Dias disponíveis:</strong> Segunda-feira,
-                  Quarta-feira, Sexta-feira
-                </Text>
-              </Group>
-              <Group>
-                <IconClock size={20} />
-                <Text size="sm">
-                  <strong>Tempo por treino:</strong> 1 hora
-                </Text>
-              </Group>
-              <Group>
-                <IconBell size={20} />
-                <Text size="sm">
-                  <strong>Equipamento:</strong> Pesos livres
-                </Text>
-              </Group>
-            </Stack>
-            <Stack style={{ flex: 1 }}>
-              <Group>
-                <IconStar size={20} />
-                <Text size="sm">
-                  <strong>Foco:</strong> Peitoral e Costas
-                </Text>
-              </Group>
-              <Group>
-                <IconHeart size={20} />
-                <Text size="sm">
-                  <strong>Cardio:</strong> Esteira, Bicicleta
-                </Text>
-              </Group>
-              <Group>
-                <IconAlertCircle size={20} />
-                <Text size="sm">
-                  <strong>Restrições:</strong> Nenhuma
-                </Text>
-              </Group>
-            </Stack>
-          </Group>
-        </Card>
-        <Card shadow="sm" padding="lg">
-          <Text size="md">Informações da Série</Text>
-          <Divider my="sm" />
-          <Stack>
-            <Select
-              label="Tipo de Treino"
-              placeholder="Selecione o tipo"
-              data={[
-                "Hipertrofia",
-                "Emagrecimento",
-                "Força",
-                "Resistência muscular",
-                "Condicionamento físico geral",
-              ]}
-              value={selectedTrainingType}
-              onChange={setSelectedTrainingType} // Atualiza o estado do tipo de treino
-            />
-            <Group grow>
-              <DateInput
-                locale="pt-BR"
-                label="Data de Início"
-                value={startDate}
-                onChange={(date) => {
-                  setStartDate(date);
-                  handleDateChange(date, endDate);
-                  setTriedSerieModelSearch(false);
-                }}
-                error={
-                  triedSerieModelSearch && !startDate
-                    ? "Campo obrigatório"
-                    : undefined
-                }
-                styles={
-                  triedSerieModelSearch && !startDate
-                    ? { input: { borderColor: "red" } }
-                    : {}
-                }
-              />
-              <DateInput
-                locale="pt-BR"
-                label="Data de Expiração"
-                value={endDate}
-                onChange={(date) => {
-                  setEndDate(date);
-                  handleDateChange(startDate, date);
-                  setTriedSerieModelSearch(false);
-                }}
-                error={
-                  triedSerieModelSearch && !endDate
-                    ? "Campo obrigatório"
-                    : undefined
-                }
-                styles={
-                  triedSerieModelSearch && !endDate
-                    ? { input: { borderColor: "red" } }
-                    : {}
-                }
-              />
+          <Card shadow="sm" padding="lg">
+            <Text size="md">Informações de Treino</Text>
+            <Divider my="sm" />
+            <Group align="flex-start" style={{ alignItems: "stretch" }}>
+              <Stack style={{ flex: 1 }}>
+                <Group>
+                  <IconCalendar size={20} />
+                  <Text size="sm">
+                    <strong>Dias disponíveis:</strong> Segunda-feira,
+                    Quarta-feira, Sexta-feira
+                  </Text>
+                </Group>
+                <Group>
+                  <IconClock size={20} />
+                  <Text size="sm">
+                    <strong>Tempo por treino:</strong> 1 hora
+                  </Text>
+                </Group>
+                <Group>
+                  <IconBell size={20} />
+                  <Text size="sm">
+                    <strong>Equipamento:</strong> Pesos livres
+                  </Text>
+                </Group>
+              </Stack>
+              <Stack style={{ flex: 1 }}>
+                <Group>
+                  <IconStar size={20} />
+                  <Text size="sm">
+                    <strong>Foco:</strong> Peitoral e Costas
+                  </Text>
+                </Group>
+                <Group>
+                  <IconHeart size={20} />
+                  <Text size="sm">
+                    <strong>Cardio:</strong> Esteira, Bicicleta
+                  </Text>
+                </Group>
+                <Group>
+                  <IconAlertCircle size={20} />
+                  <Text size="sm">
+                    <strong>Restrições:</strong> Nenhuma
+                  </Text>
+                </Group>
+              </Stack>
             </Group>
-            <Textarea
-              label="Observações"
-              placeholder="Adicione observações sobre o treino"
-            />
-            <Group mt="md" justify="space-between">
-              <Button
-                variant="outline"
-                c="gray"
-                onClick={() => {
-                  if (!startDate || !endDate) {
-                    setTriedSerieModelSearch(true);
-                  } else {
+          </Card>
+          <Card shadow="sm" padding="lg">
+            <Text size="md">Informações da Série</Text>
+            <Divider my="sm" />
+            <Stack>
+              <Select
+                label="Tipo de Treino"
+                placeholder="Selecione o tipo"
+                data={[
+                  "Hipertrofia",
+                  "Emagrecimento",
+                  "Força",
+                  "Resistência muscular",
+                  "Condicionamento físico geral",
+                ]}
+                value={selectedTrainingType}
+                onChange={setSelectedTrainingType} // Atualiza o estado do tipo de treino
+              />
+              <Group grow>
+                <DateInput
+                  locale="pt-BR"
+                  label="Data de Início"
+                  value={startDate}
+                  onChange={(date) => {
+                    setStartDate(date);
+                    handleDateChange(date, endDate);
                     setTriedSerieModelSearch(false);
-                    setSeriesModalOpened(true);
+                  }}
+                  error={
+                    triedSerieModelSearch && !startDate
+                      ? "Campo obrigatório"
+                      : undefined
                   }
-                }}
-              >
-                Buscar e adicionar série do modelo
-              </Button>
-              <Group gap="lg">
+                  styles={
+                    triedSerieModelSearch && !startDate
+                      ? { input: { borderColor: "red" } }
+                      : {}
+                  }
+                />
+                <DateInput
+                  locale="pt-BR"
+                  label="Data de Expiração"
+                  value={endDate}
+                  onChange={(date) => {
+                    setEndDate(date);
+                    handleDateChange(startDate, date);
+                    setTriedSerieModelSearch(false);
+                  }}
+                  error={
+                    triedSerieModelSearch && !endDate
+                      ? "Campo obrigatório"
+                      : undefined
+                  }
+                  styles={
+                    triedSerieModelSearch && !endDate
+                      ? { input: { borderColor: "red" } }
+                      : {}
+                  }
+                />
+              </Group>
+              <Textarea
+                label="Observações"
+                placeholder="Adicione observações sobre o treino"
+              />
+              <Group mt="md" justify="space-between">
                 <Button
                   variant="outline"
-                  c="blue"
-                  leftSection={<IconStar />}
-                  onClick={() => console.log("Rascunho salvo")}
-                >
-                  Salvar Rascunho
-                </Button>
-                <Button
-                  variant="filled"
-                  c="green"
-                  leftSection={<IconHeart />}
-                  onClick={() => setPublishModalOpened(true)}
-                  disabled={!startDate || !endDate || !selectedTrainingType}
-                >
-                  Publicar
-                </Button>
-              </Group>
-            </Group>
-            {/* Exibe o modelo de série selecionado logo abaixo do grupo de botões */}
-            {selectedSerieModel && (
-              <div style={{ minWidth: 200 }}>
-                <Text size="sm">
-                  {
-                    serieModels.find((s) => s.value === selectedSerieModel)
-                      ?.label
-                  }
-                </Text>
-                <Text size="xs" c="dimmed">
-                  Nível:{" "}
-                  {
-                    levels.find(
-                      (l) =>
-                        l.value ===
-                        serieModels.find((s) => s.value === selectedSerieModel)
-                          ?.level
-                    )?.label
-                  }
-                </Text>
-              </div>
-            )}
-            {/* Exibe erro se necessário */}
-            {serieModelError && (
-              <Text size="xs" color="red">
-                {serieModelError}
-              </Text>
-            )}
-            {/* Modal de busca e filtro de séries */}
-            <Modal
-              opened={seriesModalOpened}
-              onClose={() => setSeriesModalOpened(false)}
-              title="Buscar série do modelo"
-            >
-              <TextInput
-                placeholder="Buscar por nome da série"
-                value={seriesSearchTerm}
-                onChange={(e) => setSeriesSearchTerm(e.target.value)}
-                mb="md"
-              />
-              <MultiSelect
-                data={levels}
-                value={seriesLevelFilter}
-                onChange={setSeriesLevelFilter}
-                placeholder="Filtrar por nível"
-                clearable
-                mb="md"
-              />
-              <Stack>
-                {filteredSeriesModels.length === 0 && (
-                  <Text size="sm" c="dimmed">
-                    Nenhuma série encontrada.
-                  </Text>
-                )}
-                {filteredSeriesModels.map((serie) => (
-                  <Button
-                    key={serie.value}
-                    variant="light"
-                    fullWidth
-                    onClick={() => handleAddSerieToPlan(serie.value)}
-                  >
-                    {serie.label} (
-                    {levels.find((l) => l.value === serie.level)?.label})
-                  </Button>
-                ))}
-              </Stack>
-            </Modal>
-            {selectedSerieModel && (
-              <Modal
-                opened={applySerieModalOpened}
-                onClose={() => setApplySerieModalOpened(false)}
-                title="Aplicar modelo de série"
-                size="lg"
-              >
-                <Stack>
-                  {trainingDays.slice(0, 7).map((d, idx) => {
-                    const dayName = format(d.date, "EEEE", { locale: ptBR });
-                    const treinoOptions = [
-                      ...(serieModelTrainings[selectedSerieModel]?.map(
-                        (t) => t.name
-                      ) || []),
-                      "Descanso",
-                    ];
-                    return (
-                      <Group key={d.date.toISOString()}>
-                        <Text style={{ minWidth: 120 }}>
-                          {dayName} ({format(d.date, "dd/MM")})
-                        </Text>
-                        <Select
-                          data={treinoOptions.map((t) => ({
-                            value: t,
-                            label: t,
-                          }))}
-                          value={dayAssignments[idx] || ""}
-                          onChange={(val) => {
-                            setDayAssignments((prev) => {
-                              const arr = [...prev];
-                              arr[idx] = val || "Descanso";
-                              return arr;
-                            });
-                          }}
-                          style={{ minWidth: 180 }}
-                        />
-                      </Group>
-                    );
-                  })}
-                  <Button
-                    mt="md"
-                    onClick={handleApplySerieToPlan}
-                    color="green"
-                  >
-                    Aplicar ao plano
-                  </Button>
-                </Stack>
-              </Modal>
-            )}
-          </Stack>
-        </Card>
-
-        {/* Modal de confirmação de publicação */}
-        <Modal
-          opened={publishModalOpened}
-          onClose={() => setPublishModalOpened(false)}
-          title="Confirmar Publicação"
-          closeOnClickOutside
-        >
-          <Text>
-            Nem todos os dias disponíveis apontados pelo cliente possuem
-            treinos. Deseja continuar com a publicação?
-          </Text>
-          <Group mt="md">
-            <Button
-              variant="outline"
-              onClick={() => setPublishModalOpened(false)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="filled" c="green" onClick={handlePublish}>
-              Confirmar
-            </Button>
-          </Group>
-        </Modal>
-
-        {/* Cards para os dias da semana */}
-        <SimpleGrid cols={2} spacing="lg">
-          {trainingDays.map(({ date, exercises }, index) => {
-            const isAvailableDay = availableDays.includes(
-              format(date, "EEEE", { locale: ptBR })
-            );
-
-            return (
-              <Fragment key={date.toISOString()}>
-                <Card
-                  key={date.toISOString()}
-                  shadow="sm"
-                  padding="lg"
-                  style={{
-                    border: isAvailableDay
-                      ? "2px solid #4caf50"
-                      : "1px solid #ccc", // Borda verde para dias disponíveis
-                    backgroundColor: isAvailableDay ? "#e8f5e9" : "white", // Fundo verde claro para dias disponíveis
+                  c="gray"
+                  onClick={() => {
+                    if (!startDate || !endDate) {
+                      setTriedSerieModelSearch(true);
+                    } else {
+                      setTriedSerieModelSearch(false);
+                      setSeriesModalOpened(true);
+                    }
                   }}
                 >
-                  <Stack>
-                    <Group align="center" justify="space-between">
-                      <Text size="md">
-                        {format(date, "EEEE", { locale: ptBR })}
-                      </Text>
-                      <Group>
-                        <Button
-                          variant="subtle"
-                          size="compact-xs"
-                          c="blue"
-                          onClick={() => {
-                            setSelectedDay(date);
-                            setReplicateModalOpened(true);
-                          }}
-                          disabled={exercises.length === 0} // Desabilitar se não houver exercícios
-                          style={
-                            exercises.length === 0
-                              ? { opacity: 0.5, pointerEvents: "none" }
-                              : {}
-                          }
-                        >
-                          Replicar Treino
-                        </Button>
-                        <Button
-                          variant="subtle"
-                          size="compact-xs"
-                          c="orange"
-                          onClick={() => {
-                            setSelectedDay(date);
-                            setMoveModalOpened(true);
-                          }}
-                          disabled={exercises.length === 0}
-                          style={
-                            exercises.length === 0
-                              ? { opacity: 0.5, pointerEvents: "none" }
-                              : {}
-                          }
-                        >
-                          Mover Treino
-                        </Button>
-                        <Button
-                          variant="subtle"
-                          size="compact-xs"
-                          c="red"
-                          onClick={() => {
-                            setTrainingDays((prev) =>
-                              prev.map((day) =>
-                                day.date.getTime() === date.getTime()
-                                  ? { ...day, exercises: [] }
-                                  : day
-                              )
-                            );
-                          }}
-                          disabled={exercises.length === 0}
-                          style={
-                            exercises.length === 0
-                              ? { opacity: 0.5, pointerEvents: "none" }
-                              : {}
-                          }
-                        >
-                          Limpar Treino
-                        </Button>
-                        <Text size="sm" c="dimmed">
-                          {format(date, "dd/MM/yyyy")}
-                        </Text>
-                      </Group>
-                    </Group>
-                    <Divider mt="sm" />
+                  Buscar e adicionar série do modelo
+                </Button>
+                <Group gap="lg">
+                  <Button
+                    variant="outline"
+                    c="blue"
+                    leftSection={<IconStar />}
+                    onClick={() => console.log("Rascunho salvo")}
+                  >
+                    Salvar Rascunho
+                  </Button>
+                  <Button
+                    variant="filled"
+                    c="green"
+                    leftSection={<IconHeart />}
+                    onClick={() => setPublishModalOpened(true)}
+                    disabled={!startDate || !endDate || !selectedTrainingType}
+                  >
+                    Publicar
+                  </Button>
+                </Group>
+              </Group>
+              {/* Exibe o modelo de série selecionado logo abaixo do grupo de botões */}
+              {selectedSerieModel && (
+                <div style={{ minWidth: 200 }}>
+                  <Text size="sm">
+                    {
+                      serieModels.find((s) => s.value === selectedSerieModel)
+                        ?.label
+                    }
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    Nível:{" "}
+                    {
+                      levels.find(
+                        (l) =>
+                          l.value ===
+                          serieModels.find(
+                            (s) => s.value === selectedSerieModel
+                          )?.level
+                      )?.label
+                    }
+                  </Text>
+                </div>
+              )}
+              {/* Exibe erro se necessário */}
+              {serieModelError && (
+                <Text size="xs" color="red">
+                  {serieModelError}
+                </Text>
+              )}
+              {/* Modal de busca e filtro de séries */}
+              <Modal
+                opened={seriesModalOpened}
+                onClose={() => setSeriesModalOpened(false)}
+                title="Buscar série do modelo"
+              >
+                <TextInput
+                  placeholder="Buscar por nome da série"
+                  value={seriesSearchTerm}
+                  onChange={(e) => setSeriesSearchTerm(e.target.value)}
+                  mb="md"
+                />
+                <MultiSelect
+                  data={levels}
+                  value={seriesLevelFilter}
+                  onChange={setSeriesLevelFilter}
+                  placeholder="Filtrar por nível"
+                  clearable
+                  mb="md"
+                />
+                <Stack>
+                  {filteredSeriesModels.length === 0 && (
+                    <Text size="sm" c="dimmed">
+                      Nenhuma série encontrada.
+                    </Text>
+                  )}
+                  {filteredSeriesModels.map((serie) => (
                     <Button
-                      variant="outline"
-                      color="blue"
-                      onClick={() => {
-                        setModelTargetDay(date);
-                        setAddModelModalOpened(true);
-                      }}
+                      key={serie.value}
+                      variant="light"
+                      fullWidth
+                      onClick={() => handleAddSerieToPlan(serie.value)}
                     >
-                      Adicionar Modelo de Treino
+                      {serie.label} (
+                      {levels.find((l) => l.value === serie.level)?.label})
                     </Button>
-                    <Stack style={{ maxHeight: "200px", overflowY: "auto" }}>
-                      {exercises.map((exercise, index) => {
+                  ))}
+                </Stack>
+              </Modal>
+              {selectedSerieModel && (
+                <Modal
+                  opened={applySerieModalOpened}
+                  onClose={() => setApplySerieModalOpened(false)}
+                  title="Aplicar modelo de série"
+                  size="md"
+                >
+                  <Stack>
+                    <div>
+                      {trainingDays.slice(0, 7).map((d, idx) => {
+                        const dayName = format(d.date, "EEEE", {
+                          locale: ptBR,
+                        });
+                        const treinoOptions = [
+                          ...(serieModelTrainings[selectedSerieModel]?.map(
+                            (t) => t.name
+                          ) || []),
+                          "Descanso",
+                        ];
                         return (
-                          <Card
-                            key={index}
-                            shadow="sm"
-                            padding="lg"
-                            style={{
-                              border: "1px solid #ccc",
-                              position: "relative",
-                              minHeight: "90px",
-                            }}
-                          >
-                            <Text size="sm">{exercise.name}</Text>
-                            <Text size="xs" c="dimmed">
-                              {exercise.series} x{" "}
-                              {exercise.reps === 0 ? "falha" : exercise.reps}
-                              {!!exercise.advancedTechnique && (
-                                <> - {exercise.advancedTechnique}</>
-                              )}
-                              {exercise.restTime
-                                ? ` | Descanso: ${exercise.restTime}s`
-                                : ""}
+                          <Group key={d.date.toISOString()} mb="sm">
+                            <Select
+                              data={treinoOptions.map((t) => ({
+                                value: t,
+                                label: t,
+                              }))}
+                              value={dayAssignments[idx] || ""}
+                              onChange={(val) => {
+                                setDayAssignments((prev) => {
+                                  const arr = [...prev];
+                                  arr[idx] = val || "Descanso";
+                                  return arr;
+                                });
+                              }}
+                              style={{ flex: 1, minWidth: 0 }}
+                            />
+                            <Text
+                              style={{
+                                flex: 1,
+                                minWidth: 0,
+                                margin: 0,
+                              }}
+                            >
+                              {dayName} ({format(d.date, "dd/MM")})
                             </Text>
-                          </Card>
+                          </Group>
                         );
                       })}
-                    </Stack>
+                    </div>
                     <Button
-                      variant="light"
-                      c="green" // cor ajustada para ação de adicionar
-                      onClick={() => openExerciseModal(date)}
+                      mt="md"
+                      onClick={handleApplySerieToPlan}
+                      color="green"
                     >
-                      {exercises.length > 0 ? "Editar treino" : "Criar treino"}
+                      Aplicar ao plano
                     </Button>
                   </Stack>
-                </Card>
+                </Modal>
+              )}
+            </Stack>
+          </Card>
 
-                {(index + 1) % 7 === 0 && index + 1 < trainingDays.length && (
+          {/* Modal de confirmação de publicação */}
+          <Modal
+            opened={publishModalOpened}
+            onClose={() => setPublishModalOpened(false)}
+            title="Confirmar Publicação"
+            closeOnClickOutside
+          >
+            <Text>
+              Nem todos os dias disponíveis apontados pelo cliente possuem
+              treinos. Deseja continuar com a publicação?
+            </Text>
+            <Group mt="md">
+              <Button
+                variant="outline"
+                onClick={() => setPublishModalOpened(false)}
+              >
+                Cancelar
+              </Button>
+              <Button variant="filled" c="green" onClick={handlePublish}>
+                Confirmar
+              </Button>
+            </Group>
+          </Modal>
+
+          {/* Cards para os dias da semana */}
+          <SimpleGrid cols={2} spacing="lg">
+            {trainingDays.map(({ date, exercises }, index) => {
+              const isAvailableDay = availableDays.includes(
+                format(date, "EEEE", { locale: ptBR })
+              );
+
+              return (
+                <Fragment key={date.toISOString()}>
                   <Card
-                    key={`week-${index}`}
+                    key={date.toISOString()}
                     shadow="sm"
                     padding="lg"
                     style={{
-                      border: "2px dashed #4caf50",
+                      border: isAvailableDay
+                        ? "2px solid #4caf50"
+                        : "1px solid #ccc", // Borda verde para dias disponíveis
+                      backgroundColor: isAvailableDay ? "#e8f5e9" : "white", // Fundo verde claro para dias disponíveis
                     }}
                   >
                     <Stack>
-                      <Text size="md">
-                        Opções para a Semana {Math.floor(index / 7) + 1}
-                      </Text>
-                      <Group grow>
-                        <Button
-                          variant="outline"
-                          c="blue"
-                          onClick={() =>
-                            handleReplicateWeek(
-                              trainingDays[index - 6].date,
-                              false
-                            )
-                          }
-                          disabled={trainingDays
-                            .slice(index - 6, index + 1)
-                            .every((day) => day.exercises.length === 0)}
-                          style={
-                            trainingDays
-                              .slice(index - 6, index + 1)
-                              .every((day) => day.exercises.length === 0)
-                              ? { opacity: 0.5, pointerEvents: "none" }
-                              : {}
-                          }
-                        >
-                          Replicar para a Próxima Semana
-                        </Button>
-                        <Button
-                          variant="filled"
-                          onClick={() =>
-                            handleReplicateWeek(
-                              trainingDays[index - 6].date,
-                              true
-                            )
-                          }
-                          disabled={trainingDays
-                            .slice(index - 6, index + 1)
-                            .every((day) => day.exercises.length === 0)}
-                          style={
-                            trainingDays
-                              .slice(index - 6, index + 1)
-                              .every((day) => day.exercises.length === 0)
-                              ? { opacity: 0.5, pointerEvents: "none" }
-                              : {}
-                          }
-                        >
-                          Replicar para Todas as Semanas
-                        </Button>
+                      <Group align="center" justify="space-between">
+                        <Text size="md">
+                          {format(date, "EEEE", { locale: ptBR })}
+                        </Text>
+                        <Group>
+                          <Button
+                            variant="subtle"
+                            size="compact-xs"
+                            c="blue"
+                            onClick={() => {
+                              setSelectedDay(date);
+                              setReplicateModalOpened(true);
+                            }}
+                            disabled={exercises.length === 0} // Desabilitar se não houver exercícios
+                            style={
+                              exercises.length === 0
+                                ? { opacity: 0.5, pointerEvents: "none" }
+                                : {}
+                            }
+                          >
+                            Replicar Treino
+                          </Button>
+                          <Button
+                            variant="subtle"
+                            size="compact-xs"
+                            c="orange"
+                            onClick={() => {
+                              setSelectedDay(date);
+                              setMoveModalOpened(true);
+                            }}
+                            disabled={exercises.length === 0}
+                            style={
+                              exercises.length === 0
+                                ? { opacity: 0.5, pointerEvents: "none" }
+                                : {}
+                            }
+                          >
+                            Mover Treino
+                          </Button>
+                          <Button
+                            variant="subtle"
+                            size="compact-xs"
+                            c="red"
+                            onClick={() => {
+                              setTrainingDays((prev) =>
+                                prev.map((day) =>
+                                  day.date.getTime() === date.getTime()
+                                    ? { ...day, exercises: [] }
+                                    : day
+                                )
+                              );
+                            }}
+                            disabled={exercises.length === 0}
+                            style={
+                              exercises.length === 0
+                                ? { opacity: 0.5, pointerEvents: "none" }
+                                : {}
+                            }
+                          >
+                            Limpar Treino
+                          </Button>
+                          <Text size="sm" c="dimmed">
+                            {format(date, "dd/MM/yyyy")}
+                          </Text>
+                        </Group>
                       </Group>
+                      <Divider mt="sm" />
+                      <Button
+                        variant="outline"
+                        color="blue"
+                        onClick={() => {
+                          setModelTargetDay(date);
+                          setAddModelModalOpened(true);
+                        }}
+                      >
+                        Adicionar Modelo de Treino
+                      </Button>
+                      <Stack style={{ maxHeight: "200px", overflowY: "auto" }}>
+                        {exercises.map((exercise, index) => {
+                          return (
+                            <Card
+                              key={index}
+                              shadow="sm"
+                              padding="lg"
+                              style={{
+                                border: "1px solid #ccc",
+                                position: "relative",
+                                minHeight: "90px",
+                              }}
+                            >
+                              <Text size="sm">{exercise.name}</Text>
+                              <Text size="xs" c="dimmed">
+                                {exercise.series} x{" "}
+                                {exercise.reps === 0 ? "falha" : exercise.reps}
+                                {!!exercise.advancedTechnique && (
+                                  <> - {exercise.advancedTechnique}</>
+                                )}
+                                {exercise.restTime
+                                  ? ` | Descanso: ${exercise.restTime}s`
+                                  : ""}
+                              </Text>
+                            </Card>
+                          );
+                        })}
+                      </Stack>
+                      <Button
+                        variant="light"
+                        c="green" // cor ajustada para ação de adicionar
+                        onClick={() => openExerciseModal(date)}
+                      >
+                        {exercises.length > 0
+                          ? "Editar treino"
+                          : "Criar treino"}
+                      </Button>
                     </Stack>
                   </Card>
-                )}
-              </Fragment>
-            );
-          })}
-        </SimpleGrid>
 
-        <ExerciseModal
-          handleModalClose={handleModalClose}
-          handleModalSave={handleModalSave}
-          modalOpened={exerciseModalOpened}
-          editingExercises={editingExercises}
-        />
-        {/* Modal para replicar treinos */}
-        <Modal
-          opened={replicateModalOpened}
-          onClose={() => {
-            setReplicateModalOpened(false);
-            setSelectedReplicationDates([]);
-            setReplicationOption(null);
-          }}
-          title="Replicar Treino"
-          closeOnClickOutside
-        >
-          <Group>
-            <Stack>
-              <Group style={{ flexWrap: "wrap" }}>
-                {[
-                  "A cada 2 dias",
-                  "A cada 3 dias",
-                  "A cada 4 dias",
-                  "A cada 5 dias",
-                  "A cada 6 dias",
-                  "Toda semana",
-                ].map((label, index) => (
-                  <Button
-                    key={index}
-                    variant={replicationOption === label ? "filled" : "outline"}
-                    c={replicationOption === label ? "violet" : "gray"} // cores ajustadas para melhor descrever ações
-                    onClick={() => setReplicationOption(label)}
-                    style={{ flex: "1 1 calc(33.33% - 10px)", margin: "5px" }}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </Group>
-              <Text size="sm" c="dimmed">
-                Selecione uma opção pré-definida ou use o calendário ao lado.
-              </Text>
-            </Stack>
+                  {(index + 1) % 7 === 0 && index + 1 < trainingDays.length && (
+                    <Card
+                      key={`week-${index}`}
+                      shadow="sm"
+                      padding="lg"
+                      style={{
+                        border: "2px dashed #4caf50",
+                      }}
+                    >
+                      <Stack>
+                        <Text size="md">
+                          Opções para a Semana {Math.floor(index / 7) + 1}
+                        </Text>
+                        <Group grow>
+                          <Button
+                            variant="outline"
+                            c="blue"
+                            onClick={() =>
+                              handleReplicateWeek(
+                                trainingDays[index - 6].date,
+                                false
+                              )
+                            }
+                            disabled={trainingDays
+                              .slice(index - 6, index + 1)
+                              .every((day) => day.exercises.length === 0)}
+                            style={
+                              trainingDays
+                                .slice(index - 6, index + 1)
+                                .every((day) => day.exercises.length === 0)
+                                ? { opacity: 0.5, pointerEvents: "none" }
+                                : {}
+                            }
+                          >
+                            Replicar para a Próxima Semana
+                          </Button>
+                          <Button
+                            variant="filled"
+                            onClick={() =>
+                              handleReplicateWeek(
+                                trainingDays[index - 6].date,
+                                true
+                              )
+                            }
+                            disabled={trainingDays
+                              .slice(index - 6, index + 1)
+                              .every((day) => day.exercises.length === 0)}
+                            style={
+                              trainingDays
+                                .slice(index - 6, index + 1)
+                                .every((day) => day.exercises.length === 0)
+                                ? { opacity: 0.5, pointerEvents: "none" }
+                                : {}
+                            }
+                          >
+                            Replicar para Todas as Semanas
+                          </Button>
+                        </Group>
+                      </Stack>
+                    </Card>
+                  )}
+                </Fragment>
+              );
+            })}
+          </SimpleGrid>
+
+          <ExerciseModal
+            handleModalClose={handleModalClose}
+            handleModalSave={handleModalSave}
+            modalOpened={exerciseModalOpened}
+            editingExercises={editingExercises}
+          />
+          {/* Modal para replicar treinos */}
+          <Modal
+            opened={replicateModalOpened}
+            onClose={() => {
+              setReplicateModalOpened(false);
+              setSelectedReplicationDates([]);
+              setReplicationOption(null);
+            }}
+            title="Replicar Treino"
+            closeOnClickOutside
+          >
+            <Group>
+              <Stack>
+                <Group style={{ flexWrap: "wrap" }}>
+                  {[
+                    "A cada 2 dias",
+                    "A cada 3 dias",
+                    "A cada 4 dias",
+                    "A cada 5 dias",
+                    "A cada 6 dias",
+                    "Toda semana",
+                  ].map((label, index) => (
+                    <Button
+                      key={index}
+                      variant={
+                        replicationOption === label ? "filled" : "outline"
+                      }
+                      c={replicationOption === label ? "violet" : "gray"} // cores ajustadas para melhor descrever ações
+                      onClick={() => setReplicationOption(label)}
+                      style={{ flex: "1 1 calc(33.33% - 10px)", margin: "5px" }}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </Group>
+                <Text size="sm" c="dimmed">
+                  Selecione uma opção pré-definida ou use o calendário ao lado.
+                </Text>
+              </Stack>
+              {startDate && endDate ? (
+                <Calendar
+                  locale="pt-BR" // alterado para string "pt-BR" para evitar erro
+                  minDate={startDate}
+                  maxDate={endDate}
+                  __onDayClick={() => {}}
+                  renderDay={(date) => {
+                    const isSelected = selectedReplicationDates.some(
+                      (d) => d.toDateString() === date.toDateString()
+                    );
+                    return (
+                      <div
+                        style={{
+                          backgroundColor: isSelected ? "#4caf50" : undefined,
+                          color: isSelected ? "white" : "inherit",
+                          borderRadius: "50%",
+                          width: "32px",
+                          height: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {format(date, "d")}
+                      </div>
+                    );
+                  }}
+                />
+              ) : (
+                <Text size="sm" c="dimmed">
+                  Defina as datas de início e expiração para replicação.
+                </Text>
+              )}
+            </Group>
+            <Divider my="sm" />
+            <Button
+              variant="filled"
+              c="green"
+              fullWidth
+              mt="md"
+              onClick={handleReplicateTraining}
+              disabled={
+                !selectedDay ||
+                (!replicationOption && selectedReplicationDates.length === 0)
+              }
+            >
+              Confirmar Replicação
+            </Button>
+          </Modal>
+          {/* Modal para mover treino */}
+          <Modal
+            opened={moveModalOpened}
+            onClose={() => {
+              setMoveModalOpened(false);
+              setMoveTargetDate(null);
+            }}
+            title="Mover Treino"
+            closeOnClickOutside
+          >
+            <Text size="sm" mb="sm">
+              Selecione a data para onde deseja mover o treino. O treino será
+              removido da data atual e adicionado à data escolhida.
+            </Text>
             {startDate && endDate ? (
               <Calendar
-                locale="pt-BR" // alterado para string "pt-BR" para evitar erro
+                locale="pt-BR"
                 minDate={startDate}
                 maxDate={endDate}
-                __onDayClick={() => {}}
+                __onDayClick={() => {
+                  setMoveTargetDate(null);
+                }}
                 renderDay={(date) => {
-                  const isSelected = selectedReplicationDates.some(
-                    (d) => d.toDateString() === date.toDateString()
-                  );
+                  const isSelected =
+                    moveTargetDate &&
+                    moveTargetDate.toDateString() === date.toDateString();
                   return (
                     <div
                       style={{
-                        backgroundColor: isSelected ? "#4caf50" : undefined,
+                        backgroundColor: isSelected ? "#ff9800" : undefined,
                         color: isSelected ? "white" : "inherit",
                         borderRadius: "50%",
                         width: "32px",
@@ -1058,181 +1142,119 @@ function NewPlanPage() {
               />
             ) : (
               <Text size="sm" c="dimmed">
-                Defina as datas de início e expiração para replicação.
+                Defina as datas de início e expiração para mover o treino.
               </Text>
             )}
-          </Group>
-          <Divider my="sm" />
-          <Button
-            variant="filled"
-            c="green"
-            fullWidth
-            mt="md"
-            onClick={handleReplicateTraining}
-            disabled={
-              !selectedDay ||
-              (!replicationOption && selectedReplicationDates.length === 0)
-            }
-          >
-            Confirmar Replicação
-          </Button>
-        </Modal>
-        {/* Modal para mover treino */}
-        <Modal
-          opened={moveModalOpened}
-          onClose={() => {
-            setMoveModalOpened(false);
-            setMoveTargetDate(null);
-          }}
-          title="Mover Treino"
-          closeOnClickOutside
-        >
-          <Text size="sm" mb="sm">
-            Selecione a data para onde deseja mover o treino. O treino será
-            removido da data atual e adicionado à data escolhida.
-          </Text>
-          {startDate && endDate ? (
-            <Calendar
-              locale="pt-BR"
-              minDate={startDate}
-              maxDate={endDate}
-              __onDayClick={() => {
-                setMoveTargetDate(null);
-              }}
-              renderDay={(date) => {
-                const isSelected =
+            <Divider my="sm" />
+            <Button
+              variant="filled"
+              c="orange"
+              fullWidth
+              mt="md"
+              onClick={handleMoveTraining}
+              disabled={
+                !selectedDay ||
+                !moveTargetDate ||
+                (selectedDay &&
                   moveTargetDate &&
-                  moveTargetDate.toDateString() === date.toDateString();
-                return (
-                  <div
-                    style={{
-                      backgroundColor: isSelected ? "#ff9800" : undefined,
-                      color: isSelected ? "white" : "inherit",
-                      borderRadius: "50%",
-                      width: "32px",
-                      height: "32px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {format(date, "d")}
-                  </div>
-                );
-              }}
-            />
-          ) : (
-            <Text size="sm" c="dimmed">
-              Defina as datas de início e expiração para mover o treino.
-            </Text>
-          )}
-          <Divider my="sm" />
-          <Button
-            variant="filled"
-            c="orange"
-            fullWidth
-            mt="md"
-            onClick={handleMoveTraining}
-            disabled={
-              !selectedDay ||
-              !moveTargetDate ||
-              (selectedDay &&
-                moveTargetDate &&
-                selectedDay.toDateString() === moveTargetDate.toDateString())
-            }
-          >
-            Confirmar Movimentação
-          </Button>
-        </Modal>
-        {/* Modal para adicionar modelo de treino */}
-        <Modal
-          opened={addModelModalOpened}
-          onClose={() => {
-            setAddModelModalOpened(false);
-            setModelSearchTerm("");
-            setModelLevelFilter([]);
-            setSelectedModel(null);
-            setModelTargetDay(null);
-          }}
-          title="Adicionar Modelo de Treino ao Dia"
-        >
-          <TextInput
-            placeholder="Buscar por nome do modelo"
-            value={modelSearchTerm}
-            onChange={(e) => setModelSearchTerm(e.target.value)}
-            mb="md"
-          />
-          <MultiSelect
-            data={levels}
-            value={modelLevelFilter}
-            onChange={setModelLevelFilter}
-            placeholder="Filtrar por nível"
-            clearable
-            mb="md"
-          />
-          <div style={{ maxHeight: 250, overflowY: "auto", marginBottom: 16 }}>
-            {filteredModelsForModal.length === 0 && (
-              <Text size="sm" c="dimmed">
-                Nenhum modelo encontrado.
-              </Text>
-            )}
-            {filteredModelsForModal.map((model, idx) => (
-              <Card
-                key={model.name + idx}
-                shadow="sm"
-                padding="md"
-                mb="sm"
-                style={{
-                  cursor: "pointer",
-                  border:
-                    selectedModel?.name === model.name
-                      ? "2px solid #1971c2"
-                      : "1px solid #eee",
-                }}
-                onClick={() => setSelectedModel(model)}
-              >
-                <Group align="center" justify="space-between">
-                  <div>
-                    <Text fw={500}>{model.name}</Text>
-                    <Text size="xs" c="dimmed">
-                      {model.description}
-                    </Text>
-                  </div>
-                  {selectedModel?.name === model.name && (
-                    <IconStar size={18} color="#1971c2" />
-                  )}
-                </Group>
-              </Card>
-            ))}
-          </div>
-          <Button
-            variant="filled"
-            color="green"
-            fullWidth
-            mt="md"
-            disabled={!selectedModel}
-            onClick={() => {
-              if (!modelTargetDay || !selectedModel) return;
-              setTrainingDays((prev) =>
-                prev.map((day) =>
-                  day.date.getTime() === modelTargetDay.getTime()
-                    ? { ...day, exercises: selectedModel.exercises }
-                    : day
-                )
-              );
+                  selectedDay.toDateString() === moveTargetDate.toDateString())
+              }
+            >
+              Confirmar Movimentação
+            </Button>
+          </Modal>
+          {/* Modal para adicionar modelo de treino */}
+          <Modal
+            opened={addModelModalOpened}
+            onClose={() => {
               setAddModelModalOpened(false);
-              setSelectedModel(null);
               setModelSearchTerm("");
               setModelLevelFilter([]);
+              setSelectedModel(null);
               setModelTargetDay(null);
             }}
+            title="Adicionar Modelo de Treino ao Dia"
           >
-            Adicionar ao Dia Atual
-          </Button>
-        </Modal>
-      </Stack>
-    </DatesProvider>
+            <TextInput
+              placeholder="Buscar por nome do modelo"
+              value={modelSearchTerm}
+              onChange={(e) => setModelSearchTerm(e.target.value)}
+              mb="md"
+            />
+            <MultiSelect
+              data={levels}
+              value={modelLevelFilter}
+              onChange={setModelLevelFilter}
+              placeholder="Filtrar por nível"
+              clearable
+              mb="md"
+            />
+            <div
+              style={{ maxHeight: 250, overflowY: "auto", marginBottom: 16 }}
+            >
+              {filteredModelsForModal.length === 0 && (
+                <Text size="sm" c="dimmed">
+                  Nenhum modelo encontrado.
+                </Text>
+              )}
+              {filteredModelsForModal.map((model, idx) => (
+                <Card
+                  key={model.name + idx}
+                  shadow="sm"
+                  padding="md"
+                  mb="sm"
+                  style={{
+                    cursor: "pointer",
+                    border:
+                      selectedModel?.name === model.name
+                        ? "2px solid #1971c2"
+                        : "1px solid #eee",
+                  }}
+                  onClick={() => setSelectedModel(model)}
+                >
+                  <Group align="center" justify="space-between">
+                    <div>
+                      <Text fw={500}>{model.name}</Text>
+                      <Text size="xs" c="dimmed">
+                        {model.description}
+                      </Text>
+                    </div>
+                    {selectedModel?.name === model.name && (
+                      <IconStar size={18} color="#1971c2" />
+                    )}
+                  </Group>
+                </Card>
+              ))}
+            </div>
+            <Button
+              variant="filled"
+              color="green"
+              fullWidth
+              mt="md"
+              disabled={!selectedModel}
+              onClick={() => {
+                if (!modelTargetDay || !selectedModel) return;
+                setTrainingDays((prev) =>
+                  prev.map((day) =>
+                    day.date.getTime() === modelTargetDay.getTime()
+                      ? { ...day, exercises: selectedModel.exercises }
+                      : day
+                  )
+                );
+                setAddModelModalOpened(false);
+                setSelectedModel(null);
+                setModelSearchTerm("");
+                setModelLevelFilter([]);
+                setModelTargetDay(null);
+              }}
+            >
+              Adicionar ao Dia Atual
+            </Button>
+          </Modal>
+        </Stack>
+      </DatesProvider>
+    </Container>
   );
 }
 
-export default withAuth(NewPlanPage, true);
+export default NewPlanPage;

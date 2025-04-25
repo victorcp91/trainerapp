@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { withAuth } from "@/utils/withAuth";
 
 const HomePage = () => {
   const t = useTranslations("Page");
@@ -102,4 +101,4 @@ const HomePage = () => {
   );
 };
 
-export default withAuth(HomePage, false);
+export default HomePage;

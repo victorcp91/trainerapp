@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { withAuth } from "@/utils/withAuth";
 import {
   Flex,
   Title,
@@ -12,6 +11,9 @@ import {
   Modal,
   TextInput,
   Select,
+  Container,
+  Grid,
+  Group,
 } from "@mantine/core";
 import {
   IconFolder,
@@ -389,44 +391,34 @@ const TrainingModelsPage = () => {
 
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <Flex
-        direction="column"
-        style={{
-          height: "calc(100vh - 40px)",
-          overflow: "hidden",
-        }}
-      >
-        <Flex align="center" justify="space-between" style={{ width: "100%" }}>
-          <Title order={2} mb="lg">
-            Modelos de Treino
-          </Title>
-          <Flex gap="md">
-            <Button
-              variant="filled"
-              color="green"
-              leftSection={<IconPlus size={16} />} // Ícone para "Criar Treino"
-              onClick={() => setExerciseModalOpened(true)}
-            >
-              Criar Treino
-            </Button>
-            <Button
-              variant="filled"
-              color="blue" // Cor para "Criar Série"
-              leftSection={<IconFolder size={16} />} // Ícone para "Criar Série"
-              onClick={() => setSeriesModalOpened(true)}
-            >
-              Criar Série
-            </Button>
-          </Flex>
-        </Flex>
-        <Flex flex={1} style={{ overflow: "hidden" }}>
-          {" "}
-          {/* Impede o scroll no container principal */}
-          <Flex
-            direction="column"
-            style={{ flex: 2, marginRight: "1rem", overflow: "hidden" }}
-          >
-            <Flex mb="lg" gap="md" align="flex-start">
+      <Container size="xl" py="xl">
+        <Title order={2} mb="md">
+          Modelos de Treino
+        </Title>
+        <Grid gutter="md" align="stretch">
+          <Grid.Col span={8}>
+            <Group align="center" justify="space-between" mb="md">
+              <Group />
+              <Group gap={8}>
+                <Button
+                  variant="filled"
+                  color="green"
+                  leftSection={<IconPlus size={16} />}
+                  onClick={() => setExerciseModalOpened(true)}
+                >
+                  Criar Treino
+                </Button>
+                <Button
+                  variant="filled"
+                  color="blue"
+                  leftSection={<IconFolder size={16} />}
+                  onClick={() => setSeriesModalOpened(true)}
+                >
+                  Criar Série
+                </Button>
+              </Group>
+            </Group>
+            <Flex mb="md" gap="md" align="flex-start">
               <Flex direction="column" style={{ flex: 1 }}>
                 <Text>Nível de Treino</Text>
                 <MultiSelect
@@ -464,8 +456,7 @@ const TrainingModelsPage = () => {
                 </select>
               </Flex>
             </Flex>
-
-            <Flex mb="lg" gap="md" align="center">
+            <Flex mb="md" gap="md" align="center">
               <input
                 type="text"
                 placeholder="Buscar por nome do treino"
@@ -488,237 +479,244 @@ const TrainingModelsPage = () => {
                 Favoritos
               </label>
             </Flex>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "1rem",
-                overflowY: "auto",
-              }}
+            <div style={{ height: "100%" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "1rem",
+                  overflowY: "auto",
+                }}
+              >
+                {sortedTrainingModels.map((model, index) => (
+                  <DraggableCard id={model.name} key={index}>
+                    {(dragListeners) => (
+                      <Card
+                        shadow="sm"
+                        padding="lg"
+                        radius="md"
+                        withBorder
+                        style={{
+                          border: "1px solid #e0e0e0",
+                          boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                          borderRadius: "8px",
+                        }}
+                        onClick={handleCardClick}
+                      >
+                        <Flex align="center" justify="space-between">
+                          <Flex align="center">
+                            <Title order={4}>{model.name}</Title>
+                            <IconEdit
+                              size={20}
+                              color="gray"
+                              style={{
+                                cursor: "pointer",
+                                marginLeft: "0.5rem",
+                              }}
+                              onClick={(event) => handleEditModel(model, event)}
+                            />
+                          </Flex>
+                          <Flex>
+                            <IconStar
+                              size={20}
+                              color="#FFD700"
+                              style={{ cursor: "pointer" }}
+                              onClick={(event) => toggleFavorite(model, event)}
+                            />
+                            <IconGripVertical
+                              size={20}
+                              color="gray"
+                              style={{
+                                cursor: "grab",
+                                marginLeft: "0.5rem",
+                              }}
+                              {...dragListeners}
+                            />
+                          </Flex>
+                        </Flex>
+                        <Text size="sm" color="dimmed">
+                          {model.description}
+                        </Text>
+                      </Card>
+                    )}
+                  </DraggableCard>
+                ))}
+              </div>
+            </div>
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Card
+              withBorder
+              shadow="sm"
+              padding="lg"
+              style={{ height: "100%" }}
             >
-              {sortedTrainingModels.map((model, index) => (
-                <DraggableCard id={model.name} key={index}>
-                  {(dragListeners) => (
+              <Title order={4} mb="sm">
+                Séries
+              </Title>
+              <Flex mb="md" gap="md" align="flex-start">
+                <Flex direction="column" style={{ flex: 1 }}>
+                  <Text>Nível de Série</Text>
+                  <MultiSelect
+                    data={levels}
+                    value={selectedSeriesLevels}
+                    onChange={setSelectedSeriesLevels}
+                    placeholder="Selecione níveis"
+                    clearable
+                  />
+                </Flex>
+                <Flex direction="column" style={{ flex: 1 }}>
+                  <Text>Ordenar por</Text>
+                  <select
+                    value={seriesSortOrder}
+                    onChange={(e) => setSeriesSortOrder(e.target.value)}
+                    style={{
+                      padding: "0.5rem",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                      width: "100%",
+                    }}
+                  >
+                    <option value="recent">Recentes</option>
+                    <option value="oldest">Antigos</option>
+                  </select>
+                </Flex>
+              </Flex>
+              <Flex mb="md" gap="md" align="center">
+                <MultiSelect
+                  data={levels}
+                  value={seriesLevelFilter}
+                  onChange={setSeriesLevelFilter}
+                  placeholder="Filtrar por nível"
+                  clearable
+                  style={{ minWidth: 180 }}
+                />
+                <label style={{ display: "flex", alignItems: "center" }}>
+                  <input
+                    type="checkbox"
+                    checked={showSeriesFavoritesOnly}
+                    onChange={(e) =>
+                      setShowSeriesFavoritesOnly(e.target.checked)
+                    }
+                    style={{ marginRight: "0.5rem" }}
+                  />
+                  Favoritos
+                </label>
+              </Flex>
+              <Flex>
+                <input
+                  type="text"
+                  placeholder="Buscar por nome da série"
+                  value={seriesSearchTerm}
+                  onChange={(e) => setSeriesSearchTerm(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "0.5rem",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+              </Flex>
+              <div style={{ overflowY: "auto", flex: 1 }}>
+                {sortedSeries.map((serie, index) => (
+                  <DroppableCard id={`serie-${index}`} key={index}>
                     <Card
                       shadow="sm"
                       padding="lg"
-                      radius="md"
-                      withBorder
                       style={{
-                        border: "1px solid #e0e0e0",
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                        borderRadius: "8px",
+                        cursor: "pointer",
+                        backgroundColor: "#f7f7f7",
+                        marginBottom: 16,
                       }}
-                      onClick={handleCardClick}
                     >
                       <Flex align="center" justify="space-between">
                         <Flex align="center">
-                          <Title order={4}>{model.name}</Title>
-                          <IconEdit
-                            size={20}
-                            color="gray"
-                            style={{ cursor: "pointer", marginLeft: "0.5rem" }}
-                            onClick={(event) => handleEditModel(model, event)}
+                          <IconFolder
+                            size={24}
+                            color="teal"
+                            style={{ marginRight: "0.5rem" }}
                           />
+                          <Title
+                            order={4}
+                            style={{ cursor: "pointer" }}
+                            onClick={() =>
+                              handleSeriesNameClick(`serie-${index}`)
+                            }
+                          >
+                            {serie.name}
+                          </Title>
                         </Flex>
-                        <Flex>
+                        <Flex align="center" gap="sm">
+                          <Text size="sm" color="dimmed">
+                            {getDroppedItemCount(`serie-${index}`)} treinos
+                          </Text>
                           <IconStar
                             size={20}
                             color="#FFD700"
                             style={{ cursor: "pointer" }}
-                            onClick={(event) => toggleFavorite(model, event)}
                           />
-                          <IconGripVertical
-                            size={20}
-                            color="gray"
-                            style={{
-                              cursor: "grab",
-                              marginLeft: "0.5rem",
-                            }}
-                            {...dragListeners}
-                          />
-                        </Flex>
-                      </Flex>
-                      <Text size="sm" color="dimmed">
-                        {model.description}
-                      </Text>
-                    </Card>
-                  )}
-                </DraggableCard>
-              ))}
-            </div>
-          </Flex>
-          <Flex
-            direction="column"
-            style={{
-              flex: 1,
-              marginTop: "0rem",
-              backgroundColor: "#ffffff",
-              borderRadius: "8px",
-              height: "100%",
-              overflow: "hidden", // Impede o scroll na área de séries inteira
-            }}
-          >
-            <Flex mb="lg" gap="md" align="flex-start" p="md" pb="0">
-              <Flex direction="column" style={{ flex: 1 }}>
-                <Text>Nível de Série</Text>
-                <MultiSelect
-                  data={levels}
-                  value={selectedSeriesLevels}
-                  onChange={setSelectedSeriesLevels}
-                  placeholder="Selecione níveis"
-                  clearable
-                />
-              </Flex>
-              <Flex direction="column" style={{ flex: 1 }}>
-                <Text>Ordenar por</Text>
-                <select
-                  value={seriesSortOrder}
-                  onChange={(e) => setSeriesSortOrder(e.target.value)}
-                  style={{
-                    padding: "0.5rem",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                    width: "100%",
-                  }}
-                >
-                  <option value="recent">Recentes</option>
-                  <option value="oldest">Antigos</option>
-                </select>
-              </Flex>
-            </Flex>
-
-            <Flex mb="lg" gap="md" align="center" px="md">
-              <input
-                type="text"
-                placeholder="Buscar por nome da série"
-                value={seriesSearchTerm}
-                onChange={(e) => setSeriesSearchTerm(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: "0.5rem",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
-              />
-              <MultiSelect
-                data={levels}
-                value={seriesLevelFilter}
-                onChange={setSeriesLevelFilter}
-                placeholder="Filtrar por nível"
-                clearable
-                style={{ minWidth: 180 }}
-              />
-              <label style={{ display: "flex", alignItems: "center" }}>
-                <input
-                  type="checkbox"
-                  checked={showSeriesFavoritesOnly}
-                  onChange={(e) => setShowSeriesFavoritesOnly(e.target.checked)}
-                  style={{ marginRight: "0.5rem" }}
-                />
-                Favoritos
-              </label>
-            </Flex>
-
-            <div style={{ overflowY: "auto", flex: 1 }}>
-              {sortedSeries.map((serie, index) => (
-                <DroppableCard id={`serie-${index}`} key={index}>
-                  <Card
-                    shadow="sm"
-                    padding="lg"
-                    style={{
-                      cursor: "pointer",
-                      backgroundColor: "#f7f7f7",
-                    }}
-                  >
-                    <Flex align="center" justify="space-between">
-                      <Flex align="center">
-                        <IconFolder
-                          size={24}
-                          color="teal"
-                          style={{ marginRight: "0.5rem" }}
-                        />
-                        <Title
-                          order={4}
-                          style={{ cursor: "pointer" }}
-                          onClick={() =>
-                            handleSeriesNameClick(`serie-${index}`)
-                          }
-                        >
-                          {serie.name}
-                        </Title>
-                      </Flex>
-                      <Flex align="center" gap="sm">
-                        <Text size="sm" color="dimmed">
-                          {getDroppedItemCount(`serie-${index}`)} treinos
-                        </Text>
-                        <IconStar
-                          size={20}
-                          color="#FFD700"
-                          style={{ cursor: "pointer" }}
-                        />
-                        {hasDroppedItems(`serie-${index}`) && (
-                          <button
-                            onClick={() =>
-                              toggleSeriesExpansion(`serie-${index}`)
-                            }
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            {expandedSeries[`serie-${index}`] ? (
-                              <IconChevronUp size={20} color="gray" />
-                            ) : (
-                              <IconChevronDown size={20} color="gray" />
-                            )}
-                          </button>
-                        )}
-                      </Flex>
-                    </Flex>
-                    <Text size="sm" color="dimmed">
-                      {serie.description}
-                    </Text>
-                    {expandedSeries[`serie-${index}`] && (
-                      <div style={{ marginTop: "1rem" }}>
-                        {droppedItems[`serie-${index}`]?.map((item, idx) => (
-                          <Flex
-                            key={idx}
-                            id={`serie-${index}-${item}`}
-                            align="center"
-                            justify="space-between"
-                            style={{ marginBottom: "1rem" }} // Adicionado espaçamento entre os itens
-                          >
-                            <Text size="sm" color="dimmed">
-                              {idx + 1}. {item}
-                            </Text>
+                          {hasDroppedItems(`serie-${index}`) && (
                             <button
                               onClick={() =>
-                                handleRemoveDroppedItem(`serie-${index}`, idx)
+                                toggleSeriesExpansion(`serie-${index}`)
                               }
                               style={{
                                 background: "none",
                                 border: "none",
                                 cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
                               }}
                             >
-                              <IconTrash size={20} color="red" />
+                              {expandedSeries[`serie-${index}`] ? (
+                                <IconChevronUp size={20} color="gray" />
+                              ) : (
+                                <IconChevronDown size={20} color="gray" />
+                              )}
                             </button>
-                          </Flex>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
-                </DroppableCard>
-              ))}
-            </div>
-          </Flex>
-        </Flex>
-      </Flex>
+                          )}
+                        </Flex>
+                      </Flex>
+                      <Text size="sm" color="dimmed">
+                        {serie.description}
+                      </Text>
+                      {expandedSeries[`serie-${index}`] && (
+                        <div style={{ marginTop: "1rem" }}>
+                          {droppedItems[`serie-${index}`]?.map((item, idx) => (
+                            <Flex
+                              key={idx}
+                              id={`serie-${index}-${item}`}
+                              align="center"
+                              justify="space-between"
+                              style={{ marginBottom: "1rem" }}
+                            >
+                              <Text size="sm" color="dimmed">
+                                {idx + 1}. {item}
+                              </Text>
+                              <button
+                                onClick={() =>
+                                  handleRemoveDroppedItem(`serie-${index}`, idx)
+                                }
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <IconTrash size={20} color="red" />
+                              </button>
+                            </Flex>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  </DroppableCard>
+                ))}
+              </div>
+            </Card>
+          </Grid.Col>
+        </Grid>
+      </Container>
       <DragOverlay dropAnimation={null}>
         {activeDragItem && (
           <Card
@@ -805,4 +803,4 @@ const TrainingModelsPage = () => {
   );
 };
 
-export default withAuth(TrainingModelsPage, true);
+export default TrainingModelsPage;

@@ -1,44 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Card,
-  Stack,
-  Title,
-  Divider,
-  Group,
-  Select, // adicionado o Select
-} from "@mantine/core";
-import { withAuth } from "@/utils/withAuth";
-import { IconSettings } from "@tabler/icons-react"; // Exemplo de ícone
+import React from "react";
+import { Card, Stack, Title, Divider, Select, Container } from "@mantine/core";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "next/navigation";
 
 function SettingsPage() {
-  const [language, setLanguage] = useState<string | null>(null);
+  const t = useTranslations("SettingsPage");
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLanguageChange = (newLocale: string | null) => {
+    console.log(newLocale);
+    if (newLocale && typeof pathname === "string") {
+      document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;SameSite=Lax`;
+      router.refresh();
+    }
+  };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <Group mb="md">
-        <IconSettings size={32} />
-        <Title order={2}>Configurações</Title>
-      </Group>
+    <Container size="xl" py="xl">
+      <Title order={2} mb="md">
+        {t("title")}
+      </Title>
       <Divider my="md" />
       <Card shadow="sm" p="lg">
         <Stack>
           <Select
-            label="Selecione o idioma"
-            placeholder="Escolha um idioma"
+            label={t("selectLanguageLabel")}
+            placeholder={t("selectLanguagePlaceholder")}
             data={[
-              { value: "pt", label: "Português" },
-              { value: "en", label: "Inglês" },
-              { value: "es", label: "Espanhol" },
+              { value: "pt", label: t("languages.pt") },
+              { value: "en", label: t("languages.en") },
             ]}
-            value={language}
-            onChange={setLanguage}
+            value={locale}
+            onChange={handleLanguageChange}
           />
         </Stack>
       </Card>
-    </div>
+    </Container>
   );
 }
 
-export default withAuth(SettingsPage, true);
+export default SettingsPage;

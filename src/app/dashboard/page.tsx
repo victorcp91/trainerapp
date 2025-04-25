@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { withAuth } from "@/utils/withAuth";
 import {
   Container,
   Grid,
@@ -26,7 +25,7 @@ const DashboardPage = () => {
   const router = useRouter();
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="xl" py="xl">
       <Title order={2} mb="md">
         Bem-vindo de volta, John Doe
       </Title>
@@ -244,4 +243,4 @@ const DashboardPage = () => {
   );
 };
 
-export default withAuth(DashboardPage, true);
+export default DashboardPage;

@@ -14,6 +14,7 @@ import {
 import { NextIntlClientProvider } from "next-intl";
 import Script from "next/script";
 import { Notifications } from "@mantine/notifications";
+import { getMessages, getLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Fituno",
@@ -24,10 +25,15 @@ export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
 }>) {
+  const locale = await getLocale();
+
+  console.log("RootLayout rendering with locale:", locale);
+
+  const messages = await getMessages();
+
   return (
-    <html lang="pt" {...mantineHtmlProps}>
+    <html lang={locale} {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
       </head>
@@ -36,7 +42,7 @@ export default async function RootLayout({
         strategy="afterInteractive"
       />
       <body className="antialiased">
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <MantineProvider>
             <Notifications />
             {children}

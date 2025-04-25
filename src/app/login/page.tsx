@@ -19,7 +19,6 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { withAuth } from "@/utils/withAuth";
 import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
@@ -125,4 +124,4 @@ const LoginPage = () => {
   );
 };
 
-export default withAuth(LoginPage, false);
+export default LoginPage;

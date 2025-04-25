@@ -1,0 +1,102 @@
+import { IQuestion } from "@/types/QuestionTypes";
+
+const defaultAnamnesisModel: IQuestion[] = [
+  {
+    type: "welcome",
+    title: "Bem-vindo a minha consultoria",
+    trainerName: "João da Silva",
+    trainerImage: "https://github.com/joaodasilva.png",
+    description:
+      "Vamos começar a coletar os dados para o seu atendimento personalizado",
+    buttonText: "Começar",
+    order: 0,
+  },
+  {
+    type: "text",
+    title: "Qual é o seu nome completo?",
+    value: "",
+    required: true,
+    order: 1,
+  },
+  {
+    type: "date",
+    title: "Qual é a sua data de nascimento?",
+    description: "Este é um campo obrigatório",
+    value: null,
+    required: true,
+    order: 2,
+  },
+  {
+    type: "singleOption",
+    title: "Qual é o seu gênero?",
+    options: [
+      {
+        label: "Masculino",
+        value: "masculino",
+      },
+      {
+        label: "Feminino",
+        value: "feminino",
+      },
+      {
+        label: "Outro",
+        value: "outro",
+      },
+    ],
+    value: "",
+    required: true,
+    order: 3,
+  },
+  {
+    type: "metric",
+    title: "Qual a sua altura?",
+    value: 0,
+    required: true,
+    metric: "cm",
+    order: 4,
+  },
+  {
+    type: "metric",
+    title: "Qual o seu peso?",
+    value: 0,
+    required: true,
+    metric: "kg",
+    order: 5,
+  },
+  {
+    type: "metric",
+    title: "Qual o seu percentual de gordura?",
+    value: 0,
+    required: false,
+    metric: "%",
+    order: 6,
+  },
+  {
+    type: "bodyParts",
+    title: "Deseja focar em alguma parte do corpo?",
+    value: [],
+    options: [
+      { label: "bodyParts.thighs", value: "thighs" },
+      { label: "bodyParts.forearms", value: "forearms" },
+      { label: "bodyParts.neck", value: "neck" },
+      { label: "bodyParts.calves", value: "calves" },
+      { label: "bodyParts.chest", value: "chest" },
+      { label: "bodyParts.shoulders", value: "shoulders" },
+      { label: "bodyParts.glutes", value: "glutes" },
+      { label: "bodyParts.back", value: "back" },
+      { label: "bodyParts.abs", value: "abs" },
+      { label: "bodyParts.triceps", value: "triceps" },
+      { label: "bodyParts.biceps", value: "biceps" },
+    ],
+    required: true,
+    order: 7,
+  },
+  {
+    type: "text",
+    title: "Qual o seu objetivo?",
+    value: "",
+    required: true,
+    order: 8,
+  },
+];
+export default defaultAnamnesisModel;

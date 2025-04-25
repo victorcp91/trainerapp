@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { withAuth } from "@/utils/withAuth";
 import {
   Container,
   Card,
@@ -95,7 +94,10 @@ const AccountPage = () => {
   };
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="xl" py="xl">
+      <Title order={2} mb="md">
+        Minha Conta
+      </Title>
       <SimpleGrid cols={2} spacing="lg">
         {/* Seção 1: Informações pessoais */}
         <Card
@@ -103,7 +105,6 @@ const AccountPage = () => {
           p="lg"
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          <Title order={3}>Informações Pessoais</Title>
           {/* Agrupando avatar e input de nome na mesma linha */}
           <Group align="flex-end" mt="md">
             <FileButton onChange={setFile} accept="image/*">
@@ -291,4 +292,4 @@ const AccountPage = () => {
   );
 };
 
-export default withAuth(AccountPage, true);
+export default AccountPage;

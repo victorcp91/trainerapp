@@ -18,7 +18,9 @@ import {
   IconBarbell,
   IconSettings,
   IconLogout,
+  IconClipboardText,
 } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 
 export default function DashboardLayout({
   children,
@@ -26,6 +28,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const [opened, { toggle }] = useDisclosure();
+  const t = useTranslations("Sidebar");
 
   return (
     <AppShell
@@ -117,7 +120,7 @@ export default function DashboardLayout({
           <Stack gap={8}>
             <NavLink
               href="/dashboard"
-              label="Dashboard"
+              label={t("dashboard")}
               leftSection={<IconDashboard size={20} />}
               style={{
                 color: "#fff",
@@ -133,7 +136,7 @@ export default function DashboardLayout({
             />
             <NavLink
               href="/dashboard/clients"
-              label="Clientes"
+              label={t("clients")}
               leftSection={<IconUsers size={20} />}
               style={{
                 color: "#fff",
@@ -149,7 +152,7 @@ export default function DashboardLayout({
             />
             <NavLink
               href="/dashboard/attendances"
-              label="Atendimentos"
+              label={t("attendances")}
               leftSection={<IconCalendar size={20} />}
               style={{
                 color: "#fff",
@@ -165,8 +168,24 @@ export default function DashboardLayout({
             />
             <NavLink
               href="/dashboard/training-models"
-              label="Modelos de treinos"
+              label={t("trainingModels")}
               leftSection={<IconBarbell size={20} />}
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: 16,
+                borderRadius: 8,
+                padding: 10,
+                marginBottom: 2,
+                transition: "background .2s, color .2s",
+              }}
+              active={false}
+              className="sidebar-link"
+            />
+            <NavLink
+              href="/dashboard/anamnesis-models"
+              label={t("anamnesisModels")}
+              leftSection={<IconClipboardText size={20} />}
               style={{
                 color: "#fff",
                 fontWeight: 500,
@@ -210,7 +229,7 @@ export default function DashboardLayout({
             </Button>
           </Group>
           <NavLink
-            label="Configurações"
+            label={t("settings")}
             href="/dashboard/settings"
             leftSection={<IconSettings size={18} />}
             style={{
@@ -240,7 +259,7 @@ export default function DashboardLayout({
             }}
             className="sidebar-link"
           >
-            Logout
+            {t("logout")}
           </Button>
         </Stack>
       </AppShell.Navbar>

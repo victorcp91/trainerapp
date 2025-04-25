@@ -18,7 +18,6 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { withAuth } from "@/utils/withAuth";
 import { useRouter } from "next/navigation";
 
 const RegisterPage = () => {
@@ -129,4 +128,4 @@ const RegisterPage = () => {
   );
 };
 
-export default withAuth(RegisterPage, false);
+export default RegisterPage;

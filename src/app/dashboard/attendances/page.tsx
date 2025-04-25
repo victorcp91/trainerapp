@@ -15,6 +15,7 @@ import {
   Indicator,
   MultiSelect,
   Flex,
+  Container,
 } from "@mantine/core";
 import { DonutChart } from "@mantine/charts";
 import { DatePicker } from "@mantine/dates";
@@ -240,10 +241,10 @@ const CalendarPage = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Group mb="lg">
-        <Title order={1}>Atendimentos</Title>
-      </Group>
+    <Container size="xl" py="xl">
+      <Title order={2} mb="md">
+        Atendimentos
+      </Title>
 
       <Group mb="lg" grow style={{ alignItems: "stretch" }}>
         {/* Card do ano */}
@@ -791,7 +792,7 @@ const CalendarPage = () => {
           Confirmar
         </Button>
       </Modal>
-    </div>
+    </Container>
   );
 };
 

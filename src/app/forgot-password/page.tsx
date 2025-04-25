@@ -13,7 +13,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { withAuth } from "@/utils/withAuth";
 
 const ForgotPasswordPage = () => {
   const t = useTranslations("ForgotPassword");
@@ -92,4 +91,4 @@ const ForgotPasswordPage = () => {
   );
 };
 
-export default withAuth(ForgotPasswordPage, false);
+export default ForgotPasswordPage;

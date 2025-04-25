@@ -41,7 +41,7 @@
     "rememberMe": "Remember me",
     "forgotPassword": "Forgot your password?",
     "login": "LOGIN",
-    "dontHaveAccount": "Don’t have an account?",
+    "dontHaveAccount": "Don't have an account?",
     "signUp": "Sign Up",
     "loginSuccess": "Login successful!",
     "loginError": "Failed to log in. Please check your credentials."
@@ -67,5 +67,250 @@
     "newStudent": "+ New Student",
     "newWorkout": "+ New Workout",
     "latestFeedbacks": "Latest Feedbacks"
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "selectLanguageLabel": "Select language",
+    "selectLanguagePlaceholder": "Choose a language",
+    "languages": {
+      "pt": "Portuguese",
+      "en": "English",
+      "es": "Spanish"
+    }
+  },
+  "Sidebar": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "attendances": "Attendances",
+    "trainingModels": "Training Models",
+    "anamnesisModels": "Anamnesis Models",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "bodyParts": {
+    "thighs": "Thighs",
+    "forearms": "Forearms",
+    "neck": "Neck",
+    "calves": "Calves",
+    "chest": "Chest",
+    "shoulders": "Shoulders",
+    "glutes": "Glutes",
+    "back": "Back",
+    "abs": "Abs",
+    "body_front": "Front Torso",
+    "body_back": "Back Torso",
+    "triceps": "Triceps",
+    "biceps": "Biceps"
+  },
+  "anamnesisModelEditor": {
+    "newQuestionPrefix": "New Question",
+    "questionDefaults": {
+      "welcome": {
+        "buttonText": "Let's Start"
+      }
+    },
+    "editModelTitle": "Edit Anamnesis Model ({modelId})",
+    "newModelTitle": "New Anamnesis Model",
+    "titleNew": "New Anamnesis Model",
+    "modelQuestionsTitle": "Model Questions",
+    "emptyStateText": "Add questions using the sidebar.",
+    "addQuestionTitle": "Add Question Types",
+    "questionTypes": {
+      "welcome": "Welcome Screen",
+      "text": "Text Input",
+      "date": "Date Picker",
+      "singleOption": "Single Choice",
+      "multipleOption": "Multiple Choice",
+      "metric": "Metric Input",
+      "bodyParts": "Body Parts Selection",
+      "injury": "Injury Report"
+    },
+    "editQuestionModal": {
+      "title": "Edit Question ({type})",
+      "questionTitle": "Question Title",
+      "required": "Required",
+      "removeOption": "Remove option {index}",
+      "metric": "Metric",
+      "trainerName": "Trainer Name",
+      "trainerImageUrl": "Trainer Image URL (Optional)",
+      "buttonText": "Button Text",
+      "bodyPartsFixedNote": "Options for this question type are fixed and defined by the system.",
+      "bodyPartsSelectLabel": "Available Body Parts for this Question",
+      "bodyPartsSelectPlaceholder": "Select body parts...",
+      "allowOtherOptionInput": "Allow text input for \"Other\" option",
+      "optionLabelPlaceholder": "Option Label (e.g., Beginner)",
+      "optionValuePlaceholder": "Option Value (e.g., beginner)",
+      "description": "Description (Optional)",
+      "options": "Options"
+    },
+    "loadStandardTemplate": "Load Standard Template",
+    "saveModel": "Save Model",
+    "noQuestionsPrompt": "Drag question types from the right panel to build your model.",
+    "standardModelTitle": "Standard Anamnesis Model"
+  },
+  "standardAnamnesis": {
+    "birthDate": {
+      "title": "What is your date of birth?"
+    },
+    "height": {
+      "title": "What is your height?"
+    },
+    "weight": {
+      "title": "What is your current weight?"
+    },
+    "gender": {
+      "title": "What is your gender?",
+      "male": "Masculine",
+      "female": "Feminine",
+      "preferNotToSay": "Prefer not to say"
+    },
+    "goal": {
+      "title": "What is your main goal?",
+      "weightLoss": "Weight Loss",
+      "hypertrophy": "Hypertrophy",
+      "strengthGain": "Strength Gain",
+      "generalHealth": "General Health Improvement",
+      "conditioning": "Physical Conditioning"
+    },
+    "experience": {
+      "title": "What is your weight training experience level?",
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "daysPerWeek": {
+      "title": "How many days per week can you train?",
+      "option1": "1 day",
+      "option2": "2 days",
+      "option3": "3 days",
+      "option4": "4 days",
+      "fiveOrMore": "5 or more days"
+    },
+    "timePerWorkout": {
+      "title": "How much time do you have available per workout?",
+      "upTo30": "Up to 30 minutes",
+      "30to45": "30 to 45 minutes",
+      "45to60": "45 to 60 minutes",
+      "over60": "More than 1 hour"
+    },
+    "trainingLocation": {
+      "title": "Do you train at home, at the gym, or another location?",
+      "home": "Home",
+      "gym": "Gym",
+      "both": "Both"
+    },
+    "equipment": {
+      "title": "What equipment do you have access to?",
+      "none": "None (bodyweight only)",
+      "dumbbells": "Dumbbells",
+      "elasticBands": "Elastic Bands",
+      "benchStep": "Bench or step",
+      "gymMachines": "Gym Machines"
+    },
+    "focusMuscles": {
+      "title": "Which muscle groups would you like to focus on more?",
+      "legsGlutes": "Legs/Glutes",
+      "chest": "Chest",
+      "back": "Back",
+      "arms": "Arms",
+      "shoulders": "Shoulders",
+      "abs": "Abdomen"
+    },
+    "restrictions": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "orthopedic": {
+      "title": "Orthopedic and Joint Conditions (Select all that apply)",
+      "hernia": "Herniated disc (cervical or lumbar)",
+      "scoliosis": "Scoliosis or other postural changes",
+      "chondromalacia": "Chondromalacia patellae",
+      "meniscusLigament": "Meniscus or ligament injury (knee)",
+      "shoulderTendonitis": "Shoulder tendonitis (rotator cuff)",
+      "lowBackPain": "Chronic low back pain",
+      "hipBursitis": "Hip bursitis/tendonitis"
+    },
+    "cardio": {
+      "title": "Cardiorespiratory Conditions (Select all that apply)",
+      "hypertension": "Arterial hypertension",
+      "asthma": "Asthma / chronic bronchitis",
+      "heartDisease": "Heart disease (history of heart attack, arrhythmias, etc.)"
+    },
+    "otherConditions": {
+      "title": "Other Relevant Conditions (Select all that apply)",
+      "obesity": "Obesity",
+      "diabetes": "Diabetes",
+      "varicoseVeins": "Varicose veins or previous thrombosis",
+      "pregnancy": "Pregnancy"
+    },
+    "cardioFeeling": {
+      "title": "How do you feel about cardiovascular exercise?",
+      "likeFrequent": "Like it and do it frequently",
+      "dislikeButDo": "Don't like it, but I do it",
+      "avoid": "Avoid it as much as possible",
+      "depends": "Depends on the type"
+    },
+    "cardioType": {
+      "title": "Which aerobic exercises do you enjoy the most?",
+      "walking": "Walking",
+      "running": "Running",
+      "stationaryBike": "Stationary Bike",
+      "dance": "Dance (Zumba, FitDance etc.)",
+      "jumpRope": "Jump Rope",
+      "stairs": "Climbing Stairs",
+      "swimming": "Swimming",
+      "elliptical": "Elliptical Trainer",
+      "none": "None"
+    },
+    "common": {
+      "other": "Other",
+      "none": "None of the above"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "confirm": "Confirm",
+    "error": "An error occurred",
+    "success": "Success",
+    "required": "Required",
+    "createModel": "Create Model",
+    "saveModel": "Save Model"
+  },
+  "anamnesisModelsPage": {
+    "title": "Anamnesis Models",
+    "createButton": "Create Model",
+    "standardModel": {
+      "title": "Standard Anamnesis Model",
+      "description": "Start with a pre-defined standard set of questions.",
+      "action": "Use Template"
+    }
+  },
+  "SortableQuestionItem": {
+    "required": "Required",
+    "edit": "Edit",
+    "remove": "Remove"
+  },
+  "EditQuestionModal": {
+    "editTitle": "Edit Question",
+    "fieldTitle": "Question Title",
+    "fieldDescription": "Description (Optional)",
+    "fieldOptions": "Options",
+    "addOption": "Add Option",
+    "removeOption": "Remove",
+    "optionLabel": "Option Label",
+    "optionValue": "Option Value",
+    "fieldRequired": "Required Question",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "metricType": "Metric Type",
+    "welcomeButtonText": "Button Text",
+    "welcomeTrainerName": "Trainer Name",
+    "welcomeTrainerImage": "Trainer Image URL"
   }
 }
