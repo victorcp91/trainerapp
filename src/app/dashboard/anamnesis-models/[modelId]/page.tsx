@@ -7,7 +7,7 @@ import { Loader } from "@mantine/core";
 import { notFound } from "next/navigation";
 import sampleAnamnesisModels, {
   ISavedAnamnesisModel,
-} from "@/app/constants/sampleAnamnesisModels";
+} from "@/constants/sampleAnamnesisModels";
 
 // Function to fetch model data (simulated)
 // Now fetches from sample data and handles not found case

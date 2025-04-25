@@ -9,6 +9,7 @@ const defaultAnamnesisModel: IQuestion[] = [
     description:
       "Vamos começar a coletar os dados para o seu atendimento personalizado",
     buttonText: "Começar",
+    required: false,
     order: 0,
   },
   {

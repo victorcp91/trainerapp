@@ -111,6 +111,7 @@
     },
     "editModelTitle": "Edit Anamnesis Model ({modelId})",
     "titleNew": "New Anamnesis Model",
+    "pageTitleEdit": "Edit Anamnesis Model",
     "modelQuestionsTitle": "Model Questions",
     "emptyStateText": "Add questions using the sidebar.",
     "addQuestionTitle": "Add Question Types",
@@ -144,10 +145,19 @@
     },
     "loadStandardTemplate": "Load Standard Template",
     "saveModel": "Save Model",
+    "saveButton": "Save Model",
     "noQuestionsPrompt": "Drag question types from the right panel to build your model.",
     "standardModelTitle": "Standard Anamnesis Model"
   },
   "standardAnamnesis": {
+    "welcome": {
+      "title": "Welcome Questions",
+      "description": "Basic introductory questions."
+    },
+    "trainer": {
+      "name": "Default Trainer",
+      "image": ""
+    },
     "birthDate": {
       "title": "What is your date of birth?"
     },
@@ -285,7 +295,7 @@
     "title": "Anamnesis Models",
     "createButton": "Create New Model",
     "standardModel": {
-      "title": "Create from Standard Model",
+      "title": "Standard Model",
       "description": "Start with a pre-defined set of common questions.",
       "action": "Load Standard Model"
     },
@@ -337,54 +347,9 @@
     "resetButton": "Send Reset Link",
     "backToLogin": "Back to Login"
   },
-  "anamnesisModelEditor": {
-    "titleNew": "Create New Anamnesis Model",
-    "standardModelTitle": "Create Anamnesis Model from Standard",
-    "pageTitleEdit": "Edit Anamnesis Model",
-    "pageTitleCreateFromStandard": "Create Model from Standard",
-    "pageTitleNew": "Create New Model",
-    "addQuestionTitle": "Add Question",
-    "loadStandardButton": "Load Standard Model",
-    "saveButton": "Save Model",
-    "questionTypes": {
-      "welcome": "Welcome Screen",
-      "text": "Text Input",
-      "date": "Date Picker",
-      "singleOption": "Single Choice",
-      "multipleOption": "Multiple Choice",
-      "metric": "Metric Input",
-      "bodyParts": "Body Part Selector",
-      "injury": "Injury Description"
-    },
-    "newQuestionPrefix": "New Question",
-    "questionDefaults": {
-      "welcome": {
-        "buttonText": "Continue"
-      }
-    },
-    "noQuestionsPrompt": "Drag questions from the right panel to build your model.",
-    "loadStandardTemplate": "Load Standard Template"
-  },
-  "sortableQuestionItem": {
-    "requiredLabel": "Required",
-    "editButton": "Edit",
-    "removeButton": "Remove"
-  },
-  "editQuestionModal": {
-    "title": "Edit Question",
-    "questionTitleLabel": "Question Title",
-    "descriptionLabel": "Description (Optional)",
-    "requiredLabel": "Required Field",
-    "optionsLabel": "Options (for Choice types)",
-    "addOptionButton": "Add Option",
-    "optionLabelPlaceholder": "Option Label",
-    "optionValuePlaceholder": "Option Value",
-    "removeOptionButton": "Remove Option",
-    "metricTypeLabel": "Metric Type",
-    "welcomeButtonTextLabel": "Button Text (for Welcome type)",
-    "welcomeTrainerNameLabel": "Trainer Name (for Welcome type)",
-    "welcomeTrainerImageLabel": "Trainer Image URL (for Welcome type)",
-    "saveChangesButton": "Save Changes",
-    "cancelButton": "Cancel"
+  "userTypes": {
+    "admin": "Administrator",
+    "trainer": "Trainer",
+    "client": "Client"
   }
 }

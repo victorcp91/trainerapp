@@ -37,7 +37,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { useTranslations } from "next-intl";
-import defaultAnamnesisModel from "@/app/constants/defaulttAnamnesisModel";
+import defaultAnamnesisModel from "@/constants/defaultAnamnesisModel";
 import { IQuestion } from "@/types/QuestionTypes";
 import SortableQuestionItem from "./SortableQuestionItem";
 import EditQuestionModal from "./EditQuestionModal";
@@ -146,13 +146,13 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
       ? questionTypeDetails.label
       : type;
 
-    const defaultTitle =
+    const defaultitle =
       type === "welcome"
         ? translatedLabel
         : `${t("newQuestionPrefix")} (${translatedLabel})`;
 
     const baseProps = {
-      title: defaultTitle,
+      title: defaultitle,
       required: false,
       order: internalQuestions.length,
     };
@@ -318,7 +318,7 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
           {mode === "edit"
             ? t("pageTitleEdit")
             : mode === "create_from_standard"
-            ? t("pageTitleCreateFromStandard")
+            ? tRoot("anamnesisModelsPage.standardModel.title")
             : t("standardModelTitle")}
         </Title>
         <Group>

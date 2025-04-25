@@ -4,7 +4,7 @@ import React, { Suspense, useState, useEffect } from "react";
 import AnamnesisModelEditor from "@/components/anamnesisModel/AnamnesisModelEditor";
 import { IQuestion } from "@/types/QuestionTypes";
 import { useSearchParams } from "next/navigation";
-import standardAnamnesisModel from "@/app/constants/simpleAnamnesisModel";
+import standardAnamnesisModel from "@/constants/simpleAnamnesisModel";
 import { Loader } from "@mantine/core";
 
 // Define the actual component logic

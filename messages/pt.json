@@ -108,7 +108,8 @@
     },
     "editModelTitle": "Editar Modelo de Anamnese ({modelId})",
     "newModelTitle": "Novo Modelo de Anamnese",
-    "titleNew": "Novo Modelo de Anamnese",
+    "titleNew": "Criar Novo Modelo de Anamnese",
+    "pageTitleEdit": "Editar Modelo de Anamnese",
     "modelQuestionsTitle": "Perguntas do Modelo",
     "emptyStateText": "Adicione perguntas usando a barra lateral.",
     "addQuestionTitle": "Adicionar Tipos de Pergunta",
@@ -142,12 +143,22 @@
     },
     "loadStandardTemplate": "Carregar Modelo Padrão",
     "saveModel": "Salvar Modelo",
+    "saveButton": "Salvar Modelo",
     "noQuestionsPrompt": "Arraste os tipos de pergunta do painel direito para construir seu modelo.",
     "standardModelTitle": "Modelo de Anamnese Padrão"
   },
   "standardAnamnesis": {
+    "welcome": {
+      "title": "Bem-vindo ao seu Treinamento Personalizado",
+      "description": "Vamos começar a coletar as informações necessárias para o seu plano sob medida.",
+      "buttonText": "Começar"
+    },
+    "trainer": {
+      "name": "Treinador Padrão",
+      "image": ""
+    },
     "birthDate": {
-      "title": "Qual é a sua data de nascimento?"
+      "title": "Qual a sua data de nascimento?"
     },
     "height": {
       "title": "Qual a sua altura?"
@@ -281,12 +292,13 @@
   },
   "anamnesisModelsPage": {
     "title": "Modelos de Anamnese",
-    "createButton": "Criar Modelo",
+    "createButton": "Criar Novo Modelo",
     "standardModel": {
-      "title": "Modelo de Anamnese Padrão",
-      "description": "Comece com um conjunto padrão pré-definido de perguntas.",
-      "action": "Usar Modelo"
-    }
+      "title": "Modelo Padrão",
+      "description": "Comece com um conjunto pré-definido de perguntas comuns.",
+      "action": "Carregar Modelo Padrão"
+    },
+    "editButton": "Editar"
   },
   "SortableQuestionItem": {
     "required": "Obrigatório",

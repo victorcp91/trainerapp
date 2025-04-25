@@ -27,7 +27,7 @@ import {
   IMultipleOptionQuestion,
   IDateQuestion,
 } from "@/types/QuestionTypes";
-import defaultAnamnesisModel from "@/app/constants/defaulttAnamnesisModel";
+import defaultAnamnesisModel from "@/constants/defaultAnamnesisModel";
 
 interface Option {
   label: string;

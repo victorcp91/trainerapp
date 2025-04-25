@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import sampleAnamnesisModels, {
   ISavedAnamnesisModel,
-} from "@/app/constants/sampleAnamnesisModels";
+} from "@/constants/sampleAnamnesisModels";
 
 function AnamnesisModelsPage() {
   const router = useRouter();
