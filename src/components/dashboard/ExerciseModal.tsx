@@ -65,17 +65,20 @@ function DraggableExerciseItem({
   };
 
   // Determine exercise type for display
-  const isHiit = exercise.hiitWorkTime !== undefined;
-  const isSteadyAerobic =
-    !isHiit &&
-    (exercise.duration !== undefined || exercise.distance !== undefined);
+  const isHiit = exercise.type === "hiit_aerobic";
+  const isSteadyAerobic = exercise.type === "steady_aerobic";
+  const isStretching = exercise.type === "stretching";
 
   // Combine flags for overall aerobic check
   const isAerobic = isHiit || isSteadyAerobic;
 
   return (
     <div ref={setNodeRef} style={style} key={exercise.id}>
-      <Card withBorder p="xs" bg={isAerobic ? "yellow.0" : undefined}>
+      <Card
+        withBorder
+        p="xs"
+        bg={isAerobic ? "yellow.0" : isStretching ? "blue.0" : undefined}
+      >
         <Group justify="space-between">
           <Group gap="xs" align="center">
             <Box
@@ -106,6 +109,13 @@ function DraggableExerciseItem({
                           "Intensity"
                       )})`
                     : ""}
+                </Text>
+              ) : isStretching ? (
+                <Text size="sm" c="dimmed">
+                  {exercise.repetitions}{" "}
+                  {t("common.repetitions", { defaultValue: "reps" })} •{" "}
+                  {exercise.holdTime}s{" "}
+                  {t("common.holdTimeShort", { defaultValue: "Hold" })}
                 </Text>
               ) : (
                 // Strength display
@@ -185,7 +195,7 @@ export function ExerciseModal({
 
   // State for exercise type filter
   const [exerciseTypeFilter, setExerciseTypeFilter] = useState<
-    "strength" | "aerobic"
+    "strength" | "aerobic" | "stretching"
   >("strength");
 
   // State for aerobic subtype filter
@@ -209,9 +219,11 @@ export function ExerciseModal({
     duration: "",
     distance: "",
     intensity: "",
-    hiitWorkTime: "", // Added HIIT fields
+    hiitWorkTime: "",
     hiitRestTime: "",
     hiitRounds: "",
+    holdTime: "",
+    repetitions: "",
   });
   const [favoriteExercises, setFavoriteExercises] = useState<number[]>([]);
   const [showErrors, setShowErrors] = useState(false);
@@ -267,7 +279,7 @@ export function ExerciseModal({
       group: "Costas",
       subGroup: "Cabo",
       equipment: "Cabo",
-      type: "strength", // Added type
+      type: "strength",
     },
     {
       id: 2,
@@ -277,7 +289,6 @@ export function ExerciseModal({
       equipment: "Peso corporal",
       type: "strength",
     },
-    // ... other strength exercises with type: 'strength' ...
     {
       id: 3,
       name: "Levantamento Terra",
@@ -344,11 +355,11 @@ export function ExerciseModal({
     },
     {
       id: 11,
-      name: "Prancha", // Example: Could be strength or aerobic depending on context
+      name: "Prancha",
       group: "Core",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
-      type: "strength", // Defaulting to strength here
+      type: "strength",
     },
     {
       id: 12,
@@ -358,7 +369,6 @@ export function ExerciseModal({
       equipment: "Peso corporal",
       type: "strength",
     },
-    // Add sample Aerobic exercises
     {
       id: 101,
       name: "Corrida (Esteira)",
@@ -399,25 +409,65 @@ export function ExerciseModal({
       equipment: "Escada",
       type: "aerobic",
     },
+    {
+      id: 201,
+      name: "Alongamento Quadríceps",
+      group: "Pernas",
+      subGroup: "Estático",
+      equipment: "Peso corporal",
+      type: "stretching",
+    },
+    {
+      id: 202,
+      name: "Alongamento Isquiotibiais",
+      group: "Pernas",
+      subGroup: "Estático",
+      equipment: "Peso corporal",
+      type: "stretching",
+    },
+    {
+      id: 203,
+      name: "Alongamento Peitoral",
+      group: "Peito",
+      subGroup: "Dinâmico",
+      equipment: "Peso corporal",
+      type: "stretching",
+    },
+    {
+      id: 204,
+      name: "Alongamento Gato-Camelo",
+      group: "Costas",
+      subGroup: "Dinâmico",
+      equipment: "Peso corporal",
+      type: "stretching",
+    },
   ];
 
   const filteredExercises = allExercises.filter((exercise) => {
-    // Filter by selected exercise type (strength/aerobic)
-    const typeMatch = exercise.type === exerciseTypeFilter;
+    // Filter by selected exercise type (strength/aerobic/stretching)
+    const typeMatch =
+      exercise.type === exerciseTypeFilter ||
+      (exerciseTypeFilter === "aerobic" &&
+        (exercise.type === "steady_aerobic" ||
+          exercise.type === "hiit_aerobic"));
 
-    // Conditionally apply strength-specific filters
+    // Conditionally apply filters based on type
     const muscleGroupMatch =
-      exerciseTypeFilter === "aerobic" || // Always true for aerobic type
+      exerciseTypeFilter === "aerobic" ||
       !filters.muscleGroup ||
       exercise.group === filters.muscleGroup;
+
     const subMuscleGroupMatch =
-      exerciseTypeFilter === "aerobic" || // Always true for aerobic type
+      exerciseTypeFilter !== "strength" ||
       !filters.subMuscleGroup ||
       exercise.subGroup === filters.subMuscleGroup;
 
-    // Common filters
     const equipmentMatch =
-      !filters.equipment || exercise.equipment === filters.equipment;
+      exerciseTypeFilter === "stretching" ||
+      !filters.equipment ||
+      exercise.equipment === filters.equipment;
+
+    // Common filters
     const searchMatch =
       !filters.search ||
       exercise.name.toLowerCase().includes(filters.search.toLowerCase());
@@ -457,7 +507,7 @@ export function ExerciseModal({
     const exerciseToAdd = filteredExercises.find((ex) => ex.id === exerciseId);
     if (!exerciseToAdd) return;
 
-    let newExercise: Exercise | undefined = undefined; // Initialize as undefined
+    let newExercise: Exercise | undefined = undefined;
     let requiredFieldsMet = false;
     let errorKey = "";
 
@@ -472,6 +522,7 @@ export function ExerciseModal({
 
       if (requiredFieldsMet) {
         newExercise = {
+          type: "strength",
           name: exerciseToAdd.name,
           series: Number(seriesVal),
           reps: untilFailure ? 0 : Number(repsVal),
@@ -479,10 +530,17 @@ export function ExerciseModal({
           notes: exerciseDetails.notes,
           restTime: Number(restVal),
           id: `temp-${nextTempId}`,
+          duration: undefined,
+          distance: undefined,
+          intensity: undefined,
+          hiitWorkTime: undefined,
+          hiitRestTime: undefined,
+          hiitRounds: undefined,
+          holdTime: undefined,
+          repetitions: undefined,
         };
       }
-    } else {
-      // exerciseTypeFilter === 'aerobic'
+    } else if (exerciseTypeFilter === "aerobic") {
       if (aerobicTypeFilter === "steady") {
         const durationVal = String(exerciseDetails.duration).trim();
         const distanceVal = String(exerciseDetails.distance).trim();
@@ -493,19 +551,25 @@ export function ExerciseModal({
 
         if (requiredFieldsMet) {
           newExercise = {
+            type: "steady_aerobic",
             name: exerciseToAdd.name,
             notes: exerciseDetails.notes,
             duration: durationVal ? Number(durationVal) : undefined,
             distance: distanceVal ? Number(distanceVal) : undefined,
             intensity: intensityVal || undefined,
+            id: `temp-${nextTempId}`,
             series: 0,
             reps: 0,
+            restTime: undefined,
             advancedTechnique: "",
-            id: `temp-${nextTempId}`,
+            hiitWorkTime: undefined,
+            hiitRestTime: undefined,
+            hiitRounds: undefined,
+            holdTime: undefined,
+            repetitions: undefined,
           };
         }
       } else {
-        // aerobicTypeFilter === 'hiit'
         const workTimeVal = String(exerciseDetails.hiitWorkTime).trim();
         const restTimeVal = String(exerciseDetails.hiitRestTime).trim();
         const roundsVal = String(exerciseDetails.hiitRounds).trim();
@@ -516,17 +580,51 @@ export function ExerciseModal({
 
         if (requiredFieldsMet) {
           newExercise = {
+            type: "hiit_aerobic",
             name: exerciseToAdd.name,
             notes: exerciseDetails.notes,
             hiitWorkTime: Number(workTimeVal),
             hiitRestTime: Number(restTimeVal),
             hiitRounds: Number(roundsVal),
+            id: `temp-${nextTempId}`,
             series: 0,
             reps: 0,
+            restTime: undefined,
             advancedTechnique: "",
-            id: `temp-${nextTempId}`,
+            duration: undefined,
+            distance: undefined,
+            intensity: undefined,
+            holdTime: undefined,
+            repetitions: undefined,
           };
         }
+      }
+    } else {
+      const holdTimeVal = String(exerciseDetails.holdTime).trim();
+      const repetitionsVal = String(exerciseDetails.repetitions).trim();
+
+      requiredFieldsMet = holdTimeVal !== "" && repetitionsVal !== "";
+      errorKey = "dashboard.exerciseModal.errorAddStretchingFields";
+
+      if (requiredFieldsMet) {
+        newExercise = {
+          type: "stretching",
+          name: exerciseToAdd.name,
+          notes: exerciseDetails.notes,
+          holdTime: Number(holdTimeVal),
+          repetitions: Number(repetitionsVal),
+          id: `temp-${nextTempId}`,
+          series: 0,
+          reps: 0,
+          restTime: undefined,
+          advancedTechnique: "",
+          duration: undefined,
+          distance: undefined,
+          intensity: undefined,
+          hiitWorkTime: undefined,
+          hiitRestTime: undefined,
+          hiitRounds: undefined,
+        };
       }
     }
 
@@ -755,7 +853,6 @@ export function ExerciseModal({
               {/* Conditional Aerobic Inputs */}
               {exerciseTypeFilter === "aerobic" && (
                 <>
-                  {/* Aerobic Type Select */}
                   <Select
                     label={t("dashboard.exerciseModal.aerobicType")}
                     value={aerobicTypeFilter}
@@ -774,10 +871,9 @@ export function ExerciseModal({
                         label: t("dashboard.exerciseModal.hiit"),
                       },
                     ]}
-                    mb="sm" // Add margin below this select
+                    mb="sm"
                   />
 
-                  {/* Conditional Steady State Inputs */}
                   {aerobicTypeFilter === "steady" && (
                     <>
                       <NumberInput
@@ -796,7 +892,7 @@ export function ExerciseModal({
                           showErrors &&
                           !exerciseDetails.duration &&
                           !exerciseDetails.distance
-                            ? t("common.required")
+                            ? t("dashboard.exerciseModal.errorAddAerobicFields")
                             : undefined
                         }
                       />
@@ -816,7 +912,7 @@ export function ExerciseModal({
                           showErrors &&
                           !exerciseDetails.duration &&
                           !exerciseDetails.distance
-                            ? t("common.required")
+                            ? t("dashboard.exerciseModal.errorAddAerobicFields")
                             : undefined
                         }
                       />
@@ -851,7 +947,6 @@ export function ExerciseModal({
                     </>
                   )}
 
-                  {/* Conditional HIIT Inputs */}
                   {aerobicTypeFilter === "hiit" && (
                     <>
                       <NumberInput
@@ -914,7 +1009,71 @@ export function ExerciseModal({
                     </>
                   )}
 
-                  {/* Notes input - always visible */}
+                  <Textarea
+                    label={t("dashboard.exerciseModal.notesLabel")}
+                    placeholder={t("common.addNotesPlaceholder")}
+                    value={exerciseDetails.notes}
+                    onChange={(event) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        notes: event.currentTarget.value,
+                      })
+                    }
+                    minRows={3}
+                  />
+                  {showErrors && fieldsError && (
+                    <Text color="red" size="sm" mt="xs">
+                      {fieldsError}
+                    </Text>
+                  )}
+                </>
+              )}
+
+              {/* Conditional Stretching Inputs */}
+              {exerciseTypeFilter === "stretching" && (
+                <>
+                  <NumberInput
+                    label={t("common.repetitions", {
+                      defaultValue: "Repetitions",
+                    })}
+                    placeholder="Ex: 10"
+                    value={exerciseDetails.repetitions}
+                    onChange={(value) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        repetitions: String(value),
+                      })
+                    }
+                    min={1}
+                    allowDecimal={false}
+                    error={
+                      showErrors && !exerciseDetails.repetitions
+                        ? t("common.required")
+                        : undefined
+                    }
+                    required
+                  />
+                  <NumberInput
+                    label={t("common.holdTimeSeconds", {
+                      defaultValue: "Hold Time (seconds)",
+                    })}
+                    placeholder="Ex: 30"
+                    value={exerciseDetails.holdTime}
+                    onChange={(value) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        holdTime: String(value),
+                      })
+                    }
+                    min={1}
+                    allowDecimal={false}
+                    error={
+                      showErrors && !exerciseDetails.holdTime
+                        ? t("common.required")
+                        : undefined
+                    }
+                    required
+                  />
                   <Textarea
                     label={t("dashboard.exerciseModal.notesLabel")}
                     placeholder={t("common.addNotesPlaceholder")}
@@ -949,13 +1108,54 @@ export function ExerciseModal({
             {t("dashboard.exerciseModal.addExercisesTitle")}
           </Title>
 
-          {/* Add SegmentedControl for Strength/Aerobic toggle */}
           <SegmentedControl
             mb="sm"
             value={exerciseTypeFilter}
             onChange={(value) => {
-              if (value === "strength" || value === "aerobic") {
+              if (
+                value === "strength" ||
+                value === "aerobic" ||
+                value === "stretching"
+              ) {
                 setExerciseTypeFilter(value);
+                if (value === "stretching") {
+                  setExerciseDetails((prev) => ({
+                    ...prev,
+                    repetitions: "1",
+                    series: "",
+                    reps: "",
+                    restTime: "",
+                    advancedTechnique: "",
+                    duration: "",
+                    distance: "",
+                    intensity: "",
+                    hiitWorkTime: "",
+                    hiitRestTime: "",
+                    hiitRounds: "",
+                  }));
+                } else if (value === "aerobic") {
+                  setExerciseDetails((prev) => ({
+                    ...prev,
+                    series: "",
+                    reps: "",
+                    restTime: "",
+                    advancedTechnique: "",
+                    holdTime: "",
+                    repetitions: "",
+                  }));
+                } else {
+                  setExerciseDetails((prev) => ({
+                    ...prev,
+                    duration: "",
+                    distance: "",
+                    intensity: "",
+                    hiitWorkTime: "",
+                    hiitRestTime: "",
+                    hiitRounds: "",
+                    holdTime: "",
+                    repetitions: "",
+                  }));
+                }
               }
             }}
             data={[
@@ -967,12 +1167,17 @@ export function ExerciseModal({
                 label: t("dashboard.exerciseModal.aerobicsFilter"),
                 value: "aerobic",
               },
+              {
+                label: t("dashboard.exerciseModal.stretchingFilter", {
+                  defaultValue: "Stretching",
+                }),
+                value: "stretching",
+              },
             ]}
             fullWidth
           />
 
           <Stack gap="sm" mb="sm">
-            {/* Conditionally render Muscle/Subgroup filters */}
             {exerciseTypeFilter === "strength" && (
               <Group grow align="flex-start">
                 <Select
@@ -1008,17 +1213,44 @@ export function ExerciseModal({
               </Group>
             )}
 
+            {exerciseTypeFilter === "stretching" && (
+              <Group grow align="flex-start">
+                <Select
+                  label={t("dashboard.exerciseModal.muscleGroupLabel")}
+                  placeholder={t(
+                    "dashboard.exerciseModal.muscleGroupPlaceholder"
+                  )}
+                  data={Object.keys(muscleSubgroupMap)}
+                  value={filters.muscleGroup}
+                  onChange={(value) => {
+                    const newMuscleGroup = value || "";
+                    setFilters({
+                      ...filters,
+                      muscleGroup: newMuscleGroup,
+                      subMuscleGroup: "",
+                      equipment: "",
+                    });
+                  }}
+                  clearable
+                />
+              </Group>
+            )}
+
             <Group grow align="flex-end">
-              <Select
-                label={t("dashboard.exerciseModal.equipmentLabel")}
-                placeholder={t("dashboard.exerciseModal.equipmentPlaceholder")}
-                data={availableEquipment}
-                value={filters.equipment}
-                onChange={(value) =>
-                  setFilters({ ...filters, equipment: value || "" })
-                }
-                clearable
-              />
+              {exerciseTypeFilter !== "stretching" && (
+                <Select
+                  label={t("dashboard.exerciseModal.equipmentLabel")}
+                  placeholder={t(
+                    "dashboard.exerciseModal.equipmentPlaceholder"
+                  )}
+                  data={availableEquipment}
+                  value={filters.equipment}
+                  onChange={(value) =>
+                    setFilters({ ...filters, equipment: value || "" })
+                  }
+                  clearable
+                />
+              )}
               <TextInput
                 placeholder={t("dashboard.exerciseModal.searchPlaceholder")}
                 value={filters.search}

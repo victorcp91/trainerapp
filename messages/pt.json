@@ -298,7 +298,7 @@
     "reps": "Repetições",
     "untilFailure": "Até a Falha",
     "advancedTechnique": "Técnica Avançada",
-    "restTimeSeconds": "Descanso (s)",
+    "restTimeSeconds": "Descanso (segundos)",
     "addNotesPlaceholder": "Adicione anotações adicionais aqui...",
     "noClientFound": "Nenhum cliente encontrado",
     "noDateSelected": "Nenhuma data selecionada",
@@ -321,8 +321,11 @@
     },
     "failure": "falha",
     "rest": "Descanso",
-    "restShort": "Desc.",
-    "failureShort": "F"
+    "restShort": "Desc",
+    "failureShort": "F",
+    "repetitions": "Repetições",
+    "holdTimeSeconds": "Tempo de Segurar (segundos)",
+    "holdTimeShort": "Segurar"
   },
   "anamnesisModelsPage": {
     "title": "Modelos de Anamnese",
@@ -767,19 +770,21 @@
       "durationMinutes": "Duração (min)",
       "distanceKm": "Distância (km)",
       "intensity": "Intensidade",
-      "intensityPlaceholder": "Selecione a intensidade",
+      "intensityPlaceholder": "Selecione o nível de intensidade",
       "lowIntensity": "Baixa",
       "mediumIntensity": "Média",
       "highIntensity": "Alta",
-      "errorAddRequiredFields": "Por favor, preencha Séries, Repetições (ou marque Até a Falha) e Descanso.",
-      "errorAddAerobicFields": "Por favor, preencha Duração e/ou Distância para exercícios aeróbicos contínuos.",
-      "errorAddHiitFields": "Por favor, preencha Tempo de Trabalho, Tempo de Descanso e Rounds para HIIT.",
+      "errorAddRequiredFields": "Preencha Séries, Repetições e Descanso para o exercício de força.",
+      "errorAddAerobicFields": "Preencha pelo menos Duração ou Distância para o exercício aeróbico contínuo.",
+      "errorAddHiitFields": "Preencha Tempo de Atividade, Tempo de Descanso e Rounds para o exercício HIIT.",
+      "errorAddStretchingFields": "Preencha Repetições e Tempo de Segurar para o exercício de alongamento.",
       "aerobicType": "Tipo de Aeróbico",
       "steadyState": "Contínuo",
       "hiit": "HIIT",
       "workTimeSeconds": "Tempo Trabalho (s)",
       "restTimeSeconds": "Tempo Descanso (s)",
-      "rounds": "Rounds"
+      "rounds": "Séries (HIIT)",
+      "stretchingFilter": "Alongamento"
     },
     "title": "Dashboard"
   }

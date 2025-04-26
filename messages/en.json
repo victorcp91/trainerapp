@@ -300,7 +300,7 @@
     "reps": "Reps",
     "untilFailure": "Until Failure",
     "advancedTechnique": "Advanced Technique",
-    "restTimeSeconds": "Rest (s)",
+    "restTimeSeconds": "Rest Time (seconds)",
     "addNotesPlaceholder": "Add observations about the exercise...",
     "noClientFound": "No client found",
     "noDateSelected": "No date selected",
@@ -322,7 +322,12 @@
       "oldest": "Oldest"
     },
     "failure": "failure",
-    "rest": "Rest"
+    "rest": "Rest",
+    "failureShort": "F",
+    "restShort": "Rest",
+    "repetitions": "Repetitions",
+    "holdTimeSeconds": "Hold Time (seconds)",
+    "holdTimeShort": "Hold"
   },
   "anamnesisModelsPage": {
     "title": "Anamnesis Models",
@@ -791,19 +796,21 @@
       "durationMinutes": "Duration (min)",
       "distanceKm": "Distance (km)",
       "intensity": "Intensity",
-      "intensityPlaceholder": "Select intensity",
+      "intensityPlaceholder": "Select intensity level",
       "lowIntensity": "Low",
       "mediumIntensity": "Medium",
       "highIntensity": "High",
-      "errorAddRequiredFields": "Please fill in Series, Reps (or select Until Failure), and Rest Time.",
-      "errorAddAerobicFields": "Please fill in Duration and/or Distance for steady state aerobic exercises.",
-      "errorAddHiitFields": "Please fill in Work Time, Rest Time, and Rounds for HIIT.",
+      "errorAddRequiredFields": "Please fill in Series, Reps, and Rest Time for the strength exercise.",
+      "errorAddAerobicFields": "Please fill in at least Duration or Distance for the steady state aerobic exercise.",
+      "errorAddHiitFields": "Please fill in Work Time, Rest Time, and Rounds for the HIIT exercise.",
       "aerobicType": "Aerobic Type",
       "steadyState": "Steady State",
       "hiit": "HIIT",
       "workTimeSeconds": "Work Time (s)",
       "restTimeSeconds": "Rest Time (s)",
-      "rounds": "Rounds"
+      "rounds": "Rounds",
+      "errorAddStretchingFields": "Please fill in Repetitions and Hold Time for the stretching exercise.",
+      "stretchingFilter": "Stretching"
     }
   }
 }

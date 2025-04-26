@@ -38,13 +38,13 @@ This section describes the purpose and features of each main page and key compon
 - **`/dashboard/clients/[id]/new-plan` (`src/app/dashboard/clients/[id]/new-plan/page.tsx`)**: Interface for creating a new training plan for a specific client.
   - **Date Range:** Set start and end dates for the plan.
   - **Daily Structure:** Displays cards (`TrainingDayCard`) for each day in the range.
-  - **Exercise Management:** Add/edit exercises for each day using `ExerciseModal` (supports strength, steady aerobic, and HIIT types).
+  - **Exercise Management:** Add/edit exercises for each day using `ExerciseModal` (supports strength, steady aerobic, HIIT, and stretching types).
   - **Templates:** Apply pre-defined weekly structures (`Series` - folders of `Training Models`) or individual workout templates (`Training Models`) using `AddModelModal`.
   - **Plan Info:** Edit overall plan details using `SeriesInfoForm` and `TrainingInfoCard`.
   - **Day/Week Operations:** Clear days, replicate days (`ReplicateTrainingModal`), move days (`MoveTrainingModal`), replicate weeks.
   - **Publishing:** Allows saving the plan as a draft or publishing it.
 - **`/dashboard/training-models` (`src/app/dashboard/training-models/page.tsx`)**: Manages reusable workout templates.
-  - **Training Models:** List (`TrainingModelList`), filter (`TrainingModelFilters`), sort, create/edit (using `ExerciseModal`), and favorite individual workout templates.
+  - **Training Models:** List (`TrainingModelList`), filter (`TrainingModelFilters`), sort, create/edit (using `ExerciseModal` supporting strength, aerobic, and stretching), and favorite individual workout templates.
   - **Series:** List (`SeriesList`), filter (`SeriesFilters`), sort, create (`CreateSeriesModal`), and favorite series (folders/groups) used to organize training models.
   - **Drag & Drop:** Assign Training Models to Series by dragging cards.
 - **`/dashboard/anamnesis-models` (`src/app/dashboard/anamnesis-models/page.tsx`)**: Manages reusable anamnesis questionnaire templates.
@@ -157,7 +157,7 @@ Based on `src/types/training.ts` and `ExerciseModal.tsx`:
 - `name` (string): Name of the exercise (e.g., "Bench Press").
 - `notes` (string, optional): Specific notes for this exercise.
 - `order` (number, optional): Order of the exercise within the workout day.
-- `type` (string, required): Type of exercise ('strength', 'steady_aerobic', or 'hiit_aerobic').
+- `type` (string, required): Type of exercise ('strength', 'steady_aerobic', 'hiit_aerobic', or 'stretching').
 
 _**Strength Fields:**_
 
@@ -178,7 +178,12 @@ _**HIIT Fields:**_
 - `hiitRestTime` (number, optional): Rest interval in seconds.
 - `hiitRounds` (number, optional): Number of rounds.
 
-_**Note:** A single exercise object will typically only populate one set of the specific fields (Strength, Steady Aerobic, or HIIT), determined by the `type` field._
+_**Stretching Fields:**_
+
+- `holdTime` (number, optional): Duration to hold the stretch in seconds.
+- `repetitions` (number, optional): Number of times to perform the stretch (often 1, but allows for reps).
+
+_**Note:** A single exercise object will typically only populate one set of the specific fields (Strength, Steady Aerobic, HIIT, or Stretching), determined by the `type` field._
 
 ### 5. `sessions` (or `appointments`)
 
@@ -243,78 +248,4 @@ Represents reusable templates for anamnesis questionnaires.
 - `createdAt` (timestamp): Timestamp of model creation.
 - `updatedAt` (timestamp): Timestamp of last update.
 
-#### `IQuestion` Object Structure (within `anamnesis_models.structure`)
-
-Based on `src/types/QuestionTypes.ts` and `AnamnesisModelEditor.tsx`:
-
-- **`id`** (string): Unique identifier for the question within the model (e.g., UUID generated on creation).
-- `type` (string): Question type ('welcome', 'text', 'date', 'singleOption', 'multipleOption', 'metric', 'bodyParts', 'injury').
-- `title` (string): The question text presented to the user.
-- `order` (number): Order of the question within the model.
-- `required` (boolean): Whether the question must be answered.
-- `description` (string, optional): Additional helper text or description.
-- `options` (array of objects, optional): For 'singleOption', 'multipleOption', 'bodyParts'.
-  - _Object Structure:_ `{ label: string, value: string }`
-  - _Note:_ For 'bodyParts', the `label` might be a translation key (e.g., `bodyParts.thighs`). For the new 'weekday' question, labels are `common.weekdays.monday`, etc.
-- `metric` (string, optional): Unit for 'metric' type (e.g., 'kg', 'cm', '%').
-- `buttonText` (string, optional): For 'welcome' type.
-- `trainerName` (string, optional): For 'welcome', 'injury' types.
-- `trainerImage` (string, optional): For 'welcome' type.
-
-### 9. `anamnesis_responses`
-
-Stores a client's submitted answers to a specific `anamnesis_model`.
-
-- **`responseId`** (string, PK): Unique ID for the submitted response.
-- `clientId` (string, FK -> `clients.clientId`): The client who submitted the response.
-- `trainerUid` (string, FK -> `users.uid`): The trainer associated with the client.
-- `modelId` (string, FK -> `anamnesis_models.modelId`): The model used for this response.
-- `submissionDate` (timestamp): When the response was submitted.
-- `answers` (map): Stores the answers provided by the client.
-  - _Key:_ `id` of the `IQuestion` from the `anamnesis_models.structure`.
-  - _Value:_ The answer provided (string, number, boolean, array of strings, null, etc., depending on question type).
-  - _Example (Weekday Question):_ `{ "questionIdForWeekdays": ["monday", "wednesday", "friday"] }`
-
-### 10. `progress_photos`
-
-Stores sets of dated progress photos for clients.
-
-- **`photoSetId`** (string, PK): Unique ID for this set of photos.
-- `clientId` (string, FK -> `clients.clientId`): The client these photos belong to.
-- `trainerUid` (string, FK -> `users.uid`): The trainer associated with the client.
-- `date` (date/timestamp): The date these photos were taken.
-- `photos` (array of objects): List of photos in this set.
-  - _Object Structure:_ `{ angle: string ('front', 'side', 'back'), url: string }`
-- `notes` (string, optional): Any notes specific to this set of photos.
-- `createdAt` (timestamp): Timestamp when the photos were uploaded.
-
-### 11. `chats`
-
-Represents a single conversation thread between a trainer and a client.
-
-- **`chatId`** (string, PK): Unique ID for the chat thread (could be composite like `${trainerUid}_${clientId}`).
-- `trainerUid` (string, FK -> `users.uid`): Participant trainer UID.
-- `clientId` (string, FK -> `clients.clientId`): Participant client ID.
-- `lastMessageTimestamp` (timestamp): Timestamp of the most recent message (for sorting).
-- `lastMessageText` (string, optional): Snippet of the last message (for preview).
-- `trainerUnreadCount` (number): Count of messages unread by the trainer in this chat.
-- `clientUnreadCount` (number): Count of messages unread by the client in this chat.
-- `participants` (array of strings): List of participant UIDs (`trainerUid`, `clientUid`) for querying.
-
-### 12. `messages`
-
-Stores individual messages belonging to a chat thread. Could be a subcollection of `chats`.
-
-- **`messageId`** (string, PK): Unique ID for the message.
-- `chatId` (string, FK -> `chats.chatId`): The chat thread this message belongs to.
-- `senderUid` (string, FK -> `users.uid`): UID of the message sender (trainer or client).
-- `timestamp` (timestamp): When the message was sent.
-- `text` (string, optional): The text content of the message.
-- `type` (string): Type of message ('text', 'exercise_reference', 'image', etc.).
-- `exerciseReference` (object, optional): If `type` is 'exercise_reference'.
-  - _Object Structure:_ `{ id: string, name: string, details?: string, imageUrl?: string, lottiePath?: string }`
-- `imageUrl` (string, optional): If `type` is 'image'.
-
----
-
-This structure provides a foundation for building the application's backend API and database interactions. Adjustments may be needed as development progresses.
+#### `IQuestion`

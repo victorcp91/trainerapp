@@ -6,13 +6,15 @@ export interface Exercise {
   notes: string;
   restTime?: number;
   id?: string | number;
-  type: "strength" | "steady_aerobic" | "hiit_aerobic";
+  type: "strength" | "steady_aerobic" | "hiit_aerobic" | "stretching";
   duration?: number;
   distance?: number;
   intensity?: string;
   hiitWorkTime?: number;
   hiitRestTime?: number;
   hiitRounds?: number;
+  holdTime?: number;
+  repetitions?: number;
 }
 
 export interface TrainingModel {

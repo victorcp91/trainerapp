@@ -22,6 +22,7 @@ import {
   IconMessageCircle,
 } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -30,6 +31,7 @@ export default function DashboardLayout({
 }>) {
   const [opened, { toggle }] = useDisclosure();
   const t = useTranslations("Sidebar");
+  const pathname = usePathname();
 
   return (
     <AppShell
@@ -53,7 +55,7 @@ export default function DashboardLayout({
           minHeight: "100vh",
         }}
       >
-        <Stack gap={32} style={{ flex: 1 }}>
+        <AppShell.Section>
           <Group
             justify="space-between"
             align="center"
@@ -117,167 +119,169 @@ export default function DashboardLayout({
               </Group>
             </Group>
           </Group>
-          <Stack gap={8}>
-            <NavLink
-              href="/dashboard"
-              label={t("dashboard")}
-              leftSection={<IconDashboard size={20} />}
-              style={{
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: 16,
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 2,
-                transition: "background .2s, color .2s",
-              }}
-              active={false}
-              className="sidebar-link"
-            />
-            <NavLink
-              href="/dashboard/clients"
-              label={t("clients")}
-              leftSection={<IconUsers size={20} />}
-              style={{
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: 16,
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 2,
-                transition: "background .2s, color .2s",
-              }}
-              active={false}
-              className="sidebar-link"
-            />
-            <NavLink
-              href="/dashboard/attendances"
-              label={t("attendances")}
-              leftSection={<IconCalendar size={20} />}
-              style={{
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: 16,
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 2,
-                transition: "background .2s, color .2s",
-              }}
-              active={false}
-              className="sidebar-link"
-            />
-            <NavLink
-              href="/dashboard/training-models"
-              label={t("trainingModels")}
-              leftSection={<IconBarbell size={20} />}
-              style={{
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: 16,
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 2,
-                transition: "background .2s, color .2s",
-              }}
-              active={false}
-              className="sidebar-link"
-            />
-            <NavLink
-              href="/dashboard/anamnesis-models"
-              label={t("anamnesisModels")}
-              leftSection={<IconClipboardText size={20} />}
-              style={{
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: 16,
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 2,
-                transition: "background .2s, color .2s",
-              }}
-              active={false}
-              className="sidebar-link"
-            />
-            <NavLink
-              href="/dashboard/chats"
-              label={t("chats")}
-              leftSection={<IconMessageCircle size={20} />}
-              style={{
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: 16,
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 2,
-                transition: "background .2s, color .2s",
-              }}
-              active={false}
-              className="sidebar-link"
-            />
-          </Stack>
-        </Stack>
-        <Stack
-          gap={16}
-          style={{ borderTop: "1px solid #23272F", paddingTop: 24 }}
-        >
-          <Group gap={12} align="center">
-            <Avatar
-              radius="xl"
-              size={40}
-              c="blue"
-              style={{ border: "2px solid #2C2E33" }}
-            >
-              J
-            </Avatar>
-            <Button
-              variant="subtle"
-              c="dark"
-              onClick={() => (window.location.href = "/dashboard/account")}
-              style={{
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: 15,
-                padding: 0,
-                background: "none",
-              }}
-            >
-              John Doe
-            </Button>
-          </Group>
+        </AppShell.Section>
+
+        <AppShell.Section grow component={Stack} gap={8}>
           <NavLink
-            label={t("settings")}
-            href="/dashboard/settings"
-            leftSection={<IconSettings size={18} />}
-            style={{
+            href="/dashboard"
+            label={t("dashboard")}
+            leftSection={<IconDashboard size={20} />}
+            style={(theme) => ({
               color: "#fff",
-              fontWeight: 500,
-              fontSize: 15,
-              borderRadius: 8,
-              padding: 8,
+              borderRadius: theme.radius.sm,
               transition: "background .2s, color .2s",
-            }}
-            active={false}
+              backgroundColor:
+                pathname === "/dashboard" ? theme.colors.dark[5] : undefined,
+            })}
+            active={pathname === "/dashboard"}
             className="sidebar-link"
           />
-          <Button
-            variant="subtle"
-            c="red"
-            leftSection={<IconLogout size={18} />}
-            onClick={() => console.log("Logout")}
-            style={{
+          <NavLink
+            href="/dashboard/clients"
+            label={t("clients")}
+            leftSection={<IconUsers size={20} />}
+            style={(theme) => ({
               color: "#fff",
-              fontWeight: 500,
-              fontSize: 15,
-              borderRadius: 8,
-              padding: 8,
-              background: "none",
+              borderRadius: theme.radius.sm,
               transition: "background .2s, color .2s",
-            }}
+              backgroundColor: pathname.startsWith("/dashboard/clients")
+                ? theme.colors.dark[5]
+                : undefined,
+            })}
+            active={pathname.startsWith("/dashboard/clients")}
             className="sidebar-link"
-          >
-            {t("logout")}
-          </Button>
-        </Stack>
+          />
+          <NavLink
+            href="/dashboard/attendances"
+            label={t("attendances")}
+            leftSection={<IconCalendar size={20} />}
+            style={(theme) => ({
+              color: "#fff",
+              borderRadius: theme.radius.sm,
+              transition: "background .2s, color .2s",
+              backgroundColor:
+                pathname === "/dashboard/attendances"
+                  ? theme.colors.dark[5]
+                  : undefined,
+            })}
+            active={pathname === "/dashboard/attendances"}
+            className="sidebar-link"
+          />
+          <NavLink
+            href="/dashboard/training-models"
+            label={t("trainingModels")}
+            leftSection={<IconBarbell size={20} />}
+            style={(theme) => ({
+              color: "#fff",
+              borderRadius: theme.radius.sm,
+              transition: "background .2s, color .2s",
+              backgroundColor:
+                pathname === "/dashboard/training-models"
+                  ? theme.colors.dark[5]
+                  : undefined,
+            })}
+            active={pathname === "/dashboard/training-models"}
+            className="sidebar-link"
+          />
+          <NavLink
+            href="/dashboard/anamnesis-models"
+            label={t("anamnesisModels")}
+            leftSection={<IconClipboardText size={20} />}
+            style={(theme) => ({
+              color: "#fff",
+              borderRadius: theme.radius.sm,
+              transition: "background .2s, color .2s",
+              backgroundColor: pathname.startsWith(
+                "/dashboard/anamnesis-models"
+              )
+                ? theme.colors.dark[5]
+                : undefined,
+            })}
+            active={pathname.startsWith("/dashboard/anamnesis-models")}
+            className="sidebar-link"
+          />
+          <NavLink
+            href="/dashboard/chats"
+            label={t("chats")}
+            leftSection={<IconMessageCircle size={20} />}
+            style={(theme) => ({
+              color: "#fff",
+              borderRadius: theme.radius.sm,
+              transition: "background .2s, color .2s",
+              backgroundColor:
+                pathname === "/dashboard/chats"
+                  ? theme.colors.dark[5]
+                  : undefined,
+            })}
+            active={pathname === "/dashboard/chats"}
+            className="sidebar-link"
+          />
+        </AppShell.Section>
+
+        <AppShell.Section>
+          <Stack gap={16} style={{ paddingTop: 24 }}>
+            <Group gap={12} align="center">
+              <Avatar
+                radius="xl"
+                size={40}
+                c="blue"
+                style={{ border: "2px solid #2C2E33" }}
+              >
+                J
+              </Avatar>
+              <Button
+                variant="transparent"
+                component="a"
+                href="/dashboard/account"
+                style={{
+                  color: "#f8f9fa",
+                  fontWeight: 700,
+                  fontSize: 15,
+                  padding: 0,
+                  background: "none",
+                }}
+              >
+                John Doe
+              </Button>
+            </Group>
+            <NavLink
+              label={t("settings")}
+              href="/dashboard/settings"
+              leftSection={<IconSettings size={18} />}
+              style={(theme) => ({
+                color: "#fff",
+                borderRadius: theme.radius.sm,
+                transition: "background .2s, color .2s",
+                backgroundColor:
+                  pathname === "/dashboard/settings"
+                    ? theme.colors.dark[5]
+                    : undefined,
+              })}
+              active={pathname === "/dashboard/settings"}
+              className="sidebar-link"
+            />
+            <Button
+              variant="subtle"
+              c="red"
+              leftSection={<IconLogout size={18} />}
+              onClick={() => console.log("Logout")}
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: 15,
+                borderRadius: 8,
+                padding: "var(--mantine-spacing-xs) var(--mantine-spacing-sm)",
+                background: "none",
+                transition: "background .2s, color .2s",
+                justifyContent: "flex-start",
+                width: "100%",
+              }}
+              className="sidebar-link"
+            >
+              {t("logout")}
+            </Button>
+          </Stack>
+        </AppShell.Section>
       </AppShell.Navbar>
       <AppShell.Main style={{ backgroundColor: "#f8f9fa" }}>
         {children}
