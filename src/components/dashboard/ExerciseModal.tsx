@@ -20,6 +20,7 @@ import {
   TextInput,
   Title,
   Box,
+  SegmentedControl,
 } from "@mantine/core";
 import {
   IconGripVertical,
@@ -56,16 +57,25 @@ function DraggableExerciseItem({
   t,
 }: DraggableExerciseItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: index });
+    useSortable({ id: exercise.id! });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
+  // Determine exercise type for display
+  const isHiit = exercise.hiitWorkTime !== undefined;
+  const isSteadyAerobic =
+    !isHiit &&
+    (exercise.duration !== undefined || exercise.distance !== undefined);
+
+  // Combine flags for overall aerobic check
+  const isAerobic = isHiit || isSteadyAerobic;
+
   return (
-    <div ref={setNodeRef} style={style} key={index}>
-      <Card withBorder p="xs">
+    <div ref={setNodeRef} style={style} key={exercise.id}>
+      <Card withBorder p="xs" bg={isAerobic ? "yellow.0" : undefined}>
         <Group justify="space-between">
           <Group gap="xs" align="center">
             <Box
@@ -77,20 +87,43 @@ function DraggableExerciseItem({
             </Box>
             <Stack gap={0}>
               <Text fw={500}>{exercise.name}</Text>
-              <Text size="sm" c="dimmed">
-                {exercise.series}x
-                {exercise.reps > 0
-                  ? exercise.reps
-                  : t("common.failureShort", { defaultValue: "F" })}{" "}
-                • {exercise.restTime}s{" "}
-                {t("common.restShort", { defaultValue: "Rest" })}
-                {exercise.advancedTechnique && (
-                  <Text span size="xs" c="blue">
-                    {" "}
-                    ({exercise.advancedTechnique})
-                  </Text>
-                )}
-              </Text>
+              {/* Conditional display for details */}
+              {isHiit ? (
+                <Text size="sm" c="dimmed">
+                  HIIT: {exercise.hiitRounds} rounds ({exercise.hiitWorkTime}s /{" "}
+                  {exercise.hiitRestTime}s)
+                </Text>
+              ) : isSteadyAerobic ? (
+                <Text size="sm" c="dimmed">
+                  {exercise.duration ? `${exercise.duration} min` : ""}
+                  {exercise.duration && exercise.distance ? " / " : ""}
+                  {exercise.distance ? `${exercise.distance} km` : ""}
+                  {/* Combine Intensity label and value translation */}
+                  {exercise.intensity
+                    ? ` (${t("dashboard.exerciseModal.intensity")} ${t(
+                        "dashboard.exerciseModal." +
+                          exercise.intensity +
+                          "Intensity"
+                      )})`
+                    : ""}
+                </Text>
+              ) : (
+                // Strength display
+                <Text size="sm" c="dimmed">
+                  {exercise.series}x
+                  {exercise.reps > 0
+                    ? exercise.reps
+                    : t("common.failureShort", { defaultValue: "F" })}{" "}
+                  • {exercise.restTime}s{" "}
+                  {t("common.restShort", { defaultValue: "Rest" })}
+                  {exercise.advancedTechnique && (
+                    <Text span size="xs" c="blue">
+                      {" "}
+                      ({exercise.advancedTechnique})
+                    </Text>
+                  )}
+                </Text>
+              )}
               {exercise.notes && (
                 <Text size="xs" mt={2}>
                   {exercise.notes}
@@ -119,8 +152,12 @@ export function ExerciseModal({
   const t = useTranslations();
   const [untilFailure, setUntilFailure] = useState(false);
   const [fieldsError, setFieldsError] = useState<string>("");
+  const [nextTempId, setNextTempId] = useState(0);
   const [tempExercises, setTempExercises] = useState<Exercise[]>(
-    editingModel?.exercises || []
+    (editingModel?.exercises || []).map((ex, index) => ({
+      ...ex,
+      id: ex.id ?? `temp-${index}`,
+    }))
   );
   const [modelName, setModelName] = useState(editingModel?.name || "");
   const [modelDescription, setModelDescription] = useState(
@@ -131,13 +168,30 @@ export function ExerciseModal({
     if (editingModel) {
       setModelName(editingModel.name);
       setModelDescription(editingModel.description);
-      setTempExercises(editingModel.exercises || []);
+      setTempExercises(
+        (editingModel.exercises || []).map((ex, index) => ({
+          ...ex,
+          id: ex.id ?? `temp-${index}`,
+        }))
+      );
+      setNextTempId((editingModel.exercises || []).length);
     } else {
       setModelName("");
       setModelDescription("");
       setTempExercises([]);
+      setNextTempId(0);
     }
   }, [editingModel, modalOpened]);
+
+  // State for exercise type filter
+  const [exerciseTypeFilter, setExerciseTypeFilter] = useState<
+    "strength" | "aerobic"
+  >("strength");
+
+  // State for aerobic subtype filter
+  const [aerobicTypeFilter, setAerobicTypeFilter] = useState<"steady" | "hiit">(
+    "steady"
+  );
 
   const [filters, setFilters] = useState({
     muscleGroup: "",
@@ -152,17 +206,68 @@ export function ExerciseModal({
     advancedTechnique: "",
     notes: "",
     restTime: "",
+    duration: "",
+    distance: "",
+    intensity: "",
+    hiitWorkTime: "", // Added HIIT fields
+    hiitRestTime: "",
+    hiitRounds: "",
   });
   const [favoriteExercises, setFavoriteExercises] = useState<number[]>([]);
   const [showErrors, setShowErrors] = useState(false);
 
-  const filteredExercises = [
+  // Define muscle subgroup mapping (example data)
+  const muscleSubgroupMap: Record<string, string[]> = {
+    Costas: [
+      "Dorsais",
+      "Lombares",
+      "Trapézio",
+      "Cabo",
+      "Peso corporal",
+      "Barra",
+    ], // Added sample subgroups
+    Pernas: [
+      "Quadríceps",
+      "Posteriores",
+      "Glúteos",
+      "Panturrilhas",
+      "Máquina",
+      "Peso corporal",
+      "Barra",
+    ],
+    Braços: ["Bíceps", "Tríceps", "Antebraço", "Halteres", "Cabo"],
+    Ombros: [
+      "Deltoide Anterior",
+      "Deltoide Lateral",
+      "Deltoide Posterior",
+      "Halteres",
+    ],
+    Core: ["Abdômen Reto", "Oblíquos", "Lombar", "Peso corporal"],
+  };
+
+  // Define available equipment (extracted from sample data or predefined)
+  const availableEquipment = [
+    "Cabo",
+    "Peso corporal",
+    "Barra",
+    "Máquina",
+    "Halteres",
+  ];
+
+  // Get available subgroups based on selected muscle group
+  const availableSubgroups = filters.muscleGroup
+    ? muscleSubgroupMap[filters.muscleGroup] || []
+    : [];
+
+  // Combined list of exercises (strength and aerobic)
+  const allExercises = [
     {
       id: 1,
       name: "Remada Sentada",
       group: "Costas",
       subGroup: "Cabo",
       equipment: "Cabo",
+      type: "strength", // Added type
     },
     {
       id: 2,
@@ -170,13 +275,16 @@ export function ExerciseModal({
       group: "Costas",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
+      type: "strength",
     },
+    // ... other strength exercises with type: 'strength' ...
     {
       id: 3,
       name: "Levantamento Terra",
       group: "Costas",
       subGroup: "Barra",
       equipment: "Barra",
+      type: "strength",
     },
     {
       id: 4,
@@ -184,6 +292,7 @@ export function ExerciseModal({
       group: "Pernas",
       subGroup: "Barra",
       equipment: "Barra",
+      type: "strength",
     },
     {
       id: 5,
@@ -191,6 +300,7 @@ export function ExerciseModal({
       group: "Pernas",
       subGroup: "Máquina",
       equipment: "Máquina",
+      type: "strength",
     },
     {
       id: 6,
@@ -198,6 +308,7 @@ export function ExerciseModal({
       group: "Pernas",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
+      type: "strength",
     },
     {
       id: 7,
@@ -205,6 +316,7 @@ export function ExerciseModal({
       group: "Braços",
       subGroup: "Halteres",
       equipment: "Halteres",
+      type: "strength",
     },
     {
       id: 8,
@@ -212,6 +324,7 @@ export function ExerciseModal({
       group: "Braços",
       subGroup: "Cabo",
       equipment: "Cabo",
+      type: "strength",
     },
     {
       id: 9,
@@ -219,6 +332,7 @@ export function ExerciseModal({
       group: "Ombros",
       subGroup: "Halteres",
       equipment: "Halteres",
+      type: "strength",
     },
     {
       id: 10,
@@ -226,13 +340,15 @@ export function ExerciseModal({
       group: "Ombros",
       subGroup: "Halteres",
       equipment: "Halteres",
+      type: "strength",
     },
     {
       id: 11,
-      name: "Prancha",
+      name: "Prancha", // Example: Could be strength or aerobic depending on context
       group: "Core",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
+      type: "strength", // Defaulting to strength here
     },
     {
       id: 12,
@@ -240,28 +356,92 @@ export function ExerciseModal({
       group: "Core",
       subGroup: "Peso corporal",
       equipment: "Peso corporal",
+      type: "strength",
     },
-  ].filter(
-    (exercise) =>
-      (!filters.muscleGroup || exercise.group === filters.muscleGroup) &&
-      (!filters.subMuscleGroup ||
-        exercise.subGroup === filters.subMuscleGroup) &&
-      (!filters.equipment || exercise.equipment === filters.equipment) &&
-      (!filters.search ||
-        exercise.name.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.favorite || favoriteExercises.includes(exercise.id))
-  );
+    // Add sample Aerobic exercises
+    {
+      id: 101,
+      name: "Corrida (Esteira)",
+      group: "Aeróbico",
+      subGroup: "Esteira",
+      equipment: "Esteira",
+      type: "aerobic",
+    },
+    {
+      id: 102,
+      name: "Bicicleta Ergométrica",
+      group: "Aeróbico",
+      subGroup: "Bicicleta",
+      equipment: "Bicicleta",
+      type: "aerobic",
+    },
+    {
+      id: 103,
+      name: "Elíptico (Transport)",
+      group: "Aeróbico",
+      subGroup: "Elíptico",
+      equipment: "Elíptico",
+      type: "aerobic",
+    },
+    {
+      id: 104,
+      name: "Pular Corda",
+      group: "Aeróbico",
+      subGroup: "Corda",
+      equipment: "Corda",
+      type: "aerobic",
+    },
+    {
+      id: 105,
+      name: "Escada (Simulador)",
+      group: "Aeróbico",
+      subGroup: "Escada",
+      equipment: "Escada",
+      type: "aerobic",
+    },
+  ];
+
+  const filteredExercises = allExercises.filter((exercise) => {
+    // Filter by selected exercise type (strength/aerobic)
+    const typeMatch = exercise.type === exerciseTypeFilter;
+
+    // Conditionally apply strength-specific filters
+    const muscleGroupMatch =
+      exerciseTypeFilter === "aerobic" || // Always true for aerobic type
+      !filters.muscleGroup ||
+      exercise.group === filters.muscleGroup;
+    const subMuscleGroupMatch =
+      exerciseTypeFilter === "aerobic" || // Always true for aerobic type
+      !filters.subMuscleGroup ||
+      exercise.subGroup === filters.subMuscleGroup;
+
+    // Common filters
+    const equipmentMatch =
+      !filters.equipment || exercise.equipment === filters.equipment;
+    const searchMatch =
+      !filters.search ||
+      exercise.name.toLowerCase().includes(filters.search.toLowerCase());
+    const favoriteMatch =
+      !filters.favorite || favoriteExercises.includes(exercise.id);
+
+    return (
+      typeMatch &&
+      muscleGroupMatch &&
+      subMuscleGroupMatch &&
+      equipmentMatch &&
+      searchMatch &&
+      favoriteMatch
+    );
+  });
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      setTempExercises((exercises) =>
-        arrayMove(
-          exercises,
-          exercises.findIndex((_, i) => i === active.id),
-          exercises.findIndex((_, i) => i === over.id)
-        )
-      );
+      setTempExercises((exercises) => {
+        const oldIndex = exercises.findIndex((ex) => ex.id === active.id);
+        const newIndex = exercises.findIndex((ex) => ex.id === over.id);
+        return arrayMove(exercises, oldIndex, newIndex);
+      });
     }
   };
 
@@ -270,34 +450,94 @@ export function ExerciseModal({
   };
 
   const handleDirectAddExercise = (exerciseId: number) => {
-    const seriesVal = String(exerciseDetails.series).trim();
-    const repsVal = String(exerciseDetails.reps).trim();
-    const restVal = String(exerciseDetails.restTime).trim();
-
-    if (
-      seriesVal === "" ||
-      (!untilFailure && repsVal === "") ||
-      restVal === ""
-    ) {
-      setFieldsError(t("dashboard.exerciseModal.errorAddRequiredFields"));
-      setShowErrors(true);
-      return;
-    }
+    // Reset error state specifically for this action
     setFieldsError("");
     setShowErrors(false);
 
     const exerciseToAdd = filteredExercises.find((ex) => ex.id === exerciseId);
     if (!exerciseToAdd) return;
 
-    const newExercise: Exercise = {
-      name: exerciseToAdd.name,
-      series: Number(seriesVal),
-      reps: untilFailure ? 0 : Number(repsVal),
-      advancedTechnique: exerciseDetails.advancedTechnique,
-      notes: exerciseDetails.notes,
-      restTime: Number(restVal),
-    };
+    let newExercise: Exercise | undefined = undefined; // Initialize as undefined
+    let requiredFieldsMet = false;
+    let errorKey = "";
+
+    if (exerciseTypeFilter === "strength") {
+      const seriesVal = String(exerciseDetails.series).trim();
+      const repsVal = String(exerciseDetails.reps).trim();
+      const restVal = String(exerciseDetails.restTime).trim();
+
+      requiredFieldsMet =
+        seriesVal !== "" && !untilFailure && repsVal !== "" && restVal !== "";
+      errorKey = "dashboard.exerciseModal.errorAddRequiredFields";
+
+      if (requiredFieldsMet) {
+        newExercise = {
+          name: exerciseToAdd.name,
+          series: Number(seriesVal),
+          reps: untilFailure ? 0 : Number(repsVal),
+          advancedTechnique: exerciseDetails.advancedTechnique,
+          notes: exerciseDetails.notes,
+          restTime: Number(restVal),
+          id: `temp-${nextTempId}`,
+        };
+      }
+    } else {
+      // exerciseTypeFilter === 'aerobic'
+      if (aerobicTypeFilter === "steady") {
+        const durationVal = String(exerciseDetails.duration).trim();
+        const distanceVal = String(exerciseDetails.distance).trim();
+        const intensityVal = exerciseDetails.intensity;
+
+        requiredFieldsMet = durationVal !== "" || distanceVal !== "";
+        errorKey = "dashboard.exerciseModal.errorAddAerobicFields";
+
+        if (requiredFieldsMet) {
+          newExercise = {
+            name: exerciseToAdd.name,
+            notes: exerciseDetails.notes,
+            duration: durationVal ? Number(durationVal) : undefined,
+            distance: distanceVal ? Number(distanceVal) : undefined,
+            intensity: intensityVal || undefined,
+            series: 0,
+            reps: 0,
+            advancedTechnique: "",
+            id: `temp-${nextTempId}`,
+          };
+        }
+      } else {
+        // aerobicTypeFilter === 'hiit'
+        const workTimeVal = String(exerciseDetails.hiitWorkTime).trim();
+        const restTimeVal = String(exerciseDetails.hiitRestTime).trim();
+        const roundsVal = String(exerciseDetails.hiitRounds).trim();
+
+        requiredFieldsMet =
+          workTimeVal !== "" && restTimeVal !== "" && roundsVal !== "";
+        errorKey = "dashboard.exerciseModal.errorAddHiitFields";
+
+        if (requiredFieldsMet) {
+          newExercise = {
+            name: exerciseToAdd.name,
+            notes: exerciseDetails.notes,
+            hiitWorkTime: Number(workTimeVal),
+            hiitRestTime: Number(restTimeVal),
+            hiitRounds: Number(roundsVal),
+            series: 0,
+            reps: 0,
+            advancedTechnique: "",
+            id: `temp-${nextTempId}`,
+          };
+        }
+      }
+    }
+
+    if (!requiredFieldsMet || newExercise === undefined) {
+      setFieldsError(t(errorKey));
+      setShowErrors(true);
+      return;
+    }
+
     setTempExercises((prev: Exercise[]) => [...prev, newExercise]);
+    setNextTempId((prevId) => prevId + 1);
   };
 
   const toggleFavorite = (exerciseId: number) => {
@@ -309,6 +549,10 @@ export function ExerciseModal({
   };
 
   const onSaveChanges = () => {
+    // Reset error state specifically for this action
+    setFieldsError("");
+    setShowErrors(false);
+
     if (!modelName) {
       setFieldsError(
         t("common.requiredField", {
@@ -318,8 +562,6 @@ export function ExerciseModal({
       setShowErrors(true);
       return;
     }
-    setFieldsError("");
-    setShowErrors(false);
 
     const baseSaveData: Omit<ExerciseModalSaveData, "id"> = {
       name: modelName,
@@ -347,16 +589,26 @@ export function ExerciseModal({
       opened={modalOpened}
       onClose={handleModalClose}
       title={
-        editingModel
-          ? t("dashboard.exerciseModal.editTitle")
-          : t("dashboard.exerciseModal.createTitle")
+        <Group justify="space-between" w="100%">
+          <Text fw={500}>
+            {editingModel
+              ? t("dashboard.exerciseModal.editTitle")
+              : t("dashboard.exerciseModal.createTitle")}
+          </Text>
+          <Group ml="xl">
+            <Button variant="default" onClick={handleModalClose}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={onSaveChanges}>{t("common.saveModel")}</Button>
+          </Group>
+        </Group>
       }
-      size="90%"
+      fullScreen
       styles={{
         body: {
           display: "flex",
           flexDirection: "column",
-          height: "calc(100vh - 160px)",
+          height: "calc(100vh - 70px)",
           overflow: "hidden",
         },
       }}
@@ -379,10 +631,13 @@ export function ExerciseModal({
               value={modelName}
               onChange={(event) => setModelName(event.currentTarget.value)}
               error={
-                showErrors && !modelName
-                  ? t("common.requiredField", {
-                      field: t("dashboard.exerciseModal.modelNameLabel"),
-                    })
+                showErrors &&
+                !modelName &&
+                fieldsError ===
+                  t("common.requiredField", {
+                    field: t("dashboard.exerciseModal.modelNameLabel"),
+                  })
+                  ? fieldsError
                   : undefined
               }
               required
@@ -401,100 +656,283 @@ export function ExerciseModal({
           </Title>
           <Box style={{ flex: 1, overflowY: "auto", paddingRight: "10px" }}>
             <Stack gap="sm">
-              <NumberInput
-                label={t("common.series")}
-                placeholder="Ex: 3"
-                value={exerciseDetails.series}
-                onChange={(value) =>
-                  setExerciseDetails({
-                    ...exerciseDetails,
-                    series: String(value),
-                  })
-                }
-                min={1}
-                allowDecimal={false}
-                error={
-                  showErrors && !exerciseDetails.series
-                    ? t("common.required")
-                    : undefined
-                }
-                required
-              />
-              <NumberInput
-                label={t("common.reps")}
-                placeholder="Ex: 12"
-                value={exerciseDetails.reps}
-                onChange={(value) =>
-                  setExerciseDetails({
-                    ...exerciseDetails,
-                    reps: String(value),
-                  })
-                }
-                min={1}
-                allowDecimal={false}
-                disabled={untilFailure}
-                required={!untilFailure}
-                error={
-                  showErrors && !untilFailure && !exerciseDetails.reps
-                    ? t("common.required")
-                    : undefined
-                }
-              />
-              <Button
-                variant={untilFailure ? "filled" : "outline"}
-                onClick={() => setUntilFailure(!untilFailure)}
-                size="xs"
-              >
-                {t("common.untilFailure")}
-              </Button>
-              <Select
-                label={t("common.advancedTechnique")}
-                placeholder={t("dashboard.exerciseModal.selectPlaceholder")}
-                data={["Drop-set", "Bi-set", "Rest-pause"]}
-                value={exerciseDetails.advancedTechnique}
-                onChange={(value) =>
-                  setExerciseDetails({
-                    ...exerciseDetails,
-                    advancedTechnique: value || "",
-                  })
-                }
-                clearable
-              />
-              <NumberInput
-                label={t("common.restTimeSeconds")}
-                placeholder="Ex: 60"
-                value={exerciseDetails.restTime}
-                onChange={(value) =>
-                  setExerciseDetails({
-                    ...exerciseDetails,
-                    restTime: String(value),
-                  })
-                }
-                min={0}
-                allowDecimal={false}
-                error={
-                  showErrors && !exerciseDetails.restTime
-                    ? t("common.required")
-                    : undefined
-                }
-                required
-              />
-              <Textarea
-                label={t("dashboard.exerciseModal.notesLabel")}
-                placeholder={t("common.addNotesPlaceholder")}
-                value={exerciseDetails.notes}
-                onChange={(event) =>
-                  setExerciseDetails({
-                    ...exerciseDetails,
-                    notes: event.currentTarget.value,
-                  })
-                }
-                minRows={3}
-              />
-              {showErrors && fieldsError && (
-                <Text color="red" size="sm" mt="xs">
-                  {fieldsError}
-                </Text>
+              {/* Conditional Strength Inputs */}
+              {exerciseTypeFilter === "strength" && (
+                <>
+                  <NumberInput
+                    label={t("common.series")}
+                    placeholder="Ex: 3"
+                    value={exerciseDetails.series}
+                    onChange={(value) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        series: String(value),
+                      })
+                    }
+                    min={1}
+                    allowDecimal={false}
+                    error={
+                      showErrors && !exerciseDetails.series
+                        ? t("common.required")
+                        : undefined
+                    }
+                    required
+                  />
+                  <NumberInput
+                    label={t("common.reps")}
+                    placeholder="Ex: 12"
+                    value={exerciseDetails.reps}
+                    onChange={(value) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        reps: String(value),
+                      })
+                    }
+                    min={1}
+                    allowDecimal={false}
+                    disabled={untilFailure}
+                    required={!untilFailure}
+                    error={
+                      showErrors && !untilFailure && !exerciseDetails.reps
+                        ? t("common.required")
+                        : undefined
+                    }
+                  />
+                  <Button
+                    variant={untilFailure ? "filled" : "outline"}
+                    onClick={() => setUntilFailure(!untilFailure)}
+                    size="xs"
+                  >
+                    {t("common.untilFailure")}
+                  </Button>
+                  <NumberInput
+                    label={t("common.restTimeSeconds")}
+                    placeholder="Ex: 60"
+                    value={exerciseDetails.restTime}
+                    onChange={(value) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        restTime: String(value),
+                      })
+                    }
+                    min={0}
+                    allowDecimal={false}
+                    error={
+                      showErrors && !exerciseDetails.restTime
+                        ? t("common.required")
+                        : undefined
+                    }
+                    required
+                  />
+                  <Select
+                    label={t("common.advancedTechnique")}
+                    placeholder={t("dashboard.exerciseModal.selectPlaceholder")}
+                    data={["Drop-set", "Bi-set", "Rest-pause"]}
+                    value={exerciseDetails.advancedTechnique}
+                    onChange={(value) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        advancedTechnique: value || "",
+                      })
+                    }
+                    clearable
+                  />
+                  <Textarea
+                    label={t("dashboard.exerciseModal.notesLabel")}
+                    placeholder={t("common.addNotesPlaceholder")}
+                    value={exerciseDetails.notes}
+                    onChange={(event) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        notes: event.currentTarget.value,
+                      })
+                    }
+                    minRows={3}
+                  />
+                </>
+              )}
+
+              {/* Conditional Aerobic Inputs */}
+              {exerciseTypeFilter === "aerobic" && (
+                <>
+                  {/* Aerobic Type Select */}
+                  <Select
+                    label={t("dashboard.exerciseModal.aerobicType")}
+                    value={aerobicTypeFilter}
+                    onChange={(value) => {
+                      if (value === "steady" || value === "hiit") {
+                        setAerobicTypeFilter(value);
+                      }
+                    }}
+                    data={[
+                      {
+                        value: "steady",
+                        label: t("dashboard.exerciseModal.steadyState"),
+                      },
+                      {
+                        value: "hiit",
+                        label: t("dashboard.exerciseModal.hiit"),
+                      },
+                    ]}
+                    mb="sm" // Add margin below this select
+                  />
+
+                  {/* Conditional Steady State Inputs */}
+                  {aerobicTypeFilter === "steady" && (
+                    <>
+                      <NumberInput
+                        label={t("dashboard.exerciseModal.durationMinutes")}
+                        placeholder="Ex: 30"
+                        value={exerciseDetails.duration}
+                        onChange={(value) =>
+                          setExerciseDetails({
+                            ...exerciseDetails,
+                            duration: String(value),
+                          })
+                        }
+                        min={0}
+                        allowDecimal={false}
+                        error={
+                          showErrors &&
+                          !exerciseDetails.duration &&
+                          !exerciseDetails.distance
+                            ? t("common.required")
+                            : undefined
+                        }
+                      />
+                      <NumberInput
+                        label={t("dashboard.exerciseModal.distanceKm")}
+                        placeholder="Ex: 5"
+                        value={exerciseDetails.distance}
+                        onChange={(value) =>
+                          setExerciseDetails({
+                            ...exerciseDetails,
+                            distance: String(value),
+                          })
+                        }
+                        min={0}
+                        allowDecimal={true}
+                        error={
+                          showErrors &&
+                          !exerciseDetails.duration &&
+                          !exerciseDetails.distance
+                            ? t("common.required")
+                            : undefined
+                        }
+                      />
+                      <Select
+                        label={t("dashboard.exerciseModal.intensity")}
+                        placeholder={t(
+                          "dashboard.exerciseModal.intensityPlaceholder"
+                        )}
+                        data={[
+                          {
+                            value: "low",
+                            label: t("dashboard.exerciseModal.lowIntensity"),
+                          },
+                          {
+                            value: "medium",
+                            label: t("dashboard.exerciseModal.mediumIntensity"),
+                          },
+                          {
+                            value: "high",
+                            label: t("dashboard.exerciseModal.highIntensity"),
+                          },
+                        ]}
+                        value={exerciseDetails.intensity}
+                        onChange={(value) =>
+                          setExerciseDetails({
+                            ...exerciseDetails,
+                            intensity: value || "",
+                          })
+                        }
+                        clearable
+                      />
+                    </>
+                  )}
+
+                  {/* Conditional HIIT Inputs */}
+                  {aerobicTypeFilter === "hiit" && (
+                    <>
+                      <NumberInput
+                        label={t("dashboard.exerciseModal.workTimeSeconds")}
+                        placeholder="Ex: 30"
+                        value={exerciseDetails.hiitWorkTime}
+                        onChange={(value) =>
+                          setExerciseDetails({
+                            ...exerciseDetails,
+                            hiitWorkTime: String(value),
+                          })
+                        }
+                        min={1}
+                        allowDecimal={false}
+                        error={
+                          showErrors && !exerciseDetails.hiitWorkTime
+                            ? t("common.required")
+                            : undefined
+                        }
+                        required
+                      />
+                      <NumberInput
+                        label={t("dashboard.exerciseModal.restTimeSeconds")}
+                        placeholder="Ex: 60"
+                        value={exerciseDetails.hiitRestTime}
+                        onChange={(value) =>
+                          setExerciseDetails({
+                            ...exerciseDetails,
+                            hiitRestTime: String(value),
+                          })
+                        }
+                        min={0}
+                        allowDecimal={false}
+                        error={
+                          showErrors && !exerciseDetails.hiitRestTime
+                            ? t("common.required")
+                            : undefined
+                        }
+                        required
+                      />
+                      <NumberInput
+                        label={t("dashboard.exerciseModal.rounds")}
+                        placeholder="Ex: 8"
+                        value={exerciseDetails.hiitRounds}
+                        onChange={(value) =>
+                          setExerciseDetails({
+                            ...exerciseDetails,
+                            hiitRounds: String(value),
+                          })
+                        }
+                        min={1}
+                        allowDecimal={false}
+                        error={
+                          showErrors && !exerciseDetails.hiitRounds
+                            ? t("common.required")
+                            : undefined
+                        }
+                        required
+                      />
+                    </>
+                  )}
+
+                  {/* Notes input - always visible */}
+                  <Textarea
+                    label={t("dashboard.exerciseModal.notesLabel")}
+                    placeholder={t("common.addNotesPlaceholder")}
+                    value={exerciseDetails.notes}
+                    onChange={(event) =>
+                      setExerciseDetails({
+                        ...exerciseDetails,
+                        notes: event.currentTarget.value,
+                      })
+                    }
+                    minRows={3}
+                  />
+                  {showErrors && fieldsError && (
+                    <Text color="red" size="sm" mt="xs">
+                      {fieldsError}
+                    </Text>
+                  )}
+                </>
               )}
             </Stack>
           </Box>
@@ -510,40 +948,103 @@ export function ExerciseModal({
           <Title order={5} mb="sm">
             {t("dashboard.exerciseModal.addExercisesTitle")}
           </Title>
+
+          {/* Add SegmentedControl for Strength/Aerobic toggle */}
+          <SegmentedControl
+            mb="sm"
+            value={exerciseTypeFilter}
+            onChange={(value) => {
+              if (value === "strength" || value === "aerobic") {
+                setExerciseTypeFilter(value);
+              }
+            }}
+            data={[
+              {
+                label: t("dashboard.exerciseModal.strengthFilter"),
+                value: "strength",
+              },
+              {
+                label: t("dashboard.exerciseModal.aerobicsFilter"),
+                value: "aerobic",
+              },
+            ]}
+            fullWidth
+          />
+
           <Stack gap="sm" mb="sm">
-            <Select
-              label={t("dashboard.exerciseModal.muscleGroupLabel")}
-              placeholder={t("dashboard.exerciseModal.muscleGroupPlaceholder")}
-              data={["Costas", "Pernas", "Braços", "Ombros", "Core"]}
-              value={filters.muscleGroup}
-              onChange={(value) =>
-                setFilters({ ...filters, muscleGroup: value || "" })
-              }
-              clearable
-            />
-            <TextInput
-              placeholder={t("dashboard.exerciseModal.searchPlaceholder")}
-              value={filters.search}
-              onChange={(event) =>
-                setFilters({ ...filters, search: event.currentTarget.value })
-              }
-            />
-            <Button
-              variant={filters.favorite ? "filled" : "light"}
-              onClick={() =>
-                setFilters({ ...filters, favorite: !filters.favorite })
-              }
-              leftSection={
-                filters.favorite ? (
-                  <IconStarFilled size={14} />
-                ) : (
-                  <IconStar size={14} />
-                )
-              }
-              size="xs"
-            >
-              {t("common.favorites")}
-            </Button>
+            {/* Conditionally render Muscle/Subgroup filters */}
+            {exerciseTypeFilter === "strength" && (
+              <Group grow align="flex-start">
+                <Select
+                  label={t("dashboard.exerciseModal.muscleGroupLabel")}
+                  placeholder={t(
+                    "dashboard.exerciseModal.muscleGroupPlaceholder"
+                  )}
+                  data={Object.keys(muscleSubgroupMap)}
+                  value={filters.muscleGroup}
+                  onChange={(value) => {
+                    const newMuscleGroup = value || "";
+                    setFilters({
+                      ...filters,
+                      muscleGroup: newMuscleGroup,
+                      subMuscleGroup: "",
+                    });
+                  }}
+                  clearable
+                />
+                <Select
+                  label={t("dashboard.exerciseModal.subgroupLabel")}
+                  placeholder={t("dashboard.exerciseModal.subgroupPlaceholder")}
+                  data={availableSubgroups}
+                  value={filters.subMuscleGroup}
+                  onChange={(value) =>
+                    setFilters({ ...filters, subMuscleGroup: value || "" })
+                  }
+                  disabled={
+                    !filters.muscleGroup || availableSubgroups.length === 0
+                  }
+                  clearable
+                />
+              </Group>
+            )}
+
+            <Group grow align="flex-end">
+              <Select
+                label={t("dashboard.exerciseModal.equipmentLabel")}
+                placeholder={t("dashboard.exerciseModal.equipmentPlaceholder")}
+                data={availableEquipment}
+                value={filters.equipment}
+                onChange={(value) =>
+                  setFilters({ ...filters, equipment: value || "" })
+                }
+                clearable
+              />
+              <TextInput
+                placeholder={t("dashboard.exerciseModal.searchPlaceholder")}
+                value={filters.search}
+                onChange={(event) =>
+                  setFilters({ ...filters, search: event.currentTarget.value })
+                }
+              />
+            </Group>
+            <Group>
+              <Button
+                variant={filters.favorite ? "filled" : "light"}
+                onClick={() =>
+                  setFilters({ ...filters, favorite: !filters.favorite })
+                }
+                leftSection={
+                  filters.favorite ? (
+                    <IconStarFilled size={14} />
+                  ) : (
+                    <IconStar size={14} />
+                  )
+                }
+                size="xs"
+              >
+                {t("common.favorites")}
+              </Button>
+            </Group>
           </Stack>
 
           <Box style={{ flex: 1, overflowY: "auto", paddingRight: "10px" }}>
@@ -610,13 +1111,13 @@ export function ExerciseModal({
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={tempExercises.map((_, index) => index)}
+                items={tempExercises.map((exercise) => exercise.id!)}
                 strategy={verticalListSortingStrategy}
               >
                 <Stack gap="xs">
                   {tempExercises.map((exercise, index) => (
                     <DraggableExerciseItem
-                      key={index}
+                      key={exercise.id}
                       index={index}
                       exercise={exercise}
                       handleRemoveExercise={handleRemoveExercise}
@@ -634,18 +1135,6 @@ export function ExerciseModal({
           </Box>
         </Box>
       </Flex>
-
-      <Group
-        justify="flex-end"
-        mt="md"
-        pt="sm"
-        style={{ borderTop: "1px solid var(--mantine-color-gray-3)" }}
-      >
-        <Button variant="default" onClick={handleModalClose}>
-          {t("common.cancel")}
-        </Button>
-        <Button onClick={onSaveChanges}>{t("common.saveModel")}</Button>
-      </Group>
     </Modal>
   );
 }

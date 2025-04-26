@@ -746,8 +746,8 @@
     "exerciseModal": {
       "modelNameLabel": "Nome do Modelo",
       "muscleGroupPlaceholder": "Grupo Muscular",
-      "subgroupPlaceholder": "Subgrupo Muscular",
-      "equipmentPlaceholder": "Equipamento",
+      "subgroupPlaceholder": "Selecione o subgrupo",
+      "equipmentPlaceholder": "Selecione o equipamento",
       "selectPlaceholder": "Selecione",
       "notesLabel": "Notas",
       "addExercisesTitle": "Adicionar Exercícios",
@@ -757,11 +757,29 @@
       "searchPlaceholder": "Buscar exercício",
       "editTitle": "Editar Modelo",
       "createTitle": "Criar Novo Modelo de Treino",
+      "aerobicsFilter": "Aeróbicos",
+      "strengthFilter": "Força",
       "currentExercisesTitle": "Exercícios Atuais do Modelo",
       "noExercisesAdded": "Nenhum exercício adicionado ainda.",
       "noExercisesFound": "Nenhum exercício encontrado.",
       "exerciseDetailsTitle": "Detalhes do Exercício",
-      "modelDetailsTitle": "Detalhes do Modelo"
+      "modelDetailsTitle": "Detalhes do Modelo",
+      "durationMinutes": "Duração (min)",
+      "distanceKm": "Distância (km)",
+      "intensity": "Intensidade",
+      "intensityPlaceholder": "Selecione a intensidade",
+      "lowIntensity": "Baixa",
+      "mediumIntensity": "Média",
+      "highIntensity": "Alta",
+      "errorAddRequiredFields": "Por favor, preencha Séries, Repetições (ou marque Até a Falha) e Descanso.",
+      "errorAddAerobicFields": "Por favor, preencha Duração e/ou Distância para exercícios aeróbicos contínuos.",
+      "errorAddHiitFields": "Por favor, preencha Tempo de Trabalho, Tempo de Descanso e Rounds para HIIT.",
+      "aerobicType": "Tipo de Aeróbico",
+      "steadyState": "Contínuo",
+      "hiit": "HIIT",
+      "workTimeSeconds": "Tempo Trabalho (s)",
+      "restTimeSeconds": "Tempo Descanso (s)",
+      "rounds": "Rounds"
     }
   }
 }

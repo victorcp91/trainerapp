@@ -6,6 +6,12 @@ export interface Exercise {
   notes: string;
   restTime?: number;
   id?: string | number;
+  duration?: number;
+  distance?: number;
+  intensity?: string;
+  hiitWorkTime?: number;
+  hiitRestTime?: number;
+  hiitRounds?: number;
 }
 
 export interface TrainingModel {
