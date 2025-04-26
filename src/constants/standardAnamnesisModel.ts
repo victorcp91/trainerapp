@@ -43,7 +43,7 @@ const standardAnamnesisModel: IQuestion[] = [
   },
   {
     type: "singleOption",
-    title: `${sa}.gender.title`, // Use key
+    title: `${sa}.gender.title`,
     options: [
       { label: `${sa}.gender.male`, value: "male" },
       { label: `${sa}.gender.female`, value: "female" },
@@ -51,13 +51,13 @@ const standardAnamnesisModel: IQuestion[] = [
     ],
     value: "",
     required: true,
-    order: 4, // Incremented order
+    order: 4,
     allowOtherOptionInput: true,
     standardKey: "gender",
   },
   {
     type: "singleOption",
-    title: `${sa}.goal.title`, // Use key
+    title: `${sa}.goal.title`,
     options: [
       { label: `${sa}.goal.weightLoss`, value: "weight_loss" },
       { label: `${sa}.goal.hypertrophy`, value: "hypertrophy" },
@@ -70,24 +70,21 @@ const standardAnamnesisModel: IQuestion[] = [
     ],
     value: "",
     required: true,
-    order: 5, // Incremented order
+    order: 5,
     allowOtherOptionInput: true,
     standardKey: "primaryGoal",
   },
   {
     type: "singleOption",
-    title: `${sa}.experience.title`, // Use key
+    title: `${sa}.experience.title`,
     options: [
       { label: `${sa}.experience.beginner`, value: "beginner" },
-      {
-        label: `${sa}.experience.intermediate`,
-        value: "intermediate",
-      },
+      { label: `${sa}.experience.intermediate`, value: "intermediate" },
       { label: `${sa}.experience.advanced`, value: "advanced" },
     ],
     value: "",
     required: true,
-    order: 6, // Incremented order
+    order: 6,
     standardKey: "experienceLevel",
   },
   {
@@ -109,33 +106,21 @@ const standardAnamnesisModel: IQuestion[] = [
   },
   {
     type: "singleOption",
-    title: `${sa}.timePerWorkout.title`, // Use key
+    title: `${sa}.timePerWorkout.title`,
     options: [
-      {
-        label: `${sa}.timePerWorkout.upTo30`,
-        value: "up_to_30_minutes",
-      },
-      {
-        label: `${sa}.timePerWorkout.30to45`,
-        value: "30_to_45_minutes",
-      },
-      {
-        label: `${sa}.timePerWorkout.45to60`,
-        value: "45_to_60_minutes",
-      },
-      {
-        label: `${sa}.timePerWorkout.over60`,
-        value: "over_60_minutes",
-      },
+      { label: `${sa}.timePerWorkout.upTo30`, value: "up_to_30_minutes" },
+      { label: `${sa}.timePerWorkout.30to45`, value: "30_to_45_minutes" },
+      { label: `${sa}.timePerWorkout.45to60`, value: "45_to_60_minutes" },
+      { label: `${sa}.timePerWorkout.over60`, value: "over_60_minutes" },
     ],
     value: "",
     required: true,
-    order: 8, // Incremented order
+    order: 8,
     standardKey: "sessionTime",
   },
   {
     type: "singleOption",
-    title: `${sa}.trainingLocation.title`, // Use key
+    title: `${sa}.trainingLocation.title`,
     options: [
       { label: `${sa}.trainingLocation.home`, value: "at_home" },
       { label: `${sa}.trainingLocation.gym`, value: "gym" },
@@ -143,13 +128,13 @@ const standardAnamnesisModel: IQuestion[] = [
     ],
     value: "",
     required: true,
-    order: 9, // Incremented order
+    order: 9,
     allowOtherOptionInput: true,
     standardKey: "trainingLocation",
   },
   {
     type: "multipleOption",
-    title: `${sa}.equipment.title`, // Use key
+    title: `${sa}.equipment.title`,
     options: [
       { label: `${sa}.equipment.dumbbells`, value: "dumbbells" },
       { label: `${sa}.equipment.elasticBands`, value: "elastic_bands" },
@@ -158,59 +143,36 @@ const standardAnamnesisModel: IQuestion[] = [
     ],
     value: [],
     required: true,
-    order: 10, // Incremented order
+    order: 10,
     allowOtherOptionInput: true,
     allowNoneOption: true,
     standardKey: "equipmentAccess",
   },
   {
-    type: "multipleOption",
-    title: `${sa}.focusMuscles.title`, // Use key
-    options: [
-      {
-        label: `${sa}.focusMuscles.legsGlutes`,
-        value: "legs_glutes",
-      },
-      { label: `${sa}.focusMuscles.chest`, value: "chest" },
-      { label: `${sa}.focusMuscles.back`, value: "back" },
-      { label: `${sa}.focusMuscles.arms`, value: "arms" },
-      { label: `${sa}.focusMuscles.shoulders`, value: "shoulders" },
-      { label: `${sa}.focusMuscles.abs`, value: "abs" },
-    ],
+    type: "bodyParts",
+    title: `${sa}.focusMuscles.title`,
     value: [],
     required: true,
-    order: 11, // Incremented order
+    order: 11,
     standardKey: "focusMuscleGroups",
   },
   {
     type: "multipleOption",
     title: `${sa}.orthopedic.title`,
     options: [
-      { label: `${sa}.orthopedic.hernia`, value: `${sa}.orthopedic.hernia` },
-      {
-        label: `${sa}.orthopedic.scoliosis`,
-        value: `${sa}.orthopedic.scoliosis`,
-      },
-      {
-        label: `${sa}.orthopedic.chondromalacia`,
-        value: `${sa}.orthopedic.chondromalacia`,
-      },
+      { label: `${sa}.orthopedic.hernia`, value: "hernia" },
+      { label: `${sa}.orthopedic.scoliosis`, value: "scoliosis" },
+      { label: `${sa}.orthopedic.chondromalacia`, value: "chondromalacia" },
       {
         label: `${sa}.orthopedic.meniscusLigament`,
-        value: `${sa}.orthopedic.meniscusLigament`,
+        value: "meniscus_ligament",
       },
       {
         label: `${sa}.orthopedic.shoulderTendonitis`,
-        value: `${sa}.orthopedic.shoulderTendonitis`,
+        value: "shoulder_tendonitis",
       },
-      {
-        label: `${sa}.orthopedic.lowBackPain`,
-        value: `${sa}.orthopedic.lowBackPain`,
-      },
-      {
-        label: `${sa}.orthopedic.hipBursitis`,
-        value: `${sa}.orthopedic.hipBursitis`,
-      },
+      { label: `${sa}.orthopedic.lowBackPain`, value: "low_back_pain" },
+      { label: `${sa}.orthopedic.hipBursitis`, value: "hip_bursitis" },
     ],
     value: [],
     required: false,
@@ -221,54 +183,39 @@ const standardAnamnesisModel: IQuestion[] = [
   },
   {
     type: "multipleOption",
-    title: `${sa}.cardio.title`, // Already uses key
+    title: `${sa}.cardio.title`,
     options: [
-      {
-        label: `${sa}.cardio.hypertension`,
-        value: "arterial_hypertension",
-      },
+      { label: `${sa}.cardio.hypertension`, value: "arterial_hypertension" },
       { label: `${sa}.cardio.asthma`, value: "asthma_bronchitis" },
-      {
-        label: `${sa}.cardio.heartDisease`,
-        value: "heart_disease",
-      },
+      { label: `${sa}.cardio.heartDisease`, value: "heart_disease" },
     ],
     value: [],
     required: false,
-    order: 13, // Incremented order
+    order: 13,
     allowOtherOptionInput: true,
     allowNoneOption: true,
   },
   {
     type: "multipleOption",
-    title: `${sa}.otherConditions.title`, // Already uses key
+    title: `${sa}.otherConditions.title`,
     options: [
-      {
-        label: `${sa}.otherConditions.obesity`,
-        value: "obesity",
-      },
-      {
-        label: `${sa}.otherConditions.diabetes`,
-        value: "diabetes",
-      },
+      { label: `${sa}.otherConditions.obesity`, value: "obesity" },
+      { label: `${sa}.otherConditions.diabetes`, value: "diabetes" },
       {
         label: `${sa}.otherConditions.varicoseVeins`,
         value: "varicose_veins_thrombosis",
       },
-      {
-        label: `${sa}.otherConditions.pregnancy`,
-        value: "pregnancy",
-      },
+      { label: `${sa}.otherConditions.pregnancy`, value: "pregnancy" },
     ],
     value: [],
     required: false,
-    order: 14, // Incremented order
+    order: 14,
     allowOtherOptionInput: true,
     allowNoneOption: true,
   },
   {
     type: "singleOption",
-    title: `${sa}.cardioFeeling.title`, // Use key
+    title: `${sa}.cardioFeeling.title`,
     options: [
       { label: `${sa}.cardioFeeling.likeFrequent`, value: "like_frequent" },
       { label: `${sa}.cardioFeeling.dislikeButDo`, value: "dislike_but_do" },
@@ -277,11 +224,11 @@ const standardAnamnesisModel: IQuestion[] = [
     ],
     value: "",
     required: false,
-    order: 15, // Incremented order
+    order: 15,
   },
   {
     type: "multipleOption",
-    title: `${sa}.cardioType.title`, // Use key
+    title: `${sa}.cardioType.title`,
     options: [
       { label: `${sa}.cardioType.walking`, value: "walking" },
       { label: `${sa}.cardioType.running`, value: "running" },

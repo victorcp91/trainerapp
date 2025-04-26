@@ -71,10 +71,6 @@ interface IBodyPartsQuestion {
   value: string[];
   required: boolean;
   order: number;
-  options: {
-    label: string;
-    value: string;
-  }[];
   allowOtherOptionInput?: boolean;
   allowNoneOption?: boolean;
   otherValue?: string;

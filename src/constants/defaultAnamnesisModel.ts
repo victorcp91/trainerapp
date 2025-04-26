@@ -166,19 +166,8 @@ const defaultAnamnesisModel: IQuestion[] = [
     standardKey: "equipmentAccess",
   },
   {
-    type: "multipleOption",
+    type: "bodyParts",
     title: `${sa}.focusMuscles.title`,
-    options: [
-      {
-        label: `${sa}.focusMuscles.legsGlutes`,
-        value: "legs_glutes",
-      },
-      { label: `${sa}.focusMuscles.chest`, value: "chest" },
-      { label: `${sa}.focusMuscles.back`, value: "back" },
-      { label: `${sa}.focusMuscles.arms`, value: "arms" },
-      { label: `${sa}.focusMuscles.shoulders`, value: "shoulders" },
-      { label: `${sa}.focusMuscles.abs`, value: "abs" },
-    ],
     value: [],
     required: true,
     order: 11,
@@ -188,31 +177,19 @@ const defaultAnamnesisModel: IQuestion[] = [
     type: "multipleOption",
     title: `${sa}.orthopedic.title`,
     options: [
-      { label: `${sa}.orthopedic.hernia`, value: `${sa}.orthopedic.hernia` },
-      {
-        label: `${sa}.orthopedic.scoliosis`,
-        value: `${sa}.orthopedic.scoliosis`,
-      },
-      {
-        label: `${sa}.orthopedic.chondromalacia`,
-        value: `${sa}.orthopedic.chondromalacia`,
-      },
+      { label: `${sa}.orthopedic.hernia`, value: "hernia" },
+      { label: `${sa}.orthopedic.scoliosis`, value: "scoliosis" },
+      { label: `${sa}.orthopedic.chondromalacia`, value: "chondromalacia" },
       {
         label: `${sa}.orthopedic.meniscusLigament`,
-        value: `${sa}.orthopedic.meniscusLigament`,
+        value: "meniscus_ligament",
       },
       {
         label: `${sa}.orthopedic.shoulderTendonitis`,
-        value: `${sa}.orthopedic.shoulderTendonitis`,
+        value: "shoulder_tendonitis",
       },
-      {
-        label: `${sa}.orthopedic.lowBackPain`,
-        value: `${sa}.orthopedic.lowBackPain`,
-      },
-      {
-        label: `${sa}.orthopedic.hipBursitis`,
-        value: `${sa}.orthopedic.hipBursitis`,
-      },
+      { label: `${sa}.orthopedic.lowBackPain`, value: "low_back_pain" },
+      { label: `${sa}.orthopedic.hipBursitis`, value: "hip_bursitis" },
     ],
     value: [],
     required: false,
@@ -222,7 +199,7 @@ const defaultAnamnesisModel: IQuestion[] = [
     standardKey: "orthopedicLimitations",
   },
   {
-    type: "multipleOption", // Cardio Types is standard
+    type: "multipleOption",
     title: `${sa}.cardioType.title`,
     options: [
       { label: `${sa}.cardioType.walking`, value: "walking" },
@@ -236,10 +213,10 @@ const defaultAnamnesisModel: IQuestion[] = [
     ],
     value: [],
     required: false,
-    order: 13, // Adjusted order
+    order: 13,
     allowOtherOptionInput: true,
     allowNoneOption: true,
-    standardKey: "cardioTypes", // Added missing standardKey
+    standardKey: "cardioTypes",
   },
   // --- Custom Questions Examples (Can be removed if only standard needed) ---
   // {

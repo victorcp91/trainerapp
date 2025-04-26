@@ -127,7 +127,7 @@
       "injury": "Relato de Lesão"
     },
     "editQuestionModal": {
-      "title": "Editar Item ({type})",
+      "title": "Editar Item ({translatedType})",
       "welcomeTitleLabel": "Título",
       "questionType": "Tipo da Pergunta",
       "questionTitle": "Título / Rótulo da Pergunta",
@@ -145,7 +145,8 @@
       "buttonText": "Texto do Botão (para Boas-vindas)",
       "bodyPartsSelectLabel": "Partes do Corpo Disponíveis para esta Pergunta",
       "bodyPartsSelectPlaceholder": "Selecione as partes do corpo...",
-      "injuryOptionsNote": "Opções de lesão são predefinidas ou editadas em outro local."
+      "injuryOptionsNote": "Opções de lesão são predefinidas ou editadas em outro local.",
+      "bodyPartsInfo": "As opções de partes do corpo são definidas pelo modelo e não podem ser editadas aqui."
     },
     "loadStandardTemplate": "Carregar Modelo Padrão",
     "saveModel": "Salvar Modelo",
@@ -223,7 +224,14 @@
       "back": "Costas",
       "arms": "Braços",
       "shoulders": "Ombros",
-      "abs": "Abdômen"
+      "abs": "Abdômen",
+      "biceps": "Bíceps",
+      "calves": "Panturrilhas",
+      "forearms": "Antebraços",
+      "glutes": "Glúteos",
+      "neck": "Pescoço",
+      "thighs": "Coxas",
+      "triceps": "Tríceps"
     },
     "restrictions": {
       "yes": "Sim",
@@ -360,7 +368,8 @@
     "welcomeTrainerImage": "URL da Imagem do Treinador"
   },
   "Index": {
-    "title": "Olá mundo!"
+    "title": "Olá mundo!",
+    "anamnesisModels": "Modelos de Anamnese"
   },
   "ChatPage": {
     "title": "Conversas",

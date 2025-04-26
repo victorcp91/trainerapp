@@ -129,7 +129,7 @@
       "injury": "Injury Report"
     },
     "editQuestionModal": {
-      "title": "Edit Question ({type})",
+      "title": "Edit Item ({translatedType})",
       "questionTitle": "Question Title / Label",
       "description": "Description (Optional)",
       "required": "Required Question",

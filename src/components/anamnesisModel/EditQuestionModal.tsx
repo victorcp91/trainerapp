@@ -13,7 +13,6 @@ import {
   Text,
   Divider,
   ActionIcon,
-  MultiSelect,
 } from "@mantine/core";
 import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
@@ -26,7 +25,28 @@ import {
   IMultipleOptionQuestion,
   IDateQuestion,
 } from "@/types/QuestionTypes";
-import defaultAnamnesisModel from "@/constants/defaultAnamnesisModel";
+
+// Define a type for the valid question type translation keys
+type QuestionTypeTranslationKey =
+  `anamnesisModelEditor.questionTypes.${IQuestion["type"]}`;
+
+// Define available body parts and their i18n keys (mirroring standardAnamnesisModel)
+// Ideally, this comes from a central constant
+const sa = "standardAnamnesis"; // Abbreviation for standardAnamnesis
+const AVAILABLE_BODY_PARTS = {
+  abs: `${sa}.focusMuscles.abs`,
+  back: `${sa}.focusMuscles.back`,
+  biceps: `${sa}.focusMuscles.biceps`,
+  calves: `${sa}.focusMuscles.calves`, // Combined key
+  chest: `${sa}.focusMuscles.chest`,
+  forearms: `${sa}.focusMuscles.forearms`,
+  glutes: `${sa}.focusMuscles.glutes`,
+  neck: `${sa}.focusMuscles.neck`,
+  shoulders: `${sa}.focusMuscles.shoulders`,
+  thighs: `${sa}.focusMuscles.thighs`, // Combined key
+  triceps: `${sa}.focusMuscles.triceps`,
+};
+const availablePartKeys = Object.keys(AVAILABLE_BODY_PARTS);
 
 interface Option {
   label: string;
@@ -53,23 +73,33 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
   const [localOptions, setLocalOptions] = useState<Option[]>([]);
 
   // Get the master list of body part options from the default model
-  const masterBodyPartOptions = React.useMemo(() => {
-    const bodyPartQuestion = defaultAnamnesisModel.find(
-      (q) => q.type === "bodyParts"
-    ) as IBodyPartsQuestion | undefined;
-    return bodyPartQuestion?.options || [];
-  }, []);
+  // const masterBodyPartOptions = React.useMemo(() => { // No longer needed for rendering
+  //   const bodyPartQuestion = defaultAnamnesisModel.find(
+  //     (q) => q.type === "bodyParts"
+  //   ) as IBodyPartsQuestion | undefined;
+  //   return bodyPartQuestion?.options || [];
+  // }, []);
 
   useEffect(() => {
     if (question) {
-      setFormData({ ...question });
+      // Initialize with the question data
+      const initialFormData: Partial<IQuestion> = { ...question };
+
+      // Ensure formData.value is an array ONLY for bodyParts
+      if (
+        initialFormData.type === "bodyParts" &&
+        !Array.isArray(initialFormData.value)
+      ) {
+        initialFormData.value = [];
+      }
+      setFormData(initialFormData);
+
+      // Handle options state only for single/multiple
       if (
         question.type === "singleOption" ||
-        question.type === "multipleOption" ||
-        question.type === "bodyParts"
+        question.type === "multipleOption"
       ) {
         if (Array.isArray(question.options)) {
-          // Ensure options are in the correct format with better typing
           const formattedOptions = question.options.map(
             (opt: string | Option) =>
               typeof opt === "string" ? { label: opt, value: opt } : opt
@@ -159,15 +189,14 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
         ...formData,
       } as IQuestion;
 
+      // Only add options if it's single/multiple
       if (
         updatedQuestionData.type === "singleOption" ||
-        updatedQuestionData.type === "multipleOption" ||
-        updatedQuestionData.type === "bodyParts"
+        updatedQuestionData.type === "multipleOption"
       ) {
         const optionsQuestion = updatedQuestionData as
           | ISingleOptionQuestion
-          | IMultipleOptionQuestion
-          | IBodyPartsQuestion;
+          | IMultipleOptionQuestion;
         optionsQuestion.options = localOptions;
         updatedQuestionData = optionsQuestion;
       }
@@ -182,7 +211,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
     const isStandard = !!question?.standardKey;
 
     // Common fields logic
-    const renderCommonFields = () => (
+    const renderCommonFields = (skipDivider?: boolean) => (
       <>
         <TextInput
           label={
@@ -258,7 +287,8 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
             disabled={isStandard} // Disable for standard
           />
         )}
-        <Divider my="sm" />
+        {!skipDivider && <Divider my="sm" />}{" "}
+        {/* Conditionally render divider */}
       </>
     );
 
@@ -313,7 +343,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
                     placeholder={t(
                       "anamnesisModelEditor.editQuestionModal.optionLabelPlaceholder"
                     )}
-                    value={t(option.label)}
+                    value={option.label}
                     onChange={(e) => {
                       handleOptionChange(index, "label", e.target.value);
                     }}
@@ -349,35 +379,34 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
         );
       }
       case "bodyParts": {
-        // Function definition exists above, keeping it there
-        const handleBodyPartsChange = (selectedValues: string[]) => {
-          const newOptions = masterBodyPartOptions.filter((opt) =>
-            selectedValues.includes(opt.value)
-          );
-          setLocalOptions(newOptions);
-        };
         return (
           <Stack>
-            {renderCommonFields()}
-            <MultiSelect // Body Part Selection
-              label={t(
-                "anamnesisModelEditor.editQuestionModal.bodyPartsSelectLabel",
-                { default: "Available Body Parts for this Question" }
-              )}
-              placeholder={t(
-                "anamnesisModelEditor.editQuestionModal.bodyPartsSelectPlaceholder",
-                { default: "Select body parts..." }
-              )}
-              data={masterBodyPartOptions.map((opt) => ({
-                label: t(opt.label), // Assuming labels are translation keys
-                value: opt.value,
-              }))}
-              value={localOptions.map((opt) => opt.value)}
-              onChange={handleBodyPartsChange}
-              searchable
-              clearable
-              disabled={isStandard} // ADDED
-            />
+            {renderCommonFields(true)}
+            <Stack mt="md">
+              <Divider
+                label={t("anamnesisModelEditor.editQuestionModal.options")}
+              />
+              <Text size="xs" c="dimmed" mt="xs">
+                {t("anamnesisModelEditor.editQuestionModal.bodyPartsInfo")}
+              </Text>
+              {/* Display options like multipleOption but disabled */}
+              <Stack gap="xs" mt="xs">
+                {availablePartKeys.map((partKey) => (
+                  <Group key={partKey} wrap="nowrap" gap="xs">
+                    <TextInput
+                      value={t(
+                        AVAILABLE_BODY_PARTS[
+                          partKey as keyof typeof AVAILABLE_BODY_PARTS
+                        ]
+                      )} // Use translated label
+                      style={{ flex: 1 }}
+                      disabled // Display as read-only
+                    />
+                    {/* No Add/Remove buttons for bodyParts */}
+                  </Group>
+                ))}
+              </Stack>
+            </Stack>
           </Stack>
         );
       }
@@ -406,12 +435,17 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
 
   if (!question) return null;
 
+  // Get the translated name for the current question type
+  const translatedQuestionType = t(
+    `anamnesisModelEditor.questionTypes.${question.type}` as QuestionTypeTranslationKey
+  );
+
   return (
     <Modal
       opened={isOpen}
       onClose={onClose}
       title={t("anamnesisModelEditor.editQuestionModal.title", {
-        type: question.type,
+        translatedType: translatedQuestionType, // Pass the translated type
       })}
       size="lg"
     >
