@@ -43,11 +43,7 @@ const standardAnamnesisModel: IQuestion[] = [
     options: [
       { label: `${sa}.gender.male`, value: "male" },
       { label: `${sa}.gender.female`, value: "female" },
-      {
-        label: `${sa}.gender.preferNotToSay`,
-        value: "prefer_not_to_say",
-      },
-      { label: `${sa}.common.other`, value: "other" }, // Add "Other" option explicitly if needed by allowOtherOptionInput
+      { label: `${sa}.gender.preferNotToSay`, value: "prefer_not_to_say" },
     ],
     value: "",
     required: true,
@@ -65,11 +61,7 @@ const standardAnamnesisModel: IQuestion[] = [
         label: `${sa}.goal.generalHealth`,
         value: "general_health_improvement",
       },
-      {
-        label: `${sa}.goal.conditioning`,
-        value: "physical_conditioning",
-      },
-      { label: `${sa}.common.other`, value: "other" },
+      { label: `${sa}.goal.conditioning`, value: "physical_conditioning" },
     ],
     value: "",
     required: true,
@@ -92,18 +84,20 @@ const standardAnamnesisModel: IQuestion[] = [
     order: 6, // Incremented order
   },
   {
-    type: "singleOption",
-    title: `${sa}.daysPerWeek.title`, // Use key
+    type: "multipleOption",
+    title: `${sa}.daysPerWeek.title`,
     options: [
-      { label: `${sa}.daysPerWeek.option1`, value: "1" }, // Use keys for numbers
-      { label: `${sa}.daysPerWeek.option2`, value: "2" },
-      { label: `${sa}.daysPerWeek.option3`, value: "3" },
-      { label: `${sa}.daysPerWeek.option4`, value: "4" },
-      { label: `${sa}.daysPerWeek.fiveOrMore`, value: "5_or_more" },
+      { label: `${sa}.weekdays.monday`, value: "monday" },
+      { label: `${sa}.weekdays.tuesday`, value: "tuesday" },
+      { label: `${sa}.weekdays.wednesday`, value: "wednesday" },
+      { label: `${sa}.weekdays.thursday`, value: "thursday" },
+      { label: `${sa}.weekdays.friday`, value: "friday" },
+      { label: `${sa}.weekdays.saturday`, value: "saturday" },
+      { label: `${sa}.weekdays.sunday`, value: "sunday" },
     ],
-    value: "",
+    value: [],
     required: true,
-    order: 7, // Incremented order
+    order: 7,
   },
   {
     type: "singleOption",
@@ -137,7 +131,6 @@ const standardAnamnesisModel: IQuestion[] = [
       { label: `${sa}.trainingLocation.home`, value: "at_home" },
       { label: `${sa}.trainingLocation.gym`, value: "gym" },
       { label: `${sa}.trainingLocation.both`, value: "both" },
-      { label: `${sa}.common.other`, value: "other" },
     ],
     value: "",
     required: true,
@@ -148,23 +141,16 @@ const standardAnamnesisModel: IQuestion[] = [
     type: "multipleOption",
     title: `${sa}.equipment.title`, // Use key
     options: [
-      { label: `${sa}.equipment.none`, value: "none" },
       { label: `${sa}.equipment.dumbbells`, value: "dumbbells" },
-      {
-        label: `${sa}.equipment.elasticBands`,
-        value: "elastic_bands",
-      },
+      { label: `${sa}.equipment.elasticBands`, value: "elastic_bands" },
       { label: `${sa}.equipment.benchStep`, value: "bench_step" },
-      {
-        label: `${sa}.equipment.gymMachines`,
-        value: "gym_machines",
-      },
-      { label: `${sa}.common.other`, value: "other" },
+      { label: `${sa}.equipment.gymMachines`, value: "gym_machines" },
     ],
     value: [],
     required: true,
     order: 10, // Incremented order
     allowOtherOptionInput: true,
+    allowNoneOption: true,
   },
   {
     type: "multipleOption",
@@ -185,41 +171,22 @@ const standardAnamnesisModel: IQuestion[] = [
     order: 11, // Incremented order
   },
   {
-    type: "multipleOption",
-    title: `${sa}.orthopedic.title`, // Already uses key
+    type: "injury",
+    title: `${sa}.orthopedic.title`,
     options: [
-      { label: `${sa}.orthopedic.hernia`, value: "herniated_disc" },
-      {
-        label: `${sa}.orthopedic.scoliosis`,
-        value: "scoliosis_posture",
-      },
-      {
-        label: `${sa}.orthopedic.chondromalacia`,
-        value: "chondromalacia_patella",
-      },
-      {
-        label: `${sa}.orthopedic.meniscusLigament`,
-        value: "meniscus_ligament_injury",
-      },
-      {
-        label: `${sa}.orthopedic.shoulderTendonitis`,
-        value: "shoulder_tendonitis",
-      },
-      {
-        label: `${sa}.orthopedic.lowBackPain`,
-        value: "chronic_low_back_pain",
-      },
-      {
-        label: `${sa}.orthopedic.hipBursitis`,
-        value: "hip_bursitis_tendonitis",
-      },
-      { label: `${sa}.common.none`, value: "none_orthopedic" },
-      { label: `${sa}.common.other`, value: "other_orthopedic" },
+      `${sa}.orthopedic.hernia`,
+      `${sa}.orthopedic.scoliosis`,
+      `${sa}.orthopedic.chondromalacia`,
+      `${sa}.orthopedic.meniscusLigament`,
+      `${sa}.orthopedic.shoulderTendonitis`,
+      `${sa}.orthopedic.lowBackPain`,
+      `${sa}.orthopedic.hipBursitis`,
     ],
     value: [],
     required: false,
-    order: 12, // Incremented order
+    order: 12,
     allowOtherOptionInput: true,
+    allowNoneOption: true,
   },
   {
     type: "multipleOption",
@@ -234,13 +201,12 @@ const standardAnamnesisModel: IQuestion[] = [
         label: `${sa}.cardio.heartDisease`,
         value: "heart_disease",
       },
-      { label: `${sa}.common.none`, value: "none_cardio" },
-      { label: `${sa}.common.other`, value: "other_cardio" },
     ],
     value: [],
     required: false,
     order: 13, // Incremented order
     allowOtherOptionInput: true,
+    allowNoneOption: true,
   },
   {
     type: "multipleOption",
@@ -262,13 +228,12 @@ const standardAnamnesisModel: IQuestion[] = [
         label: `${sa}.otherConditions.pregnancy`,
         value: "pregnancy",
       },
-      { label: `${sa}.common.none`, value: "none_other" },
-      { label: `${sa}.common.other`, value: "other_other" },
     ],
     value: [],
     required: false,
     order: 14, // Incremented order
     allowOtherOptionInput: true,
+    allowNoneOption: true,
   },
   {
     type: "singleOption",
@@ -295,13 +260,12 @@ const standardAnamnesisModel: IQuestion[] = [
       { label: `${sa}.cardioType.stairs`, value: "stairs" },
       { label: `${sa}.cardioType.swimming`, value: "swimming" },
       { label: `${sa}.cardioType.elliptical`, value: "elliptical" },
-      { label: `${sa}.common.other`, value: "other_cardio_type" },
-      { label: `${sa}.cardioType.none`, value: "none_cardio_type" },
     ],
     value: [],
     required: false,
     order: 16, // Incremented order
     allowOtherOptionInput: true,
+    allowNoneOption: true,
   },
 ];
 

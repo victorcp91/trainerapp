@@ -19,6 +19,7 @@ interface ISingleOptionQuestion {
   required: boolean;
   order: number;
   allowOtherOptionInput?: boolean;
+  allowNoneOption?: boolean;
   otherValue?: string;
 }
 
@@ -34,6 +35,7 @@ interface IMultipleOptionQuestion {
   required: boolean;
   order: number;
   allowOtherOptionInput?: boolean;
+  allowNoneOption?: boolean;
   otherValue?: string;
 }
 
@@ -69,16 +71,20 @@ interface IBodyPartsQuestion {
     value: string;
   }[];
   allowOtherOptionInput?: boolean;
+  allowNoneOption?: boolean;
   otherValue?: string;
 }
 
 interface IInjuryQuestion {
   type: "injury";
   title: string;
-  trainerName: string;
-  value: string;
+  description?: string;
+  value: string[];
   required: boolean;
   order: number;
+  options?: string[];
+  allowOtherOptionInput?: boolean;
+  allowNoneOption?: boolean;
 }
 
 interface IWelcome {

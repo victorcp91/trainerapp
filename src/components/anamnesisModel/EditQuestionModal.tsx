@@ -64,9 +64,24 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
   useEffect(() => {
     if (question) {
       setFormData({ ...question });
-      if ("options" in question && Array.isArray(question.options)) {
-        setLocalOptions([...question.options]);
+      // Handle options based on question type
+      if (
+        question.type === "singleOption" ||
+        question.type === "multipleOption" ||
+        question.type === "bodyParts"
+      ) {
+        if (Array.isArray(question.options)) {
+          setLocalOptions([...question.options]);
+        } else {
+          setLocalOptions([]);
+        }
+      } else if (question.type === "injury") {
+        // Injury options are string[], cannot directly setLocalOptions (which is Option[])
+        // For editing, we might need a different approach or not show options here.
+        // Let's clear localOptions for injury for now.
+        setLocalOptions([]);
       } else {
+        // Other types (text, date, metric, welcome) don't have options in this format
         setLocalOptions([]);
       }
     } else {
@@ -231,6 +246,28 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
             mt="xs" // Add some top margin
           />
         )}
+        {/* Checkbox for allowing 'None' option */}
+        {(question.type === "singleOption" ||
+          question.type === "multipleOption" ||
+          question.type === "injury" ||
+          question.type === "bodyParts") && (
+          <Checkbox
+            label={t("anamnesisModelEditor.editQuestionModal.allowNoneOption")}
+            name="allowNoneOption"
+            checked={
+              (
+                formData as Partial<
+                  | ISingleOptionQuestion
+                  | IMultipleOptionQuestion
+                  | IInjuryQuestion
+                  | IBodyPartsQuestion
+                >
+              ).allowNoneOption || false
+            }
+            onChange={handleInputChange}
+            mt="xs"
+          />
+        )}
         <Divider my="sm" />
       </>
     );
@@ -379,19 +416,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
         );
       }
       case "injury": {
-        const injuryFormData = formData as Partial<IInjuryQuestion>;
-        return (
-          <>
-            {commonFields}
-            <TextInput
-              label={t("anamnesisModelEditor.editQuestionModal.trainerName")}
-              name="trainerName"
-              value={injuryFormData.trainerName || ""}
-              onChange={handleInputChange}
-              required={!!injuryFormData.required}
-            />
-          </>
-        );
+        return commonFields;
       }
       default:
         return <Text>Tipo de pergunta não suportado para edição.</Text>;
