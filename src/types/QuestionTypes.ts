@@ -5,6 +5,7 @@ interface IDateQuestion {
   value: Date | null;
   required: boolean;
   order: number;
+  standardKey?: StandardQuestionKey;
 }
 
 interface ISingleOptionQuestion {
@@ -20,6 +21,7 @@ interface ISingleOptionQuestion {
   order: number;
   allowOtherOptionInput?: boolean;
   allowNoneOption?: boolean;
+  standardKey?: StandardQuestionKey;
   otherValue?: string;
 }
 
@@ -36,6 +38,7 @@ interface IMultipleOptionQuestion {
   order: number;
   allowOtherOptionInput?: boolean;
   allowNoneOption?: boolean;
+  standardKey?: StandardQuestionKey;
   otherValue?: string;
 }
 
@@ -46,6 +49,7 @@ interface ITextQuestion {
   value: string;
   required: boolean;
   order: number;
+  standardKey?: StandardQuestionKey;
 }
 
 interface IMetricQuestion {
@@ -58,6 +62,7 @@ interface IMetricQuestion {
   order: number;
   allowOtherOptionInput?: boolean;
   otherValue?: string;
+  standardKey?: StandardQuestionKey;
 }
 
 interface IBodyPartsQuestion {
@@ -73,18 +78,7 @@ interface IBodyPartsQuestion {
   allowOtherOptionInput?: boolean;
   allowNoneOption?: boolean;
   otherValue?: string;
-}
-
-interface IInjuryQuestion {
-  type: "injury";
-  title: string;
-  description?: string;
-  value: string[];
-  required: boolean;
-  order: number;
-  options?: string[];
-  allowOtherOptionInput?: boolean;
-  allowNoneOption?: boolean;
+  standardKey?: StandardQuestionKey;
 }
 
 interface IWelcome {
@@ -96,7 +90,24 @@ interface IWelcome {
   buttonText: string;
   order: number;
   required: boolean;
+  standardKey?: StandardQuestionKey;
 }
+
+export type StandardQuestionKey =
+  | "welcome"
+  | "birthDate"
+  | "height"
+  | "weight"
+  | "gender"
+  | "primaryGoal"
+  | "experienceLevel"
+  | "trainingDays"
+  | "sessionTime"
+  | "trainingLocation"
+  | "equipmentAccess"
+  | "focusMuscleGroups"
+  | "orthopedicLimitations"
+  | "cardioTypes";
 
 type IQuestion =
   | IDateQuestion
@@ -105,8 +116,7 @@ type IQuestion =
   | ITextQuestion
   | IMetricQuestion
   | IBodyPartsQuestion
-  | IWelcome
-  | IInjuryQuestion;
+  | IWelcome;
 
 export type {
   IDateQuestion,
@@ -116,6 +126,5 @@ export type {
   IMetricQuestion,
   IBodyPartsQuestion,
   IWelcome,
-  IInjuryQuestion,
   IQuestion,
 };

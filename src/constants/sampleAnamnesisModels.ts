@@ -1,4 +1,5 @@
-// import { IQuestion } from "@/types/QuestionTypes"; // Remove unused import
+// Import the main IQuestion type
+import { IQuestion } from "@/types/QuestionTypes";
 import { ISavedAnamnesisModel } from "@/types/anamnesis";
 
 // Define a type for the model structure including an ID and name
@@ -13,7 +14,14 @@ export interface ISavedAnamnesisModel {
 */
 
 // Sample data for created anamnesis models
-export const sampleAnamnesisModelsData: ISavedAnamnesisModel[] = [
+// NOTE: ISavedAnamnesisModel uses a different local Question type definition.
+// For this sample data, we are aligning with the structure expected by
+// the components which likely use IQuestion from QuestionTypes.ts.
+// Ideally, ISavedAnamnesisModel should also use the main IQuestion type.
+export const sampleAnamnesisModelsData: (Omit<
+  ISavedAnamnesisModel,
+  "questions"
+> & { questions: IQuestion[] })[] = [
   {
     id: "model-1-abc",
     name: "Basic Intake Model",
@@ -28,13 +36,15 @@ export const sampleAnamnesisModelsData: ISavedAnamnesisModel[] = [
         trainerImage: "",
         order: 0,
         required: true,
+        standardKey: "welcome",
       },
       {
-        type: "text",
+        type: "text", // Custom Question
         title: "Full Name",
         order: 1,
         required: true,
         value: "",
+        // No standardKey
       },
       {
         type: "date",
@@ -42,6 +52,7 @@ export const sampleAnamnesisModelsData: ISavedAnamnesisModel[] = [
         order: 2,
         required: true,
         value: null,
+        standardKey: "birthDate",
       },
       {
         type: "singleOption",
@@ -54,6 +65,7 @@ export const sampleAnamnesisModelsData: ISavedAnamnesisModel[] = [
           { label: "General Fitness", value: "general_fitness" },
         ],
         value: "",
+        standardKey: "primaryGoal",
       },
     ],
   },
@@ -71,21 +83,31 @@ export const sampleAnamnesisModelsData: ISavedAnamnesisModel[] = [
         trainerImage: "",
         order: 0,
         required: true,
+        standardKey: "welcome",
       },
       {
-        type: "injury",
+        type: "multipleOption", // Custom injury question
         title: "Describe the Injury Location",
         order: 1,
         required: true,
-        trainerName: "", // Usually filled dynamically, but required
-        value: "",
+        value: [], // Corrected value type for multiple selection
+        allowOtherOptionInput: true, // Explicitly add based on IQuestionInjury definition
+        allowNoneOption: true, // Explicitly add based on IQuestionInjury definition
+        options: [
+          { label: "Left Shoulder", value: "left_shoulder" },
+          { label: "Right Shoulder", value: "right_shoulder" },
+          { label: "Left Knee", value: "left_knee" },
+          { label: "Right Knee", value: "right_knee" },
+        ],
+        // No standardKey
       },
       {
-        type: "date",
+        type: "date", // Custom date question
         title: "When did the injury occur?",
         order: 2,
         required: false,
         value: null,
+        // No standardKey
       },
     ],
   },

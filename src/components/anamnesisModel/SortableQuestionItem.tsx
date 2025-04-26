@@ -8,7 +8,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { IQuestion } from "@/types/QuestionTypes";
 
 interface SortableQuestionItemProps {
-  index: number; // Back to using index as ID for dnd-kit
+  index: number;
   question: IQuestion;
   onRemove: (index: number) => void;
   onEdit: (index: number) => void;
@@ -25,28 +25,24 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
   t,
 }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useSortable({ id: index }); // Back to using index as ID
+    useSortable({ id: index });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 1 : "auto",
-    // Removed marginBottom, let Stack in parent handle spacing
   };
 
   const Icon = getQuestionTypeIcon(question.type);
 
   return (
-    // Attach attributes and listeners to the outer div for the whole item to be draggable
     <div ref={setNodeRef} style={style} {...attributes}>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Flex align="center" justify="space-between">
-          {/* Drag Handle on the left */}
           <Group gap="xs" {...listeners} style={{ cursor: "grab" }}>
             <IconGripVertical size={20} color="gray" />
           </Group>
 
-          {/* Question Info */}
           <Flex
             align="center"
             style={{ flexGrow: 1, marginLeft: "10px", marginRight: "10px" }}
@@ -54,14 +50,12 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
             <Icon size={20} style={{ marginRight: "8px", flexShrink: 0 }} />
             <Text fw={500} truncate>
               {" "}
-              {/* Conditionally translate title only if it looks like a key */}
               {question.title.includes(".")
                 ? t(question.title)
                 : question.title || `Pergunta (${question.type})`}
             </Text>
           </Flex>
 
-          {/* Action Buttons on the right */}
           <Group gap="xs" wrap="nowrap">
             <Button
               variant="subtle"
@@ -83,8 +77,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
             </Button>
           </Group>
         </Flex>
-        {/* Optional: Display more question details if needed */}
-        {/* e.g., Description, Options, etc. */}
       </Card>
     </div>
   );

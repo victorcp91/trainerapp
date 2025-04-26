@@ -113,7 +113,9 @@
     "pageTitleEdit": "Editar Modelo de Anamnese",
     "modelQuestionsTitle": "Perguntas do Modelo",
     "emptyStateText": "Adicione perguntas usando a barra lateral.",
-    "addQuestionTitle": "Adicionar Tipos de Pergunta",
+    "addQuestionTitle": "Adicionar Pergunta",
+    "standardQuestionsHeader": "Perguntas Padrão",
+    "customQuestionsHeader": "Perguntas Personalizadas",
     "questionTypes": {
       "welcome": "Tela de Boas-Vindas",
       "text": "Entrada de Texto",
@@ -125,7 +127,9 @@
       "injury": "Relato de Lesão"
     },
     "editQuestionModal": {
-      "title": "Editar Pergunta ({type})",
+      "title": "Editar Item ({type})",
+      "welcomeTitleLabel": "Título",
+      "questionType": "Tipo da Pergunta",
       "questionTitle": "Título / Rótulo da Pergunta",
       "description": "Descrição (Opcional)",
       "required": "Pergunta Obrigatória",
@@ -140,12 +144,13 @@
       "trainerImageUrl": "URL da Imagem do Treinador (para Boas-vindas)",
       "buttonText": "Texto do Botão (para Boas-vindas)",
       "bodyPartsSelectLabel": "Partes do Corpo Disponíveis para esta Pergunta",
-      "bodyPartsSelectPlaceholder": "Selecione as partes do corpo..."
+      "bodyPartsSelectPlaceholder": "Selecione as partes do corpo...",
+      "injuryOptionsNote": "Opções de lesão são predefinidas ou editadas em outro local."
     },
     "loadStandardTemplate": "Carregar Modelo Padrão",
     "saveModel": "Salvar Modelo",
     "saveButton": "Salvar Modelo",
-    "noQuestionsPrompt": "Arraste os tipos de pergunta do painel direito para construir seu modelo.",
+    "noQuestionsPrompt": "Clique nos tipos de pergunta do painel direito para construir seu modelo.",
     "standardModelTitle": "Modelo de Anamnese Padrão"
   },
   "standardAnamnesis": {
@@ -188,12 +193,7 @@
       "advanced": "Avançado"
     },
     "daysPerWeek": {
-      "title": "Quantos dias por semana você pode treinar?",
-      "option1": "1 dia",
-      "option2": "2 dias",
-      "option3": "3 dias",
-      "option4": "4 dias",
-      "fiveOrMore": "5 ou mais dias"
+      "title": "Quais dias da semana você pode treinar?"
     },
     "timePerWorkout": {
       "title": "Quanto tempo você tem disponível por treino?",

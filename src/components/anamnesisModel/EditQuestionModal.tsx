@@ -20,7 +20,6 @@ import { useTranslations } from "next-intl";
 import {
   IQuestion,
   IBodyPartsQuestion,
-  IInjuryQuestion,
   IMetricQuestion,
   IWelcome,
   ISingleOptionQuestion,
@@ -64,24 +63,22 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
   useEffect(() => {
     if (question) {
       setFormData({ ...question });
-      // Handle options based on question type
       if (
         question.type === "singleOption" ||
         question.type === "multipleOption" ||
         question.type === "bodyParts"
       ) {
         if (Array.isArray(question.options)) {
-          setLocalOptions([...question.options]);
+          // Ensure options are in the correct format with better typing
+          const formattedOptions = question.options.map(
+            (opt: string | Option) =>
+              typeof opt === "string" ? { label: opt, value: opt } : opt
+          );
+          setLocalOptions([...formattedOptions]);
         } else {
           setLocalOptions([]);
         }
-      } else if (question.type === "injury") {
-        // Injury options are string[], cannot directly setLocalOptions (which is Option[])
-        // For editing, we might need a different approach or not show options here.
-        // Let's clear localOptions for injury for now.
-        setLocalOptions([]);
       } else {
-        // Other types (text, date, metric, welcome) don't have options in this format
         setLocalOptions([]);
       }
     } else {
@@ -179,34 +176,27 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
     }
   };
 
-  const hasDescription = (
-    q: IQuestion | null
-  ): q is IWelcome | IDateQuestion => {
-    return q?.type === "welcome" || q?.type === "date";
-  };
-
-  const isRequiredApplicable = (
-    q: IQuestion | null
-  ): q is Exclude<IQuestion, IWelcome> => {
-    return q?.type !== "welcome";
-  };
-
   const renderFormFields = () => {
     if (!question) return <Text>No question selected.</Text>;
 
-    const showDescription = hasDescription(question);
-    const showRequired = isRequiredApplicable(question);
+    const isStandard = !!question?.standardKey;
 
-    const commonFields = (
+    // Common fields logic
+    const renderCommonFields = () => (
       <>
         <TextInput
-          label={t("anamnesisModelEditor.editQuestionModal.questionTitle")}
+          label={
+            question?.type === "welcome"
+              ? t("anamnesisModelEditor.editQuestionModal.welcomeTitleLabel")
+              : t("anamnesisModelEditor.editQuestionModal.questionTitle")
+          }
           name="title"
           value={formData.title || ""}
           onChange={handleInputChange}
           required
+          disabled={isStandard && question?.type !== "welcome"}
         />
-        {showDescription && (
+        {(question.type === "welcome" || question.type === "date") && (
           <Textarea
             label={t("anamnesisModelEditor.editQuestionModal.description")}
             name="description"
@@ -214,9 +204,10 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
               (formData as Partial<IWelcome | IDateQuestion>).description || ""
             }
             onChange={handleInputChange}
+            // Description always editable
           />
         )}
-        {showRequired && (
+        {question.type !== "welcome" && (
           <Checkbox
             label={t("anamnesisModelEditor.editQuestionModal.required")}
             name="required"
@@ -225,9 +216,9 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
               false
             }
             onChange={handleInputChange}
+            // Required status always editable
           />
         )}
-        {/* Checkbox for allowing 'Other' text input */}
         {(question.type === "singleOption" ||
           question.type === "multipleOption") && (
           <Checkbox
@@ -243,13 +234,12 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
               ).allowOtherOptionInput || false
             }
             onChange={handleInputChange}
-            mt="xs" // Add some top margin
+            mt="xs"
+            disabled={isStandard} // Disable for standard
           />
         )}
-        {/* Checkbox for allowing 'None' option */}
         {(question.type === "singleOption" ||
           question.type === "multipleOption" ||
-          question.type === "injury" ||
           question.type === "bodyParts") && (
           <Checkbox
             label={t("anamnesisModelEditor.editQuestionModal.allowNoneOption")}
@@ -259,13 +249,13 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
                 formData as Partial<
                   | ISingleOptionQuestion
                   | IMultipleOptionQuestion
-                  | IInjuryQuestion
                   | IBodyPartsQuestion
                 >
               ).allowNoneOption || false
             }
             onChange={handleInputChange}
             mt="xs"
+            disabled={isStandard} // Disable for standard
           />
         )}
         <Divider my="sm" />
@@ -276,21 +266,8 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
       case "welcome": {
         const welcomeFormData = formData as Partial<IWelcome>;
         return (
-          <>
-            <TextInput
-              label={t("anamnesisModelEditor.editQuestionModal.questionTitle")}
-              name="title"
-              value={welcomeFormData.title || ""}
-              onChange={handleInputChange}
-              required
-            />
-            <Textarea
-              label={t("anamnesisModelEditor.editQuestionModal.description")}
-              name="description"
-              value={welcomeFormData.description || ""}
-              onChange={handleInputChange}
-            />
-            <Divider my="sm" />
+          <Stack>
+            {renderCommonFields()}
             <TextInput
               label={t("anamnesisModelEditor.editQuestionModal.trainerName")}
               name="trainerName"
@@ -313,38 +290,41 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
               onChange={handleInputChange}
               required
             />
-          </>
+          </Stack>
         );
       }
       case "text":
-        return commonFields;
       case "date":
-        return commonFields;
+        // Only common fields apply
+        return <Stack>{renderCommonFields()}</Stack>;
+
       case "singleOption":
       case "multipleOption": {
         return (
-          <>
-            {commonFields}
+          <Stack>
+            {renderCommonFields()}
             <Text size="sm" fw={500} mb="xs">
               {t("anamnesisModelEditor.editQuestionModal.options")}
             </Text>
             <Stack gap="xs">
               {localOptions.map((option, index) => (
                 <Group key={index} wrap="nowrap" gap="xs">
-                  <TextInput
+                  <TextInput // Option Label
                     placeholder={t(
                       "anamnesisModelEditor.editQuestionModal.optionLabelPlaceholder"
                     )}
-                    value={option.label}
+                    value={t(option.label)}
                     onChange={(e) => {
                       handleOptionChange(index, "label", e.target.value);
                     }}
                     style={{ flex: 1 }}
+                    disabled={isStandard}
                   />
-                  <ActionIcon
+                  <ActionIcon // Remove Option
                     variant="subtle"
                     color="red"
                     onClick={() => handleRemoveOption(index)}
+                    disabled={localOptions.length <= 1 || isStandard} // Keep this combined logic
                     title={t(
                       "anamnesisModelEditor.editQuestionModal.removeOption",
                       { index: index + 1 }
@@ -355,30 +335,31 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
                 </Group>
               ))}
             </Stack>
-            <Button
+            <Button // Add Option
               leftSection={<IconPlus size={16} />}
               onClick={handleAddOption}
               variant="light"
               mt="md"
               size="xs"
+              disabled={isStandard} // ADDED
             >
               {t("anamnesisModelEditor.editQuestionModal.addOption")}
             </Button>
-          </>
+          </Stack>
         );
       }
       case "bodyParts": {
+        // Function definition exists above, keeping it there
         const handleBodyPartsChange = (selectedValues: string[]) => {
           const newOptions = masterBodyPartOptions.filter((opt) =>
             selectedValues.includes(opt.value)
           );
           setLocalOptions(newOptions);
         };
-
         return (
           <Stack>
-            {commonFields}
-            <MultiSelect
+            {renderCommonFields()}
+            <MultiSelect // Body Part Selection
               label={t(
                 "anamnesisModelEditor.editQuestionModal.bodyPartsSelectLabel",
                 { default: "Available Body Parts for this Question" }
@@ -388,13 +369,14 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
                 { default: "Select body parts..." }
               )}
               data={masterBodyPartOptions.map((opt) => ({
-                label: t(opt.label),
+                label: t(opt.label), // Assuming labels are translation keys
                 value: opt.value,
               }))}
               value={localOptions.map((opt) => opt.value)}
               onChange={handleBodyPartsChange}
               searchable
               clearable
+              disabled={isStandard} // ADDED
             />
           </Stack>
         );
@@ -402,24 +384,23 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
       case "metric": {
         const metricFormData = formData as Partial<IMetricQuestion>;
         return (
-          <>
-            {commonFields}
-            <Select
+          <Stack>
+            {renderCommonFields()}
+            <Select // Metric Unit
               label={t("anamnesisModelEditor.editQuestionModal.metric")}
               name="metric"
               data={["kg", "g", "mg", "cm", "mm", "l", "ml", "%", "lb", "oz"]}
               value={metricFormData.metric || ""}
               onChange={(value) => handleSelectChange("metric", value || "")}
               required
+              disabled={isStandard} // ADDED
             />
-          </>
+          </Stack>
         );
       }
-      case "injury": {
-        return commonFields;
-      }
       default:
-        return <Text>Tipo de pergunta não suportado para edição.</Text>;
+        // Fallback for any unexpected type
+        return <Stack>{renderCommonFields()}</Stack>;
     }
   };
 

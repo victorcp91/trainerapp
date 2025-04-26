@@ -13,6 +13,7 @@ const standardAnamnesisModel: IQuestion[] = [
     buttonText: `${sa}.welcome.buttonText`, // Use key for button text
     required: false,
     order: 0, // Welcome screen is first
+    standardKey: "welcome",
   },
   {
     type: "date",
@@ -20,6 +21,7 @@ const standardAnamnesisModel: IQuestion[] = [
     value: null,
     required: true,
     order: 1, // Incremented order
+    standardKey: "birthDate",
   },
   {
     type: "metric",
@@ -28,6 +30,7 @@ const standardAnamnesisModel: IQuestion[] = [
     required: true,
     metric: "cm",
     order: 2, // Incremented order
+    standardKey: "height",
   },
   {
     type: "metric",
@@ -36,6 +39,7 @@ const standardAnamnesisModel: IQuestion[] = [
     required: true,
     metric: "kg",
     order: 3, // Incremented order
+    standardKey: "weight",
   },
   {
     type: "singleOption",
@@ -49,6 +53,7 @@ const standardAnamnesisModel: IQuestion[] = [
     required: true,
     order: 4, // Incremented order
     allowOtherOptionInput: true,
+    standardKey: "gender",
   },
   {
     type: "singleOption",
@@ -67,6 +72,7 @@ const standardAnamnesisModel: IQuestion[] = [
     required: true,
     order: 5, // Incremented order
     allowOtherOptionInput: true,
+    standardKey: "primaryGoal",
   },
   {
     type: "singleOption",
@@ -82,22 +88,24 @@ const standardAnamnesisModel: IQuestion[] = [
     value: "",
     required: true,
     order: 6, // Incremented order
+    standardKey: "experienceLevel",
   },
   {
     type: "multipleOption",
     title: `${sa}.daysPerWeek.title`,
     options: [
-      { label: `${sa}.weekdays.monday`, value: "monday" },
-      { label: `${sa}.weekdays.tuesday`, value: "tuesday" },
-      { label: `${sa}.weekdays.wednesday`, value: "wednesday" },
-      { label: `${sa}.weekdays.thursday`, value: "thursday" },
-      { label: `${sa}.weekdays.friday`, value: "friday" },
-      { label: `${sa}.weekdays.saturday`, value: "saturday" },
-      { label: `${sa}.weekdays.sunday`, value: "sunday" },
+      { label: `common.weekdays.monday`, value: "monday" },
+      { label: `common.weekdays.tuesday`, value: "tuesday" },
+      { label: `common.weekdays.wednesday`, value: "wednesday" },
+      { label: `common.weekdays.thursday`, value: "thursday" },
+      { label: `common.weekdays.friday`, value: "friday" },
+      { label: `common.weekdays.saturday`, value: "saturday" },
+      { label: `common.weekdays.sunday`, value: "sunday" },
     ],
     value: [],
     required: true,
     order: 7,
+    standardKey: "trainingDays",
   },
   {
     type: "singleOption",
@@ -123,6 +131,7 @@ const standardAnamnesisModel: IQuestion[] = [
     value: "",
     required: true,
     order: 8, // Incremented order
+    standardKey: "sessionTime",
   },
   {
     type: "singleOption",
@@ -136,6 +145,7 @@ const standardAnamnesisModel: IQuestion[] = [
     required: true,
     order: 9, // Incremented order
     allowOtherOptionInput: true,
+    standardKey: "trainingLocation",
   },
   {
     type: "multipleOption",
@@ -151,6 +161,7 @@ const standardAnamnesisModel: IQuestion[] = [
     order: 10, // Incremented order
     allowOtherOptionInput: true,
     allowNoneOption: true,
+    standardKey: "equipmentAccess",
   },
   {
     type: "multipleOption",
@@ -169,24 +180,44 @@ const standardAnamnesisModel: IQuestion[] = [
     value: [],
     required: true,
     order: 11, // Incremented order
+    standardKey: "focusMuscleGroups",
   },
   {
-    type: "injury",
+    type: "multipleOption",
     title: `${sa}.orthopedic.title`,
     options: [
-      `${sa}.orthopedic.hernia`,
-      `${sa}.orthopedic.scoliosis`,
-      `${sa}.orthopedic.chondromalacia`,
-      `${sa}.orthopedic.meniscusLigament`,
-      `${sa}.orthopedic.shoulderTendonitis`,
-      `${sa}.orthopedic.lowBackPain`,
-      `${sa}.orthopedic.hipBursitis`,
+      { label: `${sa}.orthopedic.hernia`, value: `${sa}.orthopedic.hernia` },
+      {
+        label: `${sa}.orthopedic.scoliosis`,
+        value: `${sa}.orthopedic.scoliosis`,
+      },
+      {
+        label: `${sa}.orthopedic.chondromalacia`,
+        value: `${sa}.orthopedic.chondromalacia`,
+      },
+      {
+        label: `${sa}.orthopedic.meniscusLigament`,
+        value: `${sa}.orthopedic.meniscusLigament`,
+      },
+      {
+        label: `${sa}.orthopedic.shoulderTendonitis`,
+        value: `${sa}.orthopedic.shoulderTendonitis`,
+      },
+      {
+        label: `${sa}.orthopedic.lowBackPain`,
+        value: `${sa}.orthopedic.lowBackPain`,
+      },
+      {
+        label: `${sa}.orthopedic.hipBursitis`,
+        value: `${sa}.orthopedic.hipBursitis`,
+      },
     ],
     value: [],
     required: false,
     order: 12,
     allowOtherOptionInput: true,
     allowNoneOption: true,
+    standardKey: "orthopedicLimitations",
   },
   {
     type: "multipleOption",
@@ -263,9 +294,10 @@ const standardAnamnesisModel: IQuestion[] = [
     ],
     value: [],
     required: false,
-    order: 16, // Incremented order
+    order: 16,
     allowOtherOptionInput: true,
     allowNoneOption: true,
+    standardKey: "cardioTypes",
   },
 ];
 

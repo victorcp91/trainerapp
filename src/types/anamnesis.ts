@@ -60,3 +60,44 @@ export interface ISavedAnamnesisModel {
   questions: Question[]; // Use the new union type
   // Removed createdAt/updatedAt as they are not in the sample data
 }
+
+export type AnamnesisQuestionType =
+  | "welcome"
+  | "text"
+  | "date"
+  | "singleOption"
+  | "multipleOption"
+  | "metric"
+  | "bodyParts"
+  | "injury"
+  | "sectionHeader";
+
+export type StandardQuestionKey =
+  | "birthDate"
+  | "height"
+  | "weight"
+  | "gender"
+  | "primaryGoal"
+  | "experienceLevel"
+  | "trainingDays"
+  | "sessionTime"
+  | "trainingLocation"
+  | "equipmentAccess"
+  | "focusMuscleGroups"
+  | "orthopedicLimitations"
+  | "cardioTypes";
+
+export interface IOption {
+  label: string;
+  value: string;
+}
+
+export interface IQuestionBase {
+  id: string; // Keep ID for database models
+  type: AnamnesisQuestionType;
+  title: string;
+  description?: string;
+  required: boolean;
+  order: number;
+  standardKey?: StandardQuestionKey; // Identifies non-editable standard questions
+}

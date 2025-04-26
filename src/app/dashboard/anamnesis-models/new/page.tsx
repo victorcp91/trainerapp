@@ -4,7 +4,7 @@ import React, { Suspense, useState, useEffect } from "react";
 import AnamnesisModelEditor from "@/components/anamnesisModel/AnamnesisModelEditor";
 import { IQuestion } from "@/types/QuestionTypes";
 import { useSearchParams } from "next/navigation";
-import standardAnamnesisModel from "@/constants/simpleAnamnesisModel";
+import standardAnamnesisModel from "@/constants/standardAnamnesisModel";
 import { Loader } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
@@ -50,9 +50,10 @@ const translateModel = (model: IQuestion[], t: TFunction): IQuestion[] => {
       "options" in translatedQuestion &&
       Array.isArray(translatedQuestion.options)
     ) {
+      // Ensure opt.label is treated as a full key for the root translator
       translatedQuestion.options = translatedQuestion.options.map((opt) => ({
         ...opt,
-        label: t(opt.label), // Translate label
+        label: t(opt.label), // Translate label using root t and full key from opt.label
       }));
     }
 

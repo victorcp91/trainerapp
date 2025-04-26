@@ -115,7 +115,9 @@
     "pageTitleEdit": "Edit Anamnesis Model",
     "modelQuestionsTitle": "Model Questions",
     "emptyStateText": "Add questions using the sidebar.",
-    "addQuestionTitle": "Add Question Types",
+    "addQuestionTitle": "Add Question",
+    "standardQuestionsHeader": "Standard Questions",
+    "customQuestionsHeader": "Custom Questions",
     "questionTypes": {
       "welcome": "Welcome Screen",
       "text": "Text Input",
@@ -147,7 +149,7 @@
     "loadStandardTemplate": "Load Standard Template",
     "saveModel": "Save Model",
     "saveButton": "Save Model",
-    "noQuestionsPrompt": "Drag question types from the right panel to build your model.",
+    "noQuestionsPrompt": "Click question types from the right panel to build your model.",
     "standardModelTitle": "Standard Anamnesis Model"
   },
   "standardAnamnesis": {
@@ -190,12 +192,7 @@
       "advanced": "Advanced"
     },
     "daysPerWeek": {
-      "title": "How many days per week can you train?",
-      "option1": "1 day",
-      "option2": "2 days",
-      "option3": "3 days",
-      "option4": "4 days",
-      "fiveOrMore": "5 or more days"
+      "title": "Which days of the week can you train?"
     },
     "timePerWorkout": {
       "title": "How much time do you have available per workout?",
