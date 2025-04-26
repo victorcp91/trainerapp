@@ -99,5 +99,21 @@ const defaultAnamnesisModel: IQuestion[] = [
     required: true,
     order: 8,
   },
+  {
+    type: "multipleOption",
+    title: "Quais dias da semana você tem disponibilidade para treinar?",
+    options: [
+      { label: "common.weekdays.monday", value: "monday" },
+      { label: "common.weekdays.tuesday", value: "tuesday" },
+      { label: "common.weekdays.wednesday", value: "wednesday" },
+      { label: "common.weekdays.thursday", value: "thursday" },
+      { label: "common.weekdays.friday", value: "friday" },
+      { label: "common.weekdays.saturday", value: "saturday" },
+      { label: "common.weekdays.sunday", value: "sunday" },
+    ],
+    value: [],
+    required: true,
+    order: 9,
+  },
 ];
 export default defaultAnamnesisModel;

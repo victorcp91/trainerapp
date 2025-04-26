@@ -299,20 +299,20 @@
     "untilFailure": "Até a Falha",
     "advancedTechnique": "Técnica Avançada",
     "restTimeSeconds": "Descanso (s)",
-    "addNotesPlaceholder": "Adicionar observações sobre o exercício...",
+    "addNotesPlaceholder": "Adicione anotações adicionais aqui...",
     "noClientFound": "Nenhum cliente encontrado",
     "noDateSelected": "Nenhuma data selecionada",
     "describeReasonPlaceholder": "Descreva o motivo (opcional)",
     "saveChanges": "Salvar Alterações",
     "noModelFound": "Nenhum modelo encontrado",
     "weekdays": {
-      "sunday": "Domingo",
-      "monday": "Segunda",
-      "tuesday": "Terça",
-      "wednesday": "Quarta",
-      "thursday": "Quinta",
-      "friday": "Sexta",
-      "saturday": "Sábado"
+      "monday": "Segunda-feira",
+      "tuesday": "Terça-feira",
+      "wednesday": "Quarta-feira",
+      "thursday": "Quinta-feira",
+      "friday": "Sexta-feira",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
     },
     "sortBy": "Ordenar por",
     "sort": {
@@ -692,23 +692,23 @@
     "seriesInfo": {
       "trainingTypeLabel": "Tipo de Treino",
       "selectTypePlaceholder": "Selecione o tipo",
-      "searchByNamePlaceholder": "Buscar por nome",
-      "moveTrainingModal": {
-        "title": "Mover Treino",
-        "description": "Selecione a data para onde deseja mover o treino. O treino será removido da data atual e adicionado à data escolhida.",
-        "confirmButton": "Confirmar Movimentação"
-      },
-      "replicateTrainingModal": {
-        "title": "Replicar Treino",
-        "every2Days": "A cada 2 dias",
-        "every3Days": "A cada 3 dias",
-        "every4Days": "A cada 4 dias",
-        "every5Days": "A cada 5 dias",
-        "every6Days": "A cada 6 dias",
-        "everyWeek": "Toda semana",
-        "description": "Selecione uma opção pré-definida ou use o calendário ao lado.",
-        "confirmButton": "Confirmar Replicação"
-      }
+      "searchByNamePlaceholder": "Buscar por nome"
+    },
+    "moveTrainingModal": {
+      "title": "Mover Treino",
+      "description": "Selecione a data para onde deseja mover o treino. O treino será removido da data atual e adicionado à data escolhida.",
+      "confirmButton": "Confirmar Movimentação"
+    },
+    "replicateTrainingModal": {
+      "title": "Replicar Treino",
+      "every2Days": "A cada 2 dias",
+      "every3Days": "A cada 3 dias",
+      "every4Days": "A cada 4 dias",
+      "every5Days": "A cada 5 dias",
+      "every6Days": "A cada 6 dias",
+      "everyWeek": "Toda semana",
+      "description": "Selecione uma opção pré-definida ou use o calendário ao lado.",
+      "confirmButton": "Confirmar Replicação"
     },
     "dayCard": {
       "replicateButton": "Replicar Treino",
@@ -780,6 +780,7 @@
       "workTimeSeconds": "Tempo Trabalho (s)",
       "restTimeSeconds": "Tempo Descanso (s)",
       "rounds": "Rounds"
-    }
+    },
+    "title": "Dashboard"
   }
 }

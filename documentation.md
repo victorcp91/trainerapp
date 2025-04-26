@@ -1,6 +1,6 @@
 # TrainerApp Documentation
 
-This document provides an overview of the TrainerApp application's functionality, screen by screen, followed by the planned data structures for its backend.
+This document provides an overview of the TrainerApp application's functionality, screen by screen, followed by the planned data structures for its backend, focusing on aspects relevant for database design.
 
 ## Application Functionality Overview
 
@@ -9,7 +9,7 @@ This section describes the purpose and features of each main page and key compon
 ### Authentication
 
 - **`/login` (`src/app/login/page.tsx`)**: Allows existing users (trainers) to log in using email/password or Google Sign-In via Firebase Authentication. Redirects to the dashboard on success. Provides links to registration and password reset.
-- **`/register` (`src/app/register/page.tsx`)**: Allows new users (trainers) to sign up using email/password or Google Sign-In via Firebase Authentication. Redirects to the dashboard on success. Includes fields for Full Name (currently unused in logic) and password confirmation (validation needed). Links to the login page.
+- **`/register` (`src/app/register/page.tsx`)**: Allows new users (trainers) to sign up using email/password or Google Sign-In via Firebase Authentication. Redirects to the dashboard on success. Includes fields for Full Name and password confirmation. Links to the login page.
 - **`/forgot-password` (`src/app/forgot-password/page.tsx`)**: Allows users to request a password reset link via email using Firebase Authentication.
 
 ### Dashboard (`/dashboard`)
@@ -25,7 +25,7 @@ This section describes the purpose and features of each main page and key compon
   - **Filtering:** Allows filtering by name, client type, plan status, client status, and gender using `ClientFilters`.
   - **Sorting:** Allows sorting the client list.
   - **Creation/Editing:** Opens `ClientFormModal` to add a new client or edit an existing one.
-    - **New Client Workflow:** When adding a new client, the modal first prompts the trainer to search for an existing user by email via an API search. If the user is found, their information might be pre-filled (or linked). If the user is not found (i.e., not registered in the system), the remaining fields in the modal become visible, allowing the trainer to enter the new client's full details for registration and creation within the trainer's client list.
+    - **New Client Workflow:** When adding a new client, the modal first prompts the trainer to search for an existing user by email. If the user is found, their information might be pre-filled. If not found, the trainer can enter the new client's details for registration/creation.
   - **Scheduling:** Opens `ScheduleSessionModal` to schedule a session for a client.
   - **Cancellation:** Opens `ConfirmCancelModal` for cancelling attendance.
 - **`/dashboard/clients/[id]` (`src/app/dashboard/clients/[id]/page.tsx`)**: Displays the detailed profile for a specific client.
@@ -38,8 +38,8 @@ This section describes the purpose and features of each main page and key compon
 - **`/dashboard/clients/[id]/new-plan` (`src/app/dashboard/clients/[id]/new-plan/page.tsx`)**: Interface for creating a new training plan for a specific client.
   - **Date Range:** Set start and end dates for the plan.
   - **Daily Structure:** Displays cards (`TrainingDayCard`) for each day in the range.
-  - **Exercise Management:** Add/edit exercises for each day using `ExerciseModal`.
-  - **Templates:** Apply pre-defined weekly structures (`Serie Models`) or individual workout templates (`Training Models`) using `AddModelModal`.
+  - **Exercise Management:** Add/edit exercises for each day using `ExerciseModal` (supports strength, steady aerobic, and HIIT types).
+  - **Templates:** Apply pre-defined weekly structures (`Series` - folders of `Training Models`) or individual workout templates (`Training Models`) using `AddModelModal`.
   - **Plan Info:** Edit overall plan details using `SeriesInfoForm` and `TrainingInfoCard`.
   - **Day/Week Operations:** Clear days, replicate days (`ReplicateTrainingModal`), move days (`MoveTrainingModal`), replicate weeks.
   - **Publishing:** Allows saving the plan as a draft or publishing it.
@@ -54,10 +54,10 @@ This section describes the purpose and features of each main page and key compon
   - Allows deleting models.
 - **`/dashboard/anamnesis-models/new` (`src/app/dashboard/anamnesis-models/new/page.tsx`)**: Editor for creating a new anamnesis model.
   - Uses `AnamnesisModelEditor` component.
-  - Can start blank or load a standard template (`?loadStandard=true`).
-  - Allows defining sections, questions (various types like text, multiple choice), and other elements.
+  - Can start blank or load a standard template (`defaultAnamnesisModel.ts`).
+  - Allows defining sections and questions (various types: welcome, text, date, singleOption, multipleOption, metric, bodyParts, injury).
   - Handles saving the model structure.
-- **`/dashboard/anamnesis-models/[modelId]` (Implicit):** Editor for modifying an existing anamnesis model (likely reuses `AnamnesisModelEditor`).
+- **`/dashboard/anamnesis-models/[modelId]` (Implicit):** Editor for modifying an existing anamnesis model (reuses `AnamnesisModelEditor`).
 - **`/dashboard/attendances` (`src/app/dashboard/attendances/page.tsx`)**: Tracks client attendance and schedules.
   - **Calendar View (`CalendarSidebar`):** Select date to view.
   - **Daily Details (`DayDetails`):** Shows appointments for the selected date, allows check-in, marking absence (with reason modal), and canceling (with reason modal).
@@ -74,74 +74,117 @@ This section describes the purpose and features of each main page and key compon
   - View subscription/plan details (placeholder/future feature).
   - Delete account (with confirmation).
 - **`/dashboard/settings` (`src/app/dashboard/settings/page.tsx`)**: Configures application settings.
-  - Currently allows changing the display language (EN/PT).
+  - Allows changing the display language (EN/PT).
 
 ---
 
 # TrainerApp Data Structure Documentation
 
-This document outlines the planned data structures for the TrainerApp application, based on the analysis of its pages and functionalities. These structures are designed with a NoSQL database like Firestore in mind.
+This document outlines the planned data structures for the TrainerApp application, based on the analysis of its pages, components, and types. These structures are designed with a NoSQL database like Firestore in mind.
 
 ## Core Collections
 
 ### 1. `users`
 
-Represents trainers (and potentially clients if they need to log in). Linked to Firebase Authentication.
+Represents registered users (primarily trainers, but potentially clients if they need app access). Linked to Firebase Authentication.
 
-- `uid` (string, PK): Unique ID from Firebase Authentication.
-- `email` (string): User's email address (from Auth).
+- **`uid`** (string, PK): Unique ID from Firebase Authentication.
+- `email` (string): User's email address (from Auth, required).
 - `fullName` (string): User's full name.
 - `phone` (string, optional): User's phone number.
 - `avatarUrl` (string, optional): URL for the user's profile picture.
-- `role` (string): User role ('trainer' or 'client').
+- `role` (string): User role (e.g., 'trainer'). _If clients need to log in, 'client' role would be added._
 - `authProvider` (string): Authentication provider used (e.g., 'password', 'google.com').
 - `createdAt` (timestamp): Timestamp of user creation.
 - `preferredLocale` (string, optional): User's preferred language ('en', 'pt', etc.).
 
-### 2. `clients`
+### 2. `trainers`
+
+Stores trainer-specific profile information, potentially including settings or links to their specific resources.
+
+- **`trainerUid`** (string, PK, FK -> `users.uid`): Unique ID matching the user record.
+- `settings` (map, optional): Trainer-specific settings (e.g., default currency, notification preferences).
+- `planDetails` (map, optional): Information about the trainer's subscription plan.
+
+### 3. `clients`
 
 Represents the clients managed by a trainer.
 
-- `clientId` (string, PK): Unique ID for the client.
+- **`clientId`** (string, PK): Unique ID for the client.
 - `trainerUid` (string, FK -> `users.uid`): The UID of the trainer managing this client.
-- `name` (string): Client's full name.
+- `userUid` (string, optional, FK -> `users.uid`): If the client is also a registered user, link to their user record.
+- `name` (string): Client's full name (required).
 - `email` (string, optional): Client's email address.
 - `phone` (string, optional): Client's phone number.
 - `status` (string): Client status ('active', 'inactive').
 - `clientType` (string): How the client is trained ('online', 'in_person', 'hybrid').
-- `gender` (string, optional): Client's gender.
+- `gender` (string, optional): Client's gender ('male', 'female', 'other').
 - `dateOfBirth` (date/timestamp, optional): Client's date of birth.
 - `notes` (array of objects, optional): Dated notes about the client.
-  - Object Structure: `{ date: timestamp, text: string }`
-- `registrationDate` (timestamp): When the client was added.
+  - _Object Structure:_ `{ date: timestamp, text: string }`
+- `tags` (array of strings, optional): Tags or objectives assigned by the trainer (e.g., ['weight_loss', 'beginner']).
+- `registrationDate` (timestamp): When the client was added by the trainer.
 - `avatarUrl` (string, optional): URL for the client's profile picture.
-- `latestPlanId` (string, optional, FK -> `training_plans.planId`): _Denormalized_ ID of the most recent plan for quick access/display.
-- `latestPlanStatus` (string, optional): _Denormalized_ status of the most recent plan for quick access/display.
+- `assignedAnamnesisModelId` (string, optional, FK -> `anamnesis_models.modelId`): ID of the anamnesis model assigned to this client.
+- `lastAnamnesisResponseId` (string, optional, FK -> `anamnesis_responses.responseId`): _Denormalized_ ID of the latest submitted anamnesis.
+- `latestPlanId` (string, optional, FK -> `training_plans.planId`): _Denormalized_ ID of the most recent plan.
+- `latestPlanStatus` (string, optional): _Denormalized_ status of the most recent plan (e.g., 'on_track', 'near_due', 'overdue').
 
-### 3. `training_plans`
+### 4. `training_plans`
 
 Represents specific training programs assigned to clients, defining workouts for a date range.
 
-- `planId` (string, PK): Unique ID for the training plan.
+- **`planId`** (string, PK): Unique ID for the training plan.
 - `clientId` (string, FK -> `clients.clientId`): The client this plan is for.
 - `trainerUid` (string, FK -> `users.uid`): The trainer who created the plan.
 - `name` (string): Name of the training plan (e.g., "Phase 1 Hypertrophy").
+- `description` (string, optional): Description of the plan.
 - `startDate` (date/timestamp): Start date of the plan.
 - `endDate` (date/timestamp): End date of the plan.
 - `status` (string): Current status ('draft', 'published', 'archived', 'completed').
 - `level` (string, optional): Difficulty level (e.g., 'beginner', 'intermediate', 'advanced').
 - `dailyWorkouts` (map): Contains exercises assigned to specific dates within the plan's range.
-  - Key: Date string "YYYY-MM-DD".
-  - Value: Array of `Exercise` objects.
-  - `Exercise` Object: `{ exerciseModelId?: string, name: string, series: number, reps: string | number, restTime: number, advancedTechnique?: string, notes?: string, muscleGroup?: string, order?: number }`
+  - _Key:_ Date string "YYYY-MM-DD".
+  - _Value:_ Array of `Exercise` objects (see structure below).
 - `createdAt` (timestamp): Timestamp of plan creation.
 - `updatedAt` (timestamp): Timestamp of last update.
 
-### 4. `sessions` (or `appointments`)
+#### `Exercise` Object Structure (within `training_plans` and `training_models`)
+
+Based on `src/types/training.ts` and `ExerciseModal.tsx`:
+
+- `id` (string): Unique identifier for this specific instance of the exercise within the plan/model (e.g., UUID or temporary ID `temp-X` generated client-side, potentially persisted or replaced on save).
+- `name` (string): Name of the exercise (e.g., "Bench Press").
+- `notes` (string, optional): Specific notes for this exercise.
+- `order` (number, optional): Order of the exercise within the workout day.
+- `type` (string, required): Type of exercise ('strength', 'steady_aerobic', or 'hiit_aerobic').
+
+_**Strength Fields:**_
+
+- `series` (number, optional): Number of sets.
+- `reps` (number | string, optional): Number of repetitions (or 'F'/'failure').
+- `restTime` (number, optional): Rest time in seconds between sets.
+- `advancedTechnique` (string, optional): E.g., 'Drop-set', 'Bi-set'.
+
+_**Steady Aerobic Fields:**_
+
+- `duration` (number, optional): Duration in minutes.
+- `distance` (number, optional): Distance in kilometers.
+- `intensity` (string, optional): E.g., 'low', 'medium', 'high'.
+
+_**HIIT Fields:**_
+
+- `hiitWorkTime` (number, optional): Work interval in seconds.
+- `hiitRestTime` (number, optional): Rest interval in seconds.
+- `hiitRounds` (number, optional): Number of rounds.
+
+_**Note:** A single exercise object will typically only populate one set of the specific fields (Strength, Steady Aerobic, or HIIT), determined by the `type` field._
+
+### 5. `sessions` (or `appointments`)
 
 Represents scheduled appointments or logged training sessions.
 
-- `sessionId` (string, PK): Unique ID for the session/appointment.
+- **`sessionId`** (string, PK): Unique ID for the session/appointment.
 - `clientId` (string, FK -> `clients.clientId`): The client involved.
 - `trainerUid` (string, FK -> `users.uid`): The trainer involved.
 - `startTime` (timestamp): Scheduled start date and time.
@@ -153,124 +196,124 @@ Represents scheduled appointments or logged training sessions.
 - `locationName` (string, optional): Name of the location (e.g., "Gym X", "Online").
 - `locationAddress` (string, optional): Full address if applicable.
 - `notes` (string, optional): Any notes specific to this session.
+- `recurrenceRule` (string, optional): Rule for recurring sessions (e.g., RRULE string, or simple days array ['monday', 'wednesday']).
+- `recurrenceParentId` (string, optional): If part of a recurrence, ID of the parent/template session.
 - `createdAt` (timestamp): Timestamp of session creation.
 - `updatedAt` (timestamp): Timestamp of last update.
 
-### 5. `training_models`
+### 6. `training_models`
 
-Represents reusable templates for individual workouts (e.g., "Leg Day").
+Represents reusable templates for individual workouts (e.g., "Leg Day A").
 
-- `modelId` (string, PK): Unique ID for the training model.
+- **`modelId`** (string, PK): Unique ID for the training model.
 - `trainerUid` (string, FK -> `users.uid`): The trainer who owns this model.
-- `name` (string): Name of the workout model.
+- `name` (string): Name of the workout model (required).
 - `description` (string, optional): Description of the model.
-- `exercises` (array of `Exercise` objects): The list of exercises in this workout template. (See `training_plans.dailyWorkouts.Exercise` for structure).
+- `exercises` (array of `Exercise` objects): Ordered list of exercises. (See `Exercise` Object Structure above).
 - `level` (string, optional): Suggested difficulty level.
-- `muscleGroups` (array of strings, optional): Primary muscle groups targeted.
-- `isFavorite` (boolean): Flag if the trainer marked it as a favorite.
+- `muscleGroups` (array of strings, optional): Primary muscle groups targeted (derived from exercises or manually set).
+- `isFavorite` (boolean, default: false): Flag if the trainer marked it as a favorite.
 - `createdAt` (timestamp): Timestamp of model creation.
 - `updatedAt` (timestamp): Timestamp of last update.
 
-### 6. `training_series`
+### 7. `training_series`
 
-Represents reusable, user-created folders or groups used to organize individual `training_models`. These are managed on the "Training Models" page (`/dashboard/training-models`). The primary purpose is organizational (e.g., grouping models by phase, muscle group, or custom category).
+Represents reusable, user-created folders or groups used to organize individual `training_models`.
 
-- `seriesId` (string, PK): Unique ID for the training series (folder/group).
+- **`seriesId`** (string, PK): Unique ID for the training series (folder/group).
 - `trainerUid` (string, FK -> `users.uid`): The trainer who owns this series.
-- `name` (string): Name of the series/folder (e.g., "Beginner Phase", "Push Days").
+- `name` (string): Name of the series/folder (e.g., "Beginner Phase", "Push Days") (required).
 - `description` (string, optional): Description of the series/folder.
 - `level` (string, optional): Suggested difficulty level associated with the group.
-- `modelIds` (array of strings, FKs -> `training_models.modelId`): Ordered list of training model IDs contained within this series/folder.
-- `isFavorite` (boolean): Flag if the trainer marked this series/folder as a favorite.
+- `trainingModelIds` (array of strings, FKs -> `training_models.modelId`): Ordered list of training model IDs contained within this series/folder.
+- `isFavorite` (boolean, default: false): Flag if the trainer marked this series/folder as a favorite.
 - `createdAt` (timestamp): Timestamp of series creation.
 - `updatedAt` (timestamp): Timestamp of last update.
 
-_**Note:** This collection should not be confused with the hardcoded "Serie Models" (e.g., "Treino A", "Treino B") used within the "New Plan" page (`/dashboard/clients/[id]/new-plan`). Those represent predefined weekly workout structures/splits and are currently implemented directly in the frontend logic. If those preset structures become user-editable in the future, they might warrant their own collection or be integrated differently._
-
-### 7. `anamnesis_models`
+### 8. `anamnesis_models`
 
 Represents reusable templates for anamnesis questionnaires.
 
-- `modelId` (string, PK): Unique ID for the anamnesis model.
-- `trainerUid` (string, FK -> `users.uid`): The trainer who owns this model.
-- `name` (string): Name of the questionnaire model.
+- **`modelId`** (string, PK): Unique ID for the anamnesis model.
+- `trainerUid` (string, FK -> `users.uid`, optional): The trainer who owns this model. Null/absent for standard models.
+- `name` (string): Name of the questionnaire model (required).
 - `description` (string, optional): Description of the model.
-- `isStandard` (boolean, optional): Flag if this is a system-provided standard model.
-- `structure` (array of objects): Ordered list defining the questionnaire sections and questions.
-  - Element Object Example: `{ elementId: string, type: string ('section_header', 'text', 'textarea', 'radio', 'checkbox', 'select', 'welcome'), text?: string, title?: string, options?: {value: string, label: string}[], isRequired?: boolean, ... }` (Specific fields depend on `type`).
+- `isStandard` (boolean, default: false): Flag if this is a system-provided standard model.
+- `structure` (array of `IQuestion` objects): Ordered list defining the questionnaire structure. (See `IQuestion` structure below).
 - `createdAt` (timestamp): Timestamp of model creation.
 - `updatedAt` (timestamp): Timestamp of last update.
 
-### 8. `anamnesis_responses`
+#### `IQuestion` Object Structure (within `anamnesis_models.structure`)
+
+Based on `src/types/QuestionTypes.ts` and `AnamnesisModelEditor.tsx`:
+
+- **`id`** (string): Unique identifier for the question within the model (e.g., UUID generated on creation).
+- `type` (string): Question type ('welcome', 'text', 'date', 'singleOption', 'multipleOption', 'metric', 'bodyParts', 'injury').
+- `title` (string): The question text presented to the user.
+- `order` (number): Order of the question within the model.
+- `required` (boolean): Whether the question must be answered.
+- `description` (string, optional): Additional helper text or description.
+- `options` (array of objects, optional): For 'singleOption', 'multipleOption', 'bodyParts'.
+  - _Object Structure:_ `{ label: string, value: string }`
+  - _Note:_ For 'bodyParts', the `label` might be a translation key (e.g., `bodyParts.thighs`). For the new 'weekday' question, labels are `common.weekdays.monday`, etc.
+- `metric` (string, optional): Unit for 'metric' type (e.g., 'kg', 'cm', '%').
+- `buttonText` (string, optional): For 'welcome' type.
+- `trainerName` (string, optional): For 'welcome', 'injury' types.
+- `trainerImage` (string, optional): For 'welcome' type.
+
+### 9. `anamnesis_responses`
 
 Stores a client's submitted answers to a specific `anamnesis_model`.
 
-- `responseId` (string, PK): Unique ID for the submitted response.
+- **`responseId`** (string, PK): Unique ID for the submitted response.
 - `clientId` (string, FK -> `clients.clientId`): The client who submitted the response.
 - `trainerUid` (string, FK -> `users.uid`): The trainer associated with the client.
 - `modelId` (string, FK -> `anamnesis_models.modelId`): The model used for this response.
 - `submissionDate` (timestamp): When the response was submitted.
 - `answers` (map): Stores the answers provided by the client.
-  - Key: `elementId` from the `anamnesis_models.structure`.
-  - Value: The answer provided (string, number, boolean, array of strings, etc., depending on question type).
-- **Assigning Models:** The process of assigning a specific `anamnesis_model` to a `client` needs to be defined (e.g., a button on the client profile's Anamnesis tab triggers assignment, potentially creating a pending `anamnesis_response` entry).
-- **Client Submission:** The workflow for how the client receives the notification/link to the assigned questionnaire and how they fill it out within their own (currently separate) client-facing app needs to be detailed. The submission would populate the `answers` field in the corresponding `anamnesis_responses` document.
+  - _Key:_ `id` of the `IQuestion` from the `anamnesis_models.structure`.
+  - _Value:_ The answer provided (string, number, boolean, array of strings, null, etc., depending on question type).
+  - _Example (Weekday Question):_ `{ "questionIdForWeekdays": ["monday", "wednesday", "friday"] }`
 
-### 9. `progress_photos`
+### 10. `progress_photos`
 
 Stores sets of dated progress photos for clients.
 
-- `photoSetId` (string, PK): Unique ID for this set of photos.
+- **`photoSetId`** (string, PK): Unique ID for this set of photos.
 - `clientId` (string, FK -> `clients.clientId`): The client these photos belong to.
 - `trainerUid` (string, FK -> `users.uid`): The trainer associated with the client.
 - `date` (date/timestamp): The date these photos were taken.
-- `frontPhotoUrl` (string): URL of the front-view photo.
-- `sidePhotoUrl` (string): URL of the side-view photo.
-- `backPhotoUrl` (string): URL of the back-view photo.
+- `photos` (array of objects): List of photos in this set.
+  - _Object Structure:_ `{ angle: string ('front', 'side', 'back'), url: string }`
 - `notes` (string, optional): Any notes specific to this set of photos.
 - `createdAt` (timestamp): Timestamp when the photos were uploaded.
 
-### 10. `chats`
+### 11. `chats`
 
 Represents a single conversation thread between a trainer and a client.
 
-- `chatId` (string, PK): Unique ID for the chat thread.
+- **`chatId`** (string, PK): Unique ID for the chat thread (could be composite like `${trainerUid}_${clientId}`).
 - `trainerUid` (string, FK -> `users.uid`): Participant trainer UID.
 - `clientId` (string, FK -> `clients.clientId`): Participant client ID.
 - `lastMessageTimestamp` (timestamp): Timestamp of the most recent message (for sorting).
 - `lastMessageText` (string, optional): Snippet of the last message (for preview).
 - `trainerUnreadCount` (number): Count of messages unread by the trainer in this chat.
 - `clientUnreadCount` (number): Count of messages unread by the client in this chat.
-- `participants` (array of strings): List of participant IDs (`trainerUid`, `clientId`) for querying.
+- `participants` (array of strings): List of participant UIDs (`trainerUid`, `clientUid`) for querying.
 
-### 11. `messages`
+### 12. `messages`
 
-Stores individual messages belonging to a chat thread.
+Stores individual messages belonging to a chat thread. Could be a subcollection of `chats`.
 
-- `messageId` (string, PK): Unique ID for the message.
+- **`messageId`** (string, PK): Unique ID for the message.
 - `chatId` (string, FK -> `chats.chatId`): The chat thread this message belongs to.
-- `senderUid` (string, FK -> `users.uid` or potentially `clients.authUid`): The UID of the message sender.
-- `senderType` (string): Type of sender ('trainer' or 'client').
-- `text` (string): The content of the message.
+- `senderUid` (string, FK -> `users.uid`): UID of the message sender (trainer or client).
 - `timestamp` (timestamp): When the message was sent.
-- `exerciseRef` (object, optional): Reference to a specific exercise mentioned in the chat.
-  - Object Structure: `{ exerciseId?: string, exerciseName: string, details: string }`
-- `isRead` (boolean, optional): _Alternative read status tracking, potentially less scalable than counts in `chats`._
-
-### 12. `subscriptions`
-
-Tracks the subscription plan details for trainers.
-
-- `subscriptionId` (string, PK): Unique ID for the subscription record.
-- `trainerUid` (string, FK -> `users.uid`): The trainer this subscription belongs to.
-- `planId` (string): Identifier for the specific plan level (e.g., 'free', 'premium_monthly').
-- `status` (string): Current status ('active', 'trialing', 'past_due', 'canceled', 'expired').
-- `startDate` (timestamp): When the subscription period started.
-- `endDate` (timestamp, optional): When the subscription period ends (for non-renewing plans).
-- `trialEndDate` (timestamp, optional): When the trial period ends.
-- `renewalDate` (timestamp, optional): Next billing date for auto-renewing plans.
-- `renewalType` (string): How the plan renews ('auto', 'manual').
-- `paymentProviderId` (string, optional): ID from the payment provider (e.g., Stripe Customer/Subscription ID).
+- `text` (string, optional): The text content of the message.
+- `type` (string): Type of message ('text', 'exercise_reference', 'image', etc.).
+- `exerciseReference` (object, optional): If `type` is 'exercise_reference'.
+  - _Object Structure:_ `{ id: string, name: string, details?: string, imageUrl?: string, lottiePath?: string }`
+- `imageUrl` (string, optional): If `type` is 'image'.
 
 ---
 

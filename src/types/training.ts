@@ -6,6 +6,7 @@ export interface Exercise {
   notes: string;
   restTime?: number;
   id?: string | number;
+  type: "strength" | "steady_aerobic" | "hiit_aerobic";
   duration?: number;
   distance?: number;
   intensity?: string;

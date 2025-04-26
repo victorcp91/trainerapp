@@ -308,13 +308,13 @@
     "saveChanges": "Save Changes",
     "noModelFound": "No model found",
     "weekdays": {
-      "sunday": "Sunday",
       "monday": "Monday",
       "tuesday": "Tuesday",
       "wednesday": "Wednesday",
       "thursday": "Thursday",
       "friday": "Friday",
-      "saturday": "Saturday"
+      "saturday": "Saturday",
+      "sunday": "Sunday"
     },
     "sortBy": "Sort by",
     "sort": {
@@ -716,11 +716,7 @@
       "trainingTypeLabel": "Training Type",
       "selectTypePlaceholder": "Select type",
       "searchByNamePlaceholder": "Search by name",
-      "moveTrainingModal": {
-        "title": "Move Training",
-        "description": "Select the date you want to move the training to. The training will be removed from the current date and added to the chosen date.",
-        "confirmButton": "Confirm Move"
-      },
+
       "replicateTrainingModal": {
         "title": "Replicate Training",
         "every2Days": "Every 2 days",
@@ -732,6 +728,11 @@
         "description": "Select a predefined option or use the calendar.",
         "confirmButton": "Confirm Replication"
       }
+    },
+    "moveTrainingModal": {
+      "title": "Move Training",
+      "description": "Select the date you want to move the training to. The training will be removed from the current date and added to the chosen date.",
+      "confirmButton": "Confirm Move"
     },
     "dayCard": {
       "replicateButton": "Replicate Training",
