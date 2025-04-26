@@ -320,7 +320,9 @@
       "oldest": "Antigos"
     },
     "failure": "falha",
-    "rest": "Descanso"
+    "rest": "Descanso",
+    "restShort": "Desc.",
+    "failureShort": "F"
   },
   "anamnesisModelsPage": {
     "title": "Modelos de Anamnese",
@@ -584,11 +586,11 @@
   "clientProfile": {
     "tabs": {
       "profile": "Perfil",
-      "training": "Treinos",
-      "anamnesis": "Anamnese",
-      "evolution": "Evolução"
+      "training": "Treino",
+      "evolution": "Evolução",
+      "anamnesis": "Anamnese"
     },
-    "progress": "Progresso",
+    "progress": "Fotos de Progresso",
     "training": {
       "drafts": "Rascunhos"
     },
@@ -599,10 +601,16 @@
       "addNoteAriaLabel": "Adicionar nota"
     },
     "progressModal": {
-      "dateBeforeLabel": "Data Antes",
+      "title": "Comparar Progresso",
+      "dateBeforeLabel": "Data Anterior",
+      "dateAfterLabel": "Data Posterior",
       "selectDatePlaceholder": "Selecione uma data",
-      "dateAfterLabel": "Data Depois",
-      "title": "Comparação de Fotos de Progresso"
+      "anglesLabel": "Ângulos",
+      "beforeLabel": "Antes",
+      "afterLabel": "Depois",
+      "selectAnglePrompt": "Selecione os ângulos para visualizar",
+      "generateImageButton": "Gerar Imagem",
+      "shareButton": "Compartilhar"
     }
   },
   "attendances": {
@@ -748,7 +756,12 @@
       "equipmentLabel": "Equipamento",
       "searchPlaceholder": "Buscar exercício",
       "editTitle": "Editar Modelo",
-      "createTitle": "Criar Modelo"
+      "createTitle": "Criar Novo Modelo de Treino",
+      "currentExercisesTitle": "Exercícios Atuais do Modelo",
+      "noExercisesAdded": "Nenhum exercício adicionado ainda.",
+      "noExercisesFound": "Nenhum exercício encontrado.",
+      "exerciseDetailsTitle": "Detalhes do Exercício",
+      "modelDetailsTitle": "Detalhes do Modelo"
     }
   }
 }

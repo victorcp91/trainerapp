@@ -9,6 +9,9 @@ import {
   Stack,
   Button,
   Text,
+  Grid,
+  Center,
+  Paper,
 } from "@mantine/core";
 import { IconShare } from "@tabler/icons-react";
 import html2canvas from "html2canvas";
@@ -55,12 +58,11 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
     "back",
   ]);
 
-  // Sync initial date when modal opens or initialBeforeDate changes
   useEffect(() => {
     if (isOpen) {
       setBeforeDate(initialBeforeDate);
-      setAfterDate(null); // Reset after date when opening
-      setSelectedAngles(["front", "side", "back"]); // Reset angles
+      setAfterDate(null);
+      setSelectedAngles(["front", "side", "back"]);
     }
   }, [isOpen, initialBeforeDate]);
 
@@ -91,12 +93,56 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
     alert("Funcionalidade de compartilhamento em redes sociais em breve!");
   };
 
+  const renderComparisonImages = (date: string | null, label: string) => {
+    if (!date || !progressPhotos[date]) {
+      return (
+        <Center h={200}>
+          {" "}
+          {/* Placeholder height */}
+          <Text c="dimmed">
+            {t("clientProfile.progressModal.selectDatePlaceholder")}
+          </Text>
+        </Center>
+      );
+    }
+
+    const photos = progressPhotos[date];
+
+    return (
+      <Stack gap="md">
+        <Text ta="center" fw={500}>{`${label} (${date})`}</Text>
+        {selectedAngles.length === 0 && (
+          <Center h={100}>
+            <Text c="dimmed" size="sm">
+              {t("clientProfile.progressModal.selectAnglePrompt")}
+            </Text>
+          </Center>
+        )}
+        {selectedAngles.map((angle) => (
+          <Paper key={angle} withBorder p="xs" radius="sm">
+            <Text size="xs" c="dimmed" mb={4}>
+              {angleOptions.find((opt) => opt.value === angle)?.label || angle}
+            </Text>
+            <Image
+              src={photos[angle as keyof ProgressPhotos]}
+              alt={`${angle} ${label} ${date}`}
+              fallbackSrc="https://placehold.co/200x200?text=No+Image"
+              radius="xs"
+              height={150} // Adjust as needed
+              fit="contain"
+            />
+          </Paper>
+        ))}
+      </Stack>
+    );
+  };
+
   return (
     <Modal
       opened={isOpen}
       onClose={onClose}
       title={t("clientProfile.progressModal.title")}
-      size="lg"
+      size="xl" // Increased size
     >
       <Group grow>
         <Select
@@ -117,72 +163,40 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
         />
       </Group>
       <Divider my="sm" />
-      <Text size="sm">Ângulos</Text>
-      <Group>
-        {angleOptions.map((angle) => (
-          <Checkbox
-            key={angle.value}
-            label={angle.label}
-            checked={selectedAngles.includes(angle.value)}
-            onChange={(e) => {
-              const isChecked = e.currentTarget.checked;
-              setSelectedAngles((prev) =>
-                isChecked
-                  ? [...prev, angle.value]
-                  : prev.filter((a) => a !== angle.value)
-              );
-            }}
-          />
-        ))}
-      </Group>
+      <Checkbox.Group
+        label={t("clientProfile.progressModal.anglesLabel")}
+        value={selectedAngles}
+        onChange={setSelectedAngles}
+      >
+        <Group mt="xs">
+          {angleOptions.map((angle) => (
+            <Checkbox
+              key={angle.value}
+              value={angle.value}
+              label={angle.label}
+            />
+          ))}
+        </Group>
+      </Checkbox.Group>
       <Divider my="sm" />
-      {/* Ensure unique ID for html2canvas target */}
       <div
         id="comparison-container-modal"
         style={{ padding: "1rem", background: "white" }}
       >
-        <Group align="flex-start">
-          {beforeDate && progressPhotos[beforeDate] && (
-            <Stack>
-              <Text size="sm">Antes ({beforeDate})</Text>
-              {selectedAngles.includes("front") && (
-                <Image
-                  src={progressPhotos[beforeDate].front}
-                  alt="Frente Antes"
-                />
-              )}
-              {selectedAngles.includes("side") && (
-                <Image src={progressPhotos[beforeDate].side} alt="Lado Antes" />
-              )}
-              {selectedAngles.includes("back") && (
-                <Image
-                  src={progressPhotos[beforeDate].back}
-                  alt="Costas Antes"
-                />
-              )}
-            </Stack>
-          )}
-          {afterDate && progressPhotos[afterDate] && (
-            <Stack>
-              <Text size="sm">Depois ({afterDate})</Text>
-              {selectedAngles.includes("front") && (
-                <Image
-                  src={progressPhotos[afterDate].front}
-                  alt="Frente Depois"
-                />
-              )}
-              {selectedAngles.includes("side") && (
-                <Image src={progressPhotos[afterDate].side} alt="Lado Depois" />
-              )}
-              {selectedAngles.includes("back") && (
-                <Image
-                  src={progressPhotos[afterDate].back}
-                  alt="Costas Depois"
-                />
-              )}
-            </Stack>
-          )}
-        </Group>
+        <Grid gutter="lg">
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            {renderComparisonImages(
+              beforeDate,
+              t("clientProfile.progressModal.beforeLabel")
+            )}
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            {renderComparisonImages(
+              afterDate,
+              t("clientProfile.progressModal.afterLabel")
+            )}
+          </Grid.Col>
+        </Grid>
       </div>
       <Divider my="sm" />
       <Group>
@@ -190,7 +204,7 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
           onClick={handleGenerateImage}
           disabled={!beforeDate || !afterDate}
         >
-          Gerar Imagem
+          {t("clientProfile.progressModal.generateImageButton")}
         </Button>
         <Button
           leftSection={<IconShare size={16} />}
@@ -198,7 +212,7 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
           onClick={handleShare}
           disabled={!beforeDate || !afterDate} // Disable if no comparison possible
         >
-          Compartilhar
+          {t("clientProfile.progressModal.shareButton")}
         </Button>
       </Group>
     </Modal>

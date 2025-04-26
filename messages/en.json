@@ -779,7 +779,9 @@
       "equipmentLabel": "Equipment",
       "searchPlaceholder": "Search exercise",
       "editTitle": "Edit Model",
-      "createTitle": "Create Model"
+      "createTitle": "Create New Training Model",
+      "modelDetailsTitle": "Model Details",
+      "exerciseDetailsTitle": "Exercise Details"
     }
   }
 }

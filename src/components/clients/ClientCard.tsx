@@ -60,7 +60,10 @@ export const ClientCard: React.FC<ClientCardProps> = ({
     <Card withBorder shadow="sm" p="lg" radius="md" style={{ height: "100%" }}>
       <Flex direction="column" h="100%">
         <Flex justify="space-between" align="center" mb="md">
-          <Group>
+          <Group
+            onClick={() => r.push(`/dashboard/clients/${client.id}`)}
+            style={{ cursor: "pointer" }}
+          >
             <Avatar
               src={client.profilePicture || undefined}
               alt={client.name}
