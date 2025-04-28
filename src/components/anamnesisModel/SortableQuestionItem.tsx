@@ -13,6 +13,7 @@ interface SortableQuestionItemProps {
   onRemove: (index: number) => void;
   onEdit: (index: number) => void;
   getQuestionTypeIcon: (type: string) => React.ElementType;
+  isFixed?: boolean;
   t: (key: string) => string;
 }
 
@@ -22,6 +23,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
   onRemove,
   onEdit,
   getQuestionTypeIcon,
+  isFixed,
   t,
 }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -39,9 +41,12 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
     <div ref={setNodeRef} style={style} {...attributes}>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Flex align="center" justify="space-between">
-          <Group gap="xs" {...listeners} style={{ cursor: "grab" }}>
-            <IconGripVertical size={20} color="gray" />
-          </Group>
+          {!isFixed && (
+            <Group gap="xs" {...listeners} style={{ cursor: "grab" }}>
+              <IconGripVertical size={20} color="gray" />
+            </Group>
+          )}
+          {isFixed && <div style={{ width: 20 }} />}
 
           <Flex
             align="center"
@@ -66,15 +71,17 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
             >
               <IconEdit size={16} />
             </Button>
-            <Button
-              variant="subtle"
-              color="red"
-              size="xs"
-              onClick={() => onRemove(index)}
-              aria-label={t("anamnesisModel.questionItem.removeAriaLabel")}
-            >
-              <IconTrash size={16} />
-            </Button>
+            {!isFixed && (
+              <Button
+                variant="subtle"
+                color="red"
+                size="xs"
+                onClick={() => onRemove(index)}
+                aria-label={t("anamnesisModel.questionItem.removeAriaLabel")}
+              >
+                <IconTrash size={16} />
+              </Button>
+            )}
           </Group>
         </Flex>
       </Card>

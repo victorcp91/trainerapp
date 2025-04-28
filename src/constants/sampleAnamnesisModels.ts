@@ -36,7 +36,6 @@ export const sampleAnamnesisModelsData: (Omit<
         trainerImage: "",
         order: 0,
         required: true,
-        standardKey: "welcome",
       },
       {
         type: "text", // Custom Question
@@ -83,7 +82,6 @@ export const sampleAnamnesisModelsData: (Omit<
         trainerImage: "",
         order: 0,
         required: true,
-        standardKey: "welcome",
       },
       {
         type: "multipleOption", // Custom injury question

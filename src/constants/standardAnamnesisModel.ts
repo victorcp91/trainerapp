@@ -13,7 +13,6 @@ const standardAnamnesisModel: IQuestion[] = [
     buttonText: `${sa}.welcome.buttonText`, // Use key for button text
     required: false,
     order: 0, // Welcome screen is first
-    standardKey: "welcome",
   },
   {
     type: "date",
@@ -154,7 +153,6 @@ const standardAnamnesisModel: IQuestion[] = [
     value: [],
     required: true,
     order: 11,
-    standardKey: "focusMuscleGroups",
   },
   {
     type: "multipleOption",
@@ -194,6 +192,7 @@ const standardAnamnesisModel: IQuestion[] = [
     order: 13,
     allowOtherOptionInput: true,
     allowNoneOption: true,
+    standardKey: "cardioTypes",
   },
   {
     type: "multipleOption",
@@ -244,7 +243,6 @@ const standardAnamnesisModel: IQuestion[] = [
     order: 16,
     allowOtherOptionInput: true,
     allowNoneOption: true,
-    standardKey: "cardioTypes",
   },
 ];
 

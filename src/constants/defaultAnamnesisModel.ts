@@ -15,7 +15,6 @@ const defaultAnamnesisModel: IQuestion[] = [
     buttonText: `${sa}.welcome.buttonText`,
     required: false,
     order: 0,
-    standardKey: "welcome",
   },
   {
     type: "date",
@@ -171,7 +170,6 @@ const defaultAnamnesisModel: IQuestion[] = [
     value: [],
     required: true,
     order: 11,
-    standardKey: "focusMuscleGroups",
   },
   {
     type: "multipleOption",

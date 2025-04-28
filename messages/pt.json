@@ -152,7 +152,12 @@
     "saveModel": "Salvar Modelo",
     "saveButton": "Salvar Modelo",
     "noQuestionsPrompt": "Clique nos tipos de pergunta do painel direito para construir seu modelo.",
-    "standardModelTitle": "Modelo de Anamnese Padrão"
+    "standardModelTitle": "Modelo de Anamnese Padrão",
+    "welcomeDefaults": {
+      "title": "[PT] Bem-vindo(a)!",
+      "description": "[PT] Vamos começar a coletar os dados para seu atendimento personalizado.",
+      "buttonText": "[PT] Começar"
+    }
   },
   "standardAnamnesis": {
     "welcome": {

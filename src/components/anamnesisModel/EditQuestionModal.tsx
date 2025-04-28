@@ -208,7 +208,9 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
   const renderFormFields = () => {
     if (!question) return <Text>No question selected.</Text>;
 
-    const isStandard = !!question?.standardKey;
+    // const isStandard = !!question?.standardKey;
+    const isStandard =
+      question && "standardKey" in question && !!question.standardKey; // Safely check for standardKey
 
     // Common fields logic
     const renderCommonFields = (skipDivider?: boolean) => (
@@ -223,7 +225,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
           value={formData.title || ""}
           onChange={handleInputChange}
           required
-          disabled={isStandard && question?.type !== "welcome"}
+          disabled={isStandard}
         />
         {(question.type === "welcome" || question.type === "date") && (
           <Textarea
@@ -236,7 +238,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
             // Description always editable
           />
         )}
-        {question.type !== "welcome" && (
+        {question.type !== "welcome" && question.type !== "bodyParts" && (
           <Checkbox
             label={t("anamnesisModelEditor.editQuestionModal.required")}
             name="required"
@@ -268,8 +270,8 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
           />
         )}
         {(question.type === "singleOption" ||
-          question.type === "multipleOption" ||
-          question.type === "bodyParts") && (
+          question.type ===
+            "multipleOption") /* Removed || question.type === "bodyParts" */ && (
           <Checkbox
             label={t("anamnesisModelEditor.editQuestionModal.allowNoneOption")}
             name="allowNoneOption"

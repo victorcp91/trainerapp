@@ -20,10 +20,10 @@ import {
   IconListNumbers,
   IconRulerMeasure,
   IconAccessible,
-  IconHandStop,
   IconListCheck,
   IconActivityHeartbeat,
   IconTemplate,
+  IconTargetArrow,
 } from "@tabler/icons-react";
 import {
   DndContext,
@@ -40,7 +40,11 @@ import {
 } from "@dnd-kit/sortable";
 import { useTranslations } from "next-intl";
 import defaultAnamnesisModel from "@/constants/defaultAnamnesisModel";
-import { IQuestion, StandardQuestionKey } from "@/types/QuestionTypes";
+import {
+  IQuestion,
+  StandardQuestionKey,
+  IWelcome,
+} from "@/types/QuestionTypes";
 import SortableQuestionItem from "./SortableQuestionItem";
 import EditQuestionModal from "./EditQuestionModal";
 
@@ -51,6 +55,37 @@ interface AnamnesisModelEditorProps {
   mode: "new" | "create_from_standard" | "edit";
   onDelete?: () => void;
 }
+
+// Define the standard welcome question constant (used for initialization)
+// Use keys from standardAnamnesisModel for consistency
+const sa_key = "standardAnamnesis"; // Match the prefix used in standardAnamnesisModel.ts
+const WELCOME_QUESTION_DEFAULTS: Partial<IQuestion> & { type: "welcome" } = {
+  type: "welcome",
+  title: `${sa_key}.welcome.title`,
+  description: `${sa_key}.welcome.description`,
+  trainerName: "", // Default to empty string
+  trainerImage: "", // Default to empty string, not a key
+  buttonText: `${sa_key}.welcome.buttonText`,
+  required: false,
+};
+
+// --- Helper Function --- Moved Outside Component ---
+const getTranslatedValue = (
+  currentValue: string | undefined | null,
+  defaultKey: string | undefined,
+  tFunc: (key: string) => string // Pass translation function
+): string => {
+  // Determine if translation is needed
+  const needsTranslation = !currentValue || currentValue === defaultKey;
+
+  if (needsTranslation) {
+    // Only translate if the defaultKey is a valid, non-empty string
+    return defaultKey ? tFunc(defaultKey) : "";
+  }
+
+  // Otherwise, return the existing value (already translated or non-key)
+  return currentValue ?? "";
+};
 
 const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
   initialQuestions = [],
@@ -68,12 +103,10 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
   // Map standard keys to icons (can be defined here)
   const standardQuestionIcons: Record<StandardQuestionKey, React.ElementType> =
     {
-      welcome: IconHandStop,
       birthDate: IconCalendar,
       gender: IconListNumbers,
       height: IconRulerMeasure,
       weight: IconRulerMeasure,
-      focusMuscleGroups: IconAccessible,
       trainingDays: IconListCheck,
       primaryGoal: IconTextPlus,
       experienceLevel: IconListNumbers,
@@ -95,10 +128,71 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
   // Only show it when creating a completely new model from scratch
   const showLoadStandardButton = mode === "new";
 
+  // --- Translate Welcome Function --- Uses Helper ---
+  const translateWelcome = React.useCallback(
+    (q: IWelcome): IWelcome => {
+      return {
+        ...q,
+        title: getTranslatedValue(
+          q.title,
+          WELCOME_QUESTION_DEFAULTS.title,
+          tRoot
+        ),
+        description: getTranslatedValue(
+          q.description,
+          WELCOME_QUESTION_DEFAULTS.description,
+          tRoot
+        ),
+        trainerName: getTranslatedValue(
+          q.trainerName,
+          WELCOME_QUESTION_DEFAULTS.trainerName,
+          tRoot
+        ),
+        buttonText: getTranslatedValue(
+          q.buttonText,
+          WELCOME_QUESTION_DEFAULTS.buttonText,
+          tRoot
+        ),
+        trainerImage:
+          q.trainerImage ?? WELCOME_QUESTION_DEFAULTS.trainerImage ?? "",
+      };
+    },
+    [tRoot]
+  );
+
   useEffect(() => {
-    setInternalQuestions(JSON.parse(JSON.stringify(initialQuestions)));
+    const processedQuestions = initialQuestions ? [...initialQuestions] : [];
+
+    // Ensure Welcome question is first and has order 0
+    if (
+      processedQuestions.length === 0 ||
+      processedQuestions[0].type !== "welcome"
+    ) {
+      // Prepend a default welcome question if missing
+      const defaultWelcome: IWelcome = {
+        ...(WELCOME_QUESTION_DEFAULTS as IWelcome), // Cast to IWelcome
+        order: 0,
+      };
+      // Translate the default fields
+      const translatedDefaultWelcome = translateWelcome(defaultWelcome);
+      processedQuestions.unshift(translatedDefaultWelcome);
+    } else {
+      // Ensure existing welcome question has order 0 and is translated
+      processedQuestions[0] = {
+        ...translateWelcome(processedQuestions[0] as IWelcome),
+        order: 0,
+      };
+    }
+
+    // Re-index all subsequent questions
+    const finalInitialQuestions = processedQuestions.map((q, index) => ({
+      ...q,
+      order: index,
+    }));
+
+    setInternalQuestions(JSON.parse(JSON.stringify(finalInitialQuestions)));
     setIsDirty(false);
-  }, [initialQuestions]);
+  }, [initialQuestions, tRoot, translateWelcome]);
 
   // Define available custom types (needed by getQuestionTypeIcon)
   const availableQuestionTypes = [
@@ -119,6 +213,11 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
       icon: IconRulerMeasure,
       label: t("questionTypes.metric"),
     },
+    {
+      type: "bodyParts",
+      icon: IconTargetArrow,
+      label: t("questionTypes.bodyParts"),
+    },
   ];
 
   // MOVED getQuestionTypeIcon function definition earlier
@@ -131,7 +230,11 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
     const standardIconKey = Object.keys(standardQuestionIcons).find((key) => {
       const stdKey = key as StandardQuestionKey;
       const defaultQuestion = defaultAnamnesisModel.find(
-        (q) => q.standardKey === stdKey
+        (q): q is IQuestion & { standardKey: StandardQuestionKey } =>
+          typeof q === "object" &&
+          q !== null &&
+          "standardKey" in q &&
+          (q as { standardKey?: string }).standardKey === stdKey
       );
       return defaultQuestion?.type === type;
     });
@@ -146,7 +249,10 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
   const standardQuestionTemplates = defaultAnamnesisModel
     .filter(
       (q): q is IQuestion & { standardKey: StandardQuestionKey } =>
-        !!q.standardKey
+        typeof q === "object" &&
+        q !== null &&
+        "standardKey" in q &&
+        (q as { standardKey?: string }).standardKey !== "welcome"
     )
     .map((q) => ({
       key: q.standardKey,
@@ -156,8 +262,15 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
 
   // Handles adding both standard templates and generic custom types
   const handleAddQuestion = (itemKey: string) => {
+    // Prevent adding welcome question manually
+    if (itemKey === "welcome") return;
+
     const standardTemplate = defaultAnamnesisModel.find(
-      (q) => q.standardKey === itemKey
+      (q) =>
+        typeof q === "object" &&
+        q !== null &&
+        "standardKey" in q &&
+        (q as { standardKey?: string }).standardKey === itemKey
     );
 
     let newQuestion: IQuestion;
@@ -219,13 +332,16 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
         ? questionTypeDetails.label
         : type;
 
+      // Ensure defaultitle is always a string
       const defaultitle =
         type === "welcome"
-          ? translatedLabel
-          : `${t("newQuestionPrefix")} (${translatedLabel})`;
+          ? translatedLabel ?? t("questionDefaults.welcome.title") // Provide fallback for welcome
+          : `${t("newQuestionPrefix")} (${
+              translatedLabel ?? t("unknownType")
+            })`; // Provide fallback for others
 
       const baseProps = {
-        title: defaultitle,
+        title: defaultitle, // Now guaranteed to be a string
         required: false,
         order: internalQuestions.length,
       };
@@ -289,6 +405,14 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
             value: 0,
           };
           break;
+        case "bodyParts":
+          newQuestion = {
+            ...baseProps,
+            type: "bodyParts",
+            value: [],
+            title: tRoot("standardAnamnesis.focusMuscles.title"),
+          };
+          break;
         default:
           // This case should not be reached if itemKey is a valid type
           console.error("Unhandled question type in handleAddQuestion:", type);
@@ -301,17 +425,22 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
       return;
     }
 
-    setInternalQuestions((currentQuestions) => [
-      ...currentQuestions,
-      newQuestion,
-    ]);
+    setInternalQuestions((currentQuestions) => {
+      const updatedQuestions = [...currentQuestions, newQuestion];
+      // Re-index everything after adding
+      return updatedQuestions.map((q, index) => ({ ...q, order: index }));
+    });
     setIsDirty(true);
   };
 
   const handleRemoveQuestion = (indexToRemove: number) => {
+    // Prevent removing the welcome question
+    if (indexToRemove === 0) return;
+
     setInternalQuestions((currentQuestions) =>
       currentQuestions
         .filter((_, index) => index !== indexToRemove)
+        // Re-index remaining questions
         .map((q, index) => ({ ...q, order: index }))
     );
     setIsDirty(true);
@@ -321,8 +450,12 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
+      // Prevent dragging welcome question or dropping onto its position
       const oldIndex = Number(active.id);
       const newIndex = Number(over.id);
+      if (oldIndex === 0 || newIndex === 0) {
+        return; // Don't allow interaction with the fixed welcome question
+      }
 
       if (
         oldIndex < 0 ||
@@ -336,6 +469,7 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
 
       setInternalQuestions((items: IQuestion[]) => {
         const movedItems = arrayMove(items, oldIndex, newIndex);
+        // Re-index everything after moving
         const updatedOrder = movedItems.map((item, index) => ({
           ...item,
           order: index,
@@ -428,7 +562,7 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
                 onDragEnd={handleDragEnd}
               >
                 <SortableContext
-                  items={internalQuestions.map((_, index) => index)}
+                  items={internalQuestions.slice(1).map((q) => q.order)}
                   strategy={verticalListSortingStrategy}
                 >
                   <Stack gap="sm">
@@ -442,8 +576,8 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
                           index={index}
                           onEdit={() => handleEditQuestion(index)}
                           onRemove={() => handleRemoveQuestion(index)}
-                          // REMOVED icon={ItemIcon}
-                          getQuestionTypeIcon={getQuestionTypeIcon} // RESTORED prop
+                          getQuestionTypeIcon={getQuestionTypeIcon}
+                          isFixed={index === 0}
                           t={tRoot}
                         />
                       );
@@ -471,19 +605,22 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
                   {t("customQuestionsHeader")}
                 </Title>
                 <Stack gap="xs">
-                  {availableQuestionTypes.map((item) => (
-                    <Card
-                      key={item.type}
-                      onClick={() => handleAddQuestion(item.type)}
-                      style={{ cursor: "pointer" }}
-                      p="xs"
-                    >
-                      <Flex align="center">
-                        <item.icon size={20} style={{ marginRight: 8 }} />
-                        <Text size="sm">{item.label}</Text>
-                      </Flex>
-                    </Card>
-                  ))}
+                  {/* Filter out welcome type from addable custom types */}
+                  {availableQuestionTypes
+                    .filter((item) => item.type !== "welcome")
+                    .map((item) => (
+                      <Card
+                        key={item.type}
+                        onClick={() => handleAddQuestion(item.type)}
+                        style={{ cursor: "pointer" }}
+                        p="xs"
+                      >
+                        <Flex align="flex-start">
+                          <item.icon size={20} style={{ marginRight: 8 }} />
+                          <Text size="sm">{item.label}</Text>
+                        </Flex>
+                      </Card>
+                    ))}
                 </Stack>
 
                 <Divider my="sm" />
@@ -500,7 +637,7 @@ const AnamnesisModelEditor: React.FC<AnamnesisModelEditorProps> = ({
                       style={{ cursor: "pointer" }}
                       p="xs"
                     >
-                      <Flex align="center">
+                      <Flex align="flex-start">
                         <item.icon size={20} style={{ marginRight: 8 }} />
                         <Text size="sm">{item.label}</Text>
                       </Flex>

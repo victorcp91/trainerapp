@@ -74,7 +74,6 @@ interface IBodyPartsQuestion {
   allowOtherOptionInput?: boolean;
   allowNoneOption?: boolean;
   otherValue?: string;
-  standardKey?: StandardQuestionKey;
 }
 
 interface IWelcome {
@@ -86,11 +85,9 @@ interface IWelcome {
   buttonText: string;
   order: number;
   required: boolean;
-  standardKey?: StandardQuestionKey;
 }
 
 export type StandardQuestionKey =
-  | "welcome"
   | "birthDate"
   | "height"
   | "weight"
@@ -101,7 +98,6 @@ export type StandardQuestionKey =
   | "sessionTime"
   | "trainingLocation"
   | "equipmentAccess"
-  | "focusMuscleGroups"
   | "orthopedicLimitations"
   | "cardioTypes";
 
