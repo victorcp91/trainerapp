@@ -375,7 +375,8 @@ export function ExerciseModal({
       group: "Aeróbico",
       subGroup: "Esteira",
       equipment: "Esteira",
-      type: "aerobic",
+      type: "steady_aerobic",
+      isOutdoor: false,
     },
     {
       id: 102,
@@ -383,7 +384,8 @@ export function ExerciseModal({
       group: "Aeróbico",
       subGroup: "Bicicleta",
       equipment: "Bicicleta",
-      type: "aerobic",
+      type: "steady_aerobic",
+      isOutdoor: false,
     },
     {
       id: 103,
@@ -391,7 +393,8 @@ export function ExerciseModal({
       group: "Aeróbico",
       subGroup: "Elíptico",
       equipment: "Elíptico",
-      type: "aerobic",
+      type: "steady_aerobic",
+      isOutdoor: false,
     },
     {
       id: 104,
@@ -399,7 +402,8 @@ export function ExerciseModal({
       group: "Aeróbico",
       subGroup: "Corda",
       equipment: "Corda",
-      type: "aerobic",
+      type: "steady_aerobic",
+      isOutdoor: false,
     },
     {
       id: 105,
@@ -407,7 +411,35 @@ export function ExerciseModal({
       group: "Aeróbico",
       subGroup: "Escada",
       equipment: "Escada",
-      type: "aerobic",
+      type: "steady_aerobic",
+      isOutdoor: false,
+    },
+    {
+      id: 106,
+      name: "Corrida (Rua)",
+      group: "Aeróbico",
+      subGroup: "Outdoor",
+      equipment: "Nenhum",
+      type: "steady_aerobic",
+      isOutdoor: true,
+    },
+    {
+      id: 107,
+      name: "HIIT (Esteira)",
+      group: "Aeróbico",
+      subGroup: "Esteira",
+      equipment: "Esteira",
+      type: "hiit_aerobic",
+      isOutdoor: false,
+    },
+    {
+      id: 108,
+      name: "HIIT (Parque - Sprints)",
+      group: "Aeróbico",
+      subGroup: "Outdoor",
+      equipment: "Nenhum",
+      type: "hiit_aerobic",
+      isOutdoor: true,
     },
     {
       id: 201,
@@ -853,73 +885,71 @@ export function ExerciseModal({
               {/* Conditional Aerobic Inputs */}
               {exerciseTypeFilter === "aerobic" && (
                 <>
-                  <Select
-                    label={t("dashboard.exerciseModal.aerobicType")}
+                  <SegmentedControl
                     value={aerobicTypeFilter}
-                    onChange={(value) => {
-                      if (value === "steady" || value === "hiit") {
-                        setAerobicTypeFilter(value);
-                      }
-                    }}
+                    onChange={(value) =>
+                      setAerobicTypeFilter(value as "steady" | "hiit")
+                    }
                     data={[
                       {
+                        label: t("dashboard.exerciseModal.steady", {
+                          defaultValue: "Steady",
+                        }),
                         value: "steady",
-                        label: t("dashboard.exerciseModal.steadyState"),
                       },
                       {
+                        label: t("dashboard.exerciseModal.hiit", {
+                          defaultValue: "HIIT",
+                        }),
                         value: "hiit",
-                        label: t("dashboard.exerciseModal.hiit"),
                       },
                     ]}
-                    mb="sm"
                   />
 
+                  {/* STEADY FIELDS */}
                   {aerobicTypeFilter === "steady" && (
                     <>
-                      <NumberInput
-                        label={t("dashboard.exerciseModal.durationMinutes")}
-                        placeholder="Ex: 30"
-                        value={exerciseDetails.duration}
-                        onChange={(value) =>
-                          setExerciseDetails({
-                            ...exerciseDetails,
-                            duration: String(value),
-                          })
-                        }
-                        min={0}
-                        allowDecimal={false}
-                        error={
-                          showErrors &&
-                          !exerciseDetails.duration &&
-                          !exerciseDetails.distance
-                            ? t("dashboard.exerciseModal.errorAddAerobicFields")
-                            : undefined
-                        }
-                      />
-                      <NumberInput
-                        label={t("dashboard.exerciseModal.distanceKm")}
-                        placeholder="Ex: 5"
-                        value={exerciseDetails.distance}
-                        onChange={(value) =>
-                          setExerciseDetails({
-                            ...exerciseDetails,
-                            distance: String(value),
-                          })
-                        }
-                        min={0}
-                        allowDecimal={true}
-                        error={
-                          showErrors &&
-                          !exerciseDetails.duration &&
-                          !exerciseDetails.distance
-                            ? t("dashboard.exerciseModal.errorAddAerobicFields")
-                            : undefined
-                        }
-                      />
+                      <Group grow>
+                        <NumberInput
+                          label={t("dashboard.exerciseModal.duration", {
+                            defaultValue: "Duration (min)",
+                          })}
+                          placeholder="30"
+                          value={Number(exerciseDetails.duration) || ""}
+                          onChange={(value) =>
+                            setExerciseDetails({
+                              ...exerciseDetails,
+                              duration: String(value),
+                            })
+                          }
+                          min={1}
+                          step={1}
+                          error={showErrors && !exerciseDetails.duration}
+                        />
+                        <NumberInput
+                          label={t("dashboard.exerciseModal.distance", {
+                            defaultValue: "Distance (km)",
+                          })}
+                          placeholder="5"
+                          value={Number(exerciseDetails.distance) || ""}
+                          onChange={(value) =>
+                            setExerciseDetails({
+                              ...exerciseDetails,
+                              distance: String(value),
+                            })
+                          }
+                          min={0.1}
+                          step={0.1}
+                          decimalScale={1}
+                        />
+                      </Group>
                       <Select
-                        label={t("dashboard.exerciseModal.intensity")}
+                        label={t("dashboard.exerciseModal.intensity", {
+                          defaultValue: "Intensity",
+                        })}
                         placeholder={t(
-                          "dashboard.exerciseModal.intensityPlaceholder"
+                          "dashboard.exerciseModal.selectIntensityPlaceholder",
+                          { defaultValue: "Select Intensity" }
                         )}
                         data={[
                           {
@@ -934,6 +964,11 @@ export function ExerciseModal({
                             value: "high",
                             label: t("dashboard.exerciseModal.highIntensity"),
                           },
+                          { value: "zone1", label: "Zone 1" }, // Add HR Zones or other metrics
+                          { value: "zone2", label: "Zone 2" },
+                          { value: "zone3", label: "Zone 3" },
+                          { value: "zone4", label: "Zone 4" },
+                          { value: "zone5", label: "Zone 5" },
                         ]}
                         value={exerciseDetails.intensity}
                         onChange={(value) =>
@@ -947,12 +982,15 @@ export function ExerciseModal({
                     </>
                   )}
 
+                  {/* HIIT FIELDS */}
                   {aerobicTypeFilter === "hiit" && (
-                    <>
+                    <Group grow>
                       <NumberInput
-                        label={t("dashboard.exerciseModal.workTimeSeconds")}
-                        placeholder="Ex: 30"
-                        value={exerciseDetails.hiitWorkTime}
+                        label={t("dashboard.exerciseModal.hiitWorkTime", {
+                          defaultValue: "Work Time (s)",
+                        })}
+                        placeholder="30"
+                        value={Number(exerciseDetails.hiitWorkTime) || ""}
                         onChange={(value) =>
                           setExerciseDetails({
                             ...exerciseDetails,
@@ -960,18 +998,14 @@ export function ExerciseModal({
                           })
                         }
                         min={1}
-                        allowDecimal={false}
-                        error={
-                          showErrors && !exerciseDetails.hiitWorkTime
-                            ? t("common.required")
-                            : undefined
-                        }
-                        required
+                        error={showErrors && !exerciseDetails.hiitWorkTime}
                       />
                       <NumberInput
-                        label={t("dashboard.exerciseModal.restTimeSeconds")}
-                        placeholder="Ex: 60"
-                        value={exerciseDetails.hiitRestTime}
+                        label={t("dashboard.exerciseModal.hiitRestTime", {
+                          defaultValue: "Rest Time (s)",
+                        })}
+                        placeholder="30"
+                        value={Number(exerciseDetails.hiitRestTime) || ""}
                         onChange={(value) =>
                           setExerciseDetails({
                             ...exerciseDetails,
@@ -979,18 +1013,14 @@ export function ExerciseModal({
                           })
                         }
                         min={0}
-                        allowDecimal={false}
-                        error={
-                          showErrors && !exerciseDetails.hiitRestTime
-                            ? t("common.required")
-                            : undefined
-                        }
-                        required
+                        error={showErrors && !exerciseDetails.hiitRestTime}
                       />
                       <NumberInput
-                        label={t("dashboard.exerciseModal.rounds")}
-                        placeholder="Ex: 8"
-                        value={exerciseDetails.hiitRounds}
+                        label={t("dashboard.exerciseModal.hiitRounds", {
+                          defaultValue: "Rounds",
+                        })}
+                        placeholder="8"
+                        value={Number(exerciseDetails.hiitRounds) || ""}
                         onChange={(value) =>
                           setExerciseDetails({
                             ...exerciseDetails,
@@ -998,15 +1028,9 @@ export function ExerciseModal({
                           })
                         }
                         min={1}
-                        allowDecimal={false}
-                        error={
-                          showErrors && !exerciseDetails.hiitRounds
-                            ? t("common.required")
-                            : undefined
-                        }
-                        required
+                        error={showErrors && !exerciseDetails.hiitRounds}
                       />
-                    </>
+                    </Group>
                   )}
 
                   <Textarea
