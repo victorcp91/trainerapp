@@ -66,7 +66,6 @@ const ClientList: React.FC<ClientListProps> = ({
                   size="md"
                 />
                 <Stack gap={0}>
-                  {" "}
                   {/* Use Stack for vertical layout */}
                   <Text
                     size="sm"
@@ -76,7 +75,6 @@ const ClientList: React.FC<ClientListProps> = ({
                     {client.name}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    {" "}
                     {/* Display last message time */}
                     {t("lastMessagePrefix")}
                     {(() => {

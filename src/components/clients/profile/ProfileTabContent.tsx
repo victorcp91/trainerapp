@@ -170,7 +170,6 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
           <Text size="md">Anotações</Text>
           <Divider my="sm" />
           <Stack style={{ flexGrow: 1 }}>
-            {" "}
             {/* Allow stack to grow */}
             {notes.map((note, index) => (
               <Group key={index} style={{ width: "100%" }} wrap="nowrap">
@@ -191,7 +190,6 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
             ))}
             {isAddingNote ? (
               <Group wrap="nowrap">
-                {" "}
                 {/* Prevent wrapping */}
                 <DateInput
                   value={newNoteDate}
@@ -257,7 +255,6 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
           <Text size="md">{t("clientProfile.profile.training")}</Text>
           <Divider my="sm" />
           <Stack style={{ flexGrow: 1 }}>
-            {" "}
             {/* Allow stack to grow */}
             <Text size="sm" color="green">
               Status: Em dia

@@ -97,7 +97,6 @@ const ProgressComparisonModal: React.FC<ProgressComparisonModalProps> = ({
     if (!date || !progressPhotos[date]) {
       return (
         <Center h={200}>
-          {" "}
           {/* Placeholder height */}
           <Text c="dimmed">
             {t("clientProfile.progressModal.selectDatePlaceholder")}

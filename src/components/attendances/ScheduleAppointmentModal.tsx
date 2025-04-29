@@ -219,10 +219,7 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
         direction={{ base: "column", sm: "row" }}
         align="flex-start"
       >
-        {" "}
-        {/* Responsive direction */}
         <Group flex={1} justify="center" style={{ minWidth: "280px" }}>
-          {" "}
           {/* Ensure calendar has enough width */}
           {/* <Text>Selecione o dia do atendimento</Text> */}
           <DatePicker
@@ -234,7 +231,6 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
           />
         </Group>
         <Group flex={1} style={{ width: "100%" }}>
-          {" "}
           {/* Make this group take remaining space */}
           <div
             style={{
@@ -270,7 +266,6 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({
       {currentSelectedDate && (
         <>
           <Group mt="md" grow>
-            {" "}
             {/* Use grow for equal width */}
             <div>
               <label

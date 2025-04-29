@@ -80,7 +80,6 @@ export const TrainingModelList: React.FC<TrainingModelListProps> = ({
                   />
                 </Flex>
                 <Flex align="center" gap="xs">
-                  {" "}
                   {/* Added gap for spacing */}
                   <IconStar
                     size={20}
@@ -90,14 +89,12 @@ export const TrainingModelList: React.FC<TrainingModelListProps> = ({
                     onClick={(event) => toggleFavorite(model, event)}
                   />
                   <div {...dragListeners} style={{ cursor: "grab" }}>
-                    {" "}
                     {/* Apply listeners only to handle */}
                     <IconGripVertical size={20} color="gray" />
                   </div>
                 </Flex>
               </Flex>
               <Text size="sm" color="dimmed" mt="xs">
-                {" "}
                 {/* Added margin top */}
                 {model.description}
               </Text>

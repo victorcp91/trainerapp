@@ -128,7 +128,6 @@ function DraggableExerciseItem({
                   {t("common.restShort", { defaultValue: "Rest" })}
                   {exercise.advancedTechnique && (
                     <Text span size="xs" c="blue">
-                      {" "}
                       ({exercise.advancedTechnique})
                     </Text>
                   )}

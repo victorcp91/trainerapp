@@ -54,7 +54,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
           >
             <Icon size={20} style={{ marginRight: "8px", flexShrink: 0 }} />
             <Text fw={500} truncate>
-              {" "}
               {question.title.includes(".")
                 ? t(question.title)
                 : question.title || `Pergunta (${question.type})`}

@@ -100,7 +100,6 @@ export const SeriesFilters: React.FC<SeriesFiltersProps> = ({
 
       {/* Search Input */}
       <Flex mb="md">
-        {" "}
         {/* Ensure search is below other filters */}
         <TextInput
           placeholder={t(

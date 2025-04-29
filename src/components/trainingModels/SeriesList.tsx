@@ -58,7 +58,6 @@ export const SeriesList: React.FC<SeriesListProps> = ({
   const t = useTranslations();
   return (
     <div style={{ overflowY: "auto", height: "100%" }}>
-      {" "}
       {/* Ensure scrollability */}
       {series.map((serie: Serie) => {
         const serieId = serie.id;
@@ -127,7 +126,6 @@ export const SeriesList: React.FC<SeriesListProps> = ({
               </Text>
               {isExpanded && (
                 <div style={{ marginTop: "1rem", paddingLeft: "1rem" }}>
-                  {" "}
                   {/* Indent dropped items */}
                   {droppedItems[serieId]?.map((item, idx) => (
                     <Flex
